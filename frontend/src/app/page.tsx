@@ -814,7 +814,8 @@ export default function CarAdvisor() {
     } else {
       setLoading(true);
       try {
-        const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+        const isProd = typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1";
+        const apiBase = process.env.NEXT_PUBLIC_API_URL || (isProd ? "/api/backend" : "http://127.0.0.1:8000");
         const res = await fetch(`${apiBase}/api/recommend`, {
           method: "POST",
           headers: {
