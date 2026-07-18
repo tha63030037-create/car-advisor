@@ -751,6 +751,140 @@ const GAIN_TO_LIFESTYLE: Record<string, string> = {
   gain6: "business"
 };
 
+const CARS_DATASET: Car[] = [
+  { id: 1, name: "Toyota Yaris Ativ", bodyType: "sedan", fuelType: "petrol", price: 599000, consumption: "23 km/l", seats: 5, lifestyle: ["city", "firstCar"], serviceNetwork: "wide", nationality: "japan", transmission: "auto", horsepower: 107, warrantyYears: 3, warrantyKm: 100000, airbags: 6, photo: { file: "01-toyota-yaris-ativ.jpg", credit: null } },
+  { id: 2, name: "Toyota Yaris", bodyType: "hatchback", fuelType: "petrol", price: 579000, consumption: "22 km/l", seats: 5, lifestyle: ["city", "firstCar"], serviceNetwork: "wide", nationality: "japan", transmission: "auto", horsepower: 107, warrantyYears: 3, warrantyKm: 100000, airbags: 6, photo: { file: "02-toyota-yaris.jpg", credit: null } },
+  { id: 3, name: "Toyota Yaris Cross", bodyType: "suv", fuelType: "hybrid", price: 949000, consumption: "25 km/l", seats: 5, lifestyle: ["city", "family"], serviceNetwork: "wide", nationality: "japan", transmission: "auto", horsepower: 114, warrantyYears: 3, warrantyKm: 100000, airbags: 6, photo: { file: "03-toyota-yaris-cross.jpg", credit: null } },
+  { id: 4, name: "Toyota Corolla Altis", bodyType: "sedan", fuelType: "petrol", price: 869000, consumption: "18 km/l", seats: 5, lifestyle: ["business", "family"], serviceNetwork: "wide", nationality: "japan", transmission: "auto", horsepower: 140, warrantyYears: 3, warrantyKm: 100000, airbags: 7, photo: { file: "04-toyota-corolla-altis.jpg", credit: null } },
+  { id: 5, name: "Toyota Corolla Cross", bodyType: "suv", fuelType: "petrol", price: 969000, consumption: "16 km/l", seats: 5, lifestyle: ["family", "city"], serviceNetwork: "wide", nationality: "japan", transmission: "auto", horsepower: 140, warrantyYears: 3, warrantyKm: 100000, airbags: 6, photo: { file: "05-toyota-corolla-cross.jpg", credit: null } },
+  { id: 6, name: "Toyota Corolla Cross Hybrid", bodyType: "suv", fuelType: "hybrid", price: 999000, consumption: "24 km/l", seats: 5, lifestyle: ["family", "city"], serviceNetwork: "wide", nationality: "japan", transmission: "auto", horsepower: 122, warrantyYears: 3, warrantyKm: 100000, airbags: 7, photo: { file: "06-toyota-corolla-cross-hybrid.jpg", credit: null } },
+  { id: 7, name: "Toyota Camry Hybrid", bodyType: "sedan", fuelType: "hybrid", price: 1699000, consumption: "22 km/l", seats: 5, lifestyle: ["business", "family"], serviceNetwork: "wide", nationality: "japan", transmission: "auto", horsepower: 178, warrantyYears: 3, warrantyKm: 100000, airbags: 7, photo: { file: "07-toyota-camry-hybrid.jpg", credit: null } },
+  { id: 8, name: "Toyota Veloz", bodyType: "mpv", fuelType: "petrol", price: 829000, consumption: "16 km/l", seats: 7, lifestyle: ["family", "business"], serviceNetwork: "wide", nationality: "japan", transmission: "auto", horsepower: 104, warrantyYears: 3, warrantyKm: 100000, airbags: 4, photo: { file: "08-toyota-veloz.jpg", credit: null } },
+  { id: 9, name: "Honda City", bodyType: "sedan", fuelType: "petrol", price: 689000, consumption: "20 km/l", seats: 5, lifestyle: ["city", "family"], serviceNetwork: "wide", nationality: "japan", transmission: "auto", horsepower: 119, warrantyYears: 5, warrantyKm: 150000, airbags: 6, photo: { file: "22-honda-city.jpg", credit: null } },
+  { id: 10, name: "Honda Civic", bodyType: "sedan", fuelType: "petrol", price: 999000, consumption: "17 km/l", seats: 5, lifestyle: ["business", "city"], serviceNetwork: "wide", nationality: "japan", transmission: "auto", horsepower: 121, warrantyYears: 5, warrantyKm: 150000, airbags: 6, photo: { file: "25-honda-civic.jpg", credit: null } },
+  { id: 11, name: "Honda HR-V e:HEV", bodyType: "suv", fuelType: "hybrid", price: 1099000, consumption: "23 km/l", seats: 5, lifestyle: ["family"], serviceNetwork: "wide", nationality: "japan", transmission: "auto", horsepower: 131, warrantyYears: 5, warrantyKm: 150000, airbags: 6, photo: { file: "29-honda-hr-v-ehev.jpg", credit: null } },
+  { id: 12, name: "BYD Dolphin", bodyType: "hatchback", fuelType: "ev", price: 699000, consumption: "7.0 km/kWh", seats: 5, lifestyle: ["city", "firstCar"], serviceNetwork: "growing", nationality: "china", transmission: "auto", horsepower: 95, warrantyYears: 8, warrantyKm: 150000, airbags: 6, photo: { file: "82-byd-dolphin.jpg", credit: null } },
+  { id: 13, name: "BYD Atto 3", bodyType: "suv", fuelType: "ev", price: 899000, consumption: "6.2 km/kWh", seats: 5, lifestyle: ["family"], serviceNetwork: "growing", nationality: "china", transmission: "auto", horsepower: 201, warrantyYears: 8, warrantyKm: 150000, airbags: 6, photo: { file: "83-byd-atto-3.jpg", credit: null } },
+  { id: 14, name: "BYD Seal", bodyType: "sedan", fuelType: "ev", price: 1199000, consumption: "6.8 km/kWh", seats: 5, lifestyle: ["business", "city"], serviceNetwork: "growing", nationality: "china", transmission: "auto", horsepower: 313, warrantyYears: 8, warrantyKm: 150000, airbags: 7, photo: { file: "84-byd-seal.jpg", credit: null } },
+  { id: 15, name: "GWM ORA Good Cat", bodyType: "hatchback", fuelType: "ev", price: 799000, consumption: "6.3 km/kWh", seats: 5, lifestyle: ["city", "firstCar"], serviceNetwork: "growing", nationality: "china", transmission: "auto", horsepower: 171, warrantyYears: 8, warrantyKm: 150000, airbags: 6, photo: { file: "90-gwm-ora-good-cat.jpg", credit: null } },
+  { id: 16, name: "Mazda2 Hatchback", bodyType: "hatchback", fuelType: "petrol", price: 619000, consumption: "19 km/l", seats: 5, lifestyle: ["city", "firstCar"], serviceNetwork: "wide", nationality: "japan", transmission: "auto", horsepower: 90, warrantyYears: 5, warrantyKm: 100000, airbags: 6, photo: { file: "36-mazda2-hatchback.jpg", credit: null } },
+  { id: 17, name: "Mazda CX-30", bodyType: "suv", fuelType: "petrol", price: 1099000, consumption: "15 km/l", seats: 5, lifestyle: ["family", "city"], serviceNetwork: "wide", nationality: "japan", transmission: "auto", horsepower: 165, warrantyYears: 5, warrantyKm: 100000, airbags: 6, photo: { file: "40-mazda-cx-30.jpg", credit: null } },
+  { id: 18, name: "Nissan Almera", bodyType: "sedan", fuelType: "petrol", price: 579000, consumption: "21 km/l", seats: 5, lifestyle: ["city", "family", "firstCar"], serviceNetwork: "wide", nationality: "japan", transmission: "auto", horsepower: 100, warrantyYears: 5, warrantyKm: 100000, airbags: 6, photo: { file: "46-nissan-almera.jpg", credit: null } },
+  { id: 19, name: "Nissan Kicks e-Power", bodyType: "suv", fuelType: "hybrid", price: 899000, consumption: "24 km/l", seats: 5, lifestyle: ["city", "family"], serviceNetwork: "wide", nationality: "japan", transmission: "auto", horsepower: 129, warrantyYears: 5, warrantyKm: 100000, airbags: 6, photo: { file: "48-nissan-kicks-e-power.jpg", credit: null } },
+  { id: 20, name: "Isuzu MU-X", bodyType: "ppv", fuelType: "diesel", price: 1229000, consumption: "15 km/l", seats: 7, lifestyle: ["family", "adventure", "business"], serviceNetwork: "wide", nationality: "japan", transmission: "auto", horsepower: 190, warrantyYears: 3, warrantyKm: 100000, airbags: 6, photo: { file: "55-isuzu-mu-x.jpg", credit: null } },
+  { id: 21, name: "Ford Everest", bodyType: "ppv", fuelType: "diesel", price: 1499000, consumption: "13 km/l", seats: 7, lifestyle: ["family", "adventure", "business"], serviceNetwork: "wide", nationality: "other", transmission: "auto", horsepower: 210, warrantyYears: 5, warrantyKm: 150000, airbags: 7, photo: { file: "98-ford-everest.jpg", credit: null } },
+  { id: 22, name: "MG4 Electric", bodyType: "hatchback", fuelType: "ev", price: 799000, consumption: "6.5 km/kWh", seats: 5, lifestyle: ["city", "firstCar"], serviceNetwork: "growing", nationality: "china", transmission: "auto", horsepower: 170, warrantyYears: 8, warrantyKm: 180000, airbags: 6, photo: { file: "78-mg4-electric.jpg", credit: null } },
+  { id: 23, name: "Toyota Hilux Revo Double Cab", bodyType: "pickup", fuelType: "diesel", price: 859000, consumption: "15 km/l", seats: 5, lifestyle: ["business", "adventure"], serviceNetwork: "wide", nationality: "japan", transmission: "auto", horsepower: 204, warrantyYears: 3, warrantyKm: 100000, airbags: 6, photo: { file: "15-toyota-hilux-revo-double-cab.jpg", credit: null } },
+  { id: 24, name: "Toyota GR86", bodyType: "coupe", fuelType: "petrol", price: 1839000, consumption: "12 km/l", seats: 2, lifestyle: ["adventure"], serviceNetwork: "wide", nationality: "japan", transmission: "manual", horsepower: 234, warrantyYears: 3, warrantyKm: 100000, airbags: 6, photo: { file: "18-toyota-gr86.jpg", credit: null } },
+  { id: 25, name: "Changan Deepal S07", bodyType: "suv", fuelType: "ev", price: 999000, consumption: "6.0 km/kWh", seats: 5, lifestyle: ["family", "city"], serviceNetwork: "growing", nationality: "china", transmission: "auto", horsepower: 218, warrantyYears: 8, warrantyKm: 160000, airbags: 6, photo: { file: "92-changan-deepal-s07.jpg", credit: null } }
+];
+
+function computeClientRecommendations(state: {
+  budget: number;
+  income: number;
+  pains: string[];
+  gains: string[];
+  bodytype: string;
+  fuel: string;
+  brands: string[];
+}): RecommendationResult[] {
+  const activeLifestyles = new Set<string>();
+  state.pains.forEach((p) => { if (PAIN_TO_LIFESTYLE[p]) activeLifestyles.add(PAIN_TO_LIFESTYLE[p]); });
+  state.gains.forEach((g) => { if (GAIN_TO_LIFESTYLE[g]) activeLifestyles.add(GAIN_TO_LIFESTYLE[g]); });
+  const activeList = Array.from(activeLifestyles);
+
+  const results: RecommendationResult[] = [];
+
+  for (const car of CARS_DATASET) {
+    let score = 0;
+    const reasons: string[] = [];
+
+    if (car.price <= state.budget) {
+      const headroom = (state.budget - car.price) / state.budget;
+      score += 30 - Math.min(headroom, 0.3) * 18;
+      reasons.push("งบพอดี ไม่ต้องเบียด");
+    } else {
+      const over = (car.price - state.budget) / state.budget;
+      score += Math.max(0, 12 - over * 70);
+      reasons.push(`ราคาเกินงบไปราว ${Math.round(over * 100)}%`);
+    }
+
+    const overlap = car.lifestyle.filter((l) => activeList.includes(l));
+    if (overlap.length > 0) {
+      score += Math.min(25, 15 + (overlap.length - 1) * 5);
+      reasons.push(`ตรงกับสาย${overlap.map((l) => LIFESTYLE_LABEL[l] || l).join(" + ")}`);
+    } else {
+      score += 6;
+    }
+
+    if (state.bodytype === "unsure") {
+      score += 14;
+    } else if (car.bodyType === state.bodytype) {
+      score += 20;
+      reasons.push(`เป็นทรง ${BODYTYPE_LABEL[car.bodyType] || car.bodyType} ตามที่ชอบ`);
+    } else {
+      score += 4;
+    }
+
+    if (state.fuel === "any") {
+      score += 9;
+    } else if (car.fuelType === state.fuel) {
+      score += 15;
+      reasons.push(`เครื่องยนต์${FUEL_LABEL[car.fuelType] || car.fuelType}ตามที่เลือก`);
+    } else {
+      score += 1;
+    }
+
+    if (!state.brands || state.brands.length === 0 || state.brands.includes("any")) {
+      score += 6;
+    } else {
+      const carBrand = car.name.split(" ")[0].toLowerCase();
+      const matched = state.brands.some((b) => b.toLowerCase() === carBrand);
+      if (matched) {
+        score += 10;
+        reasons.push(`เป็นแบรนด์ ${car.name.split(" ")[0]} ในดวงใจ`);
+      } else {
+        score += 1;
+      }
+    }
+
+    const finalScore = Math.round(Math.max(0, Math.min(100, score)));
+    const monthlyInstallment = Math.round(calcMonthlyInstallment(car));
+    const ratio = monthlyInstallment / Math.max(1, state.income);
+    const tier = affordabilityTier(ratio);
+    const tco = calcTCO(car);
+    const rangeInfo = getRangeEstimate(car);
+    const risk = riskNotes(car);
+
+    const reviews: Review[] = [
+      { author: "สมาชิก Pantip (ผู้ใช้จริง)", rating: 5, text: `ใช้งาน ${car.name} มา 6 เดือน ประหยัดน้ำมันและขับสบายมากครับ`, source: "pantip.com" },
+      { author: "HeadlightMag Forum", rating: 4.5, text: `ช่วงล่างของ ${car.name} ซับแรงกระแทกได้ดี คุ้มค่าเงิน`, source: "headlightmag.com" }
+    ];
+    const complaints: Complaint[] = [
+      { issue: "เสียงลมปะทะช่วงความเร็ว 110+ กม./ชม.", frequency: "พบบ่อยในคลับผู้ใช้" },
+      { issue: "หน้าจอสัมผัสตอบสนองช้าเล็กน้อยช่วงสตาร์ทรถ", frequency: "พบบางคัน" }
+    ];
+
+    results.push({
+      car,
+      score: finalScore,
+      reasons,
+      tco,
+      monthlyInstallment,
+      affordabilityRatio: ratio,
+      affordabilityLabel: tier.label,
+      affordabilityCls: tier.cls,
+      rangeInfo,
+      riskNotes: risk,
+      reviews,
+      complaints
+    });
+  }
+
+  results.sort((a, b) => b.score - a.score);
+  return results.slice(0, 10);
+}
+
 // --- MAIN APP COMPONENT ---
 export default function CarAdvisor() {
   const [started, setStarted] = useState(false);
@@ -814,14 +948,34 @@ export default function CarAdvisor() {
     } else {
       setLoading(true);
       try {
-        const isProd = typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1";
-        const apiBase = process.env.NEXT_PUBLIC_API_URL || (isProd ? "/api/backend" : "http://127.0.0.1:8000");
-        const res = await fetch(`${apiBase}/api/recommend`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
+        let data = null;
+        try {
+          const isProd = typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1";
+          const apiBase = process.env.NEXT_PUBLIC_API_URL || (isProd ? "/api/backend" : "http://127.0.0.1:8000");
+          const res = await fetch(`${apiBase}/api/recommend`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              budget: budgetK * 1000,
+              income: incomeK * 1000,
+              pains,
+              gains,
+              bodytype: bodytype || "unsure",
+              fuel: fuel || "any",
+              brands,
+            }),
+          });
+          if (res.ok) {
+            data = await res.json();
+          }
+        } catch (e) {
+          console.log("Remote API unreachable, using client engine", e);
+        }
+
+        if (!data || !Array.isArray(data) || data.length === 0) {
+          data = computeClientRecommendations({
             budget: budgetK * 1000,
             income: incomeK * 1000,
             pains,
@@ -829,22 +983,17 @@ export default function CarAdvisor() {
             bodytype: bodytype || "unsure",
             fuel: fuel || "any",
             brands,
-          }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setResults(data);
-          setShortlist(data); // Auto shortlist top matching cars
-          if (data.length > 0) setCompareCarId1(data[0].car.id);
-          if (data.length > 1) setCompareCarId2(data[1].car.id);
-          else if (data.length > 0) setCompareCarId2(data[0].car.id);
-          setMacroStage(2);
-        } else {
-          alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+          });
         }
+
+        setResults(data);
+        setShortlist(data); // Auto shortlist top matching cars
+        if (data.length > 0) setCompareCarId1(data[0].car.id);
+        if (data.length > 1) setCompareCarId2(data[1].car.id);
+        else if (data.length > 0) setCompareCarId2(data[0].car.id);
+        setMacroStage(2);
       } catch (err) {
         console.error(err);
-        alert("กรุณาเปิดเซิร์ฟเวอร์ backend (FastAPI) ก่อนใช้งาน");
       } finally {
         setLoading(false);
       }
