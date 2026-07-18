@@ -1,0 +1,50 @@
+macroStage === 2 && (
+        <section className="results-stage">
+          <div className="results-summary">
+            งบ {formatBaht(budget)} · สาย {getDerivedLifestyles().map((l) => LIFESTYLE_LABEL[l]).join(" + ")}
+            {bodytype === "unsure" ? "" : ` ทรง ${BODYTYPE_LABEL[bodytype]} `}
+            คัดเลือกมา {results.length} คันที่เหมาะสมที่สุด
+          </div>
+
+          <div className="results-grid">
+            {results.map((result) => {
+              const car = result.car;
+              const details = generateCarDetails(car);
+              const isShortlisted = shortlist.some((item) => item.car.id === car.id);
+
+              return (
+                <article key={car.id} className="car-card">
+                  {/* Matching Score Circle Ring */}
+                  <div className="car-card__score-container">
+                    <div className="score-ring">
+                      <svg width="48" height="48" viewBox="0 0 36 36">
+                        <circle cx="18" cy="18" r="15.915" fill="none" stroke="rgba(241,233,216,0.1)" strokeWidth="3" />
+                        <circle
+                          cx="18"
+                          cy="18"
+                          r="15.915"
+                          fill="none"
+                          stroke={result.score >= 70 ? "var(--good)" : result.score >= 45 ? "var(--mid)" : "var(--low)"}
+                          strokeWidth="3"
+                          strokeDasharray={`${result.score} ${100 - result.score}`}
+                          strokeDashoffset="25"
+                        />
+                      </svg>
+                      <span className="score-val">{result.score}</span>
+                    </div>
+                    <span className={`match-badge ${result.score >= 70 ? "match-good" : result.score >= 45 ? "match-mid" : "match-low"}`}>
+                      {result.score >= 70 ? "ใช่เลย" : result.score >= 45 ? "ก็โอเค" : "ยังไม่ใช่ทีเดียว"}
+                    </span>
+                  </div>
+
+                  {/* Car Image Visual */}
+                  <CarVisual car={car} />
+
+                  {/* Head Meta Info */}
+                  <div className="car-card__head">
+                    <h3 className="car-card__name">
+                      {car.name} <span className="car-card__flag">{NATIONALITY_FLAG[car.nationality]}</span>
+                    </h3>
+                    <div className="car-card__meta">
+                      <span>{BODYTYPE_LABEL[car.bodyType]}</span>
+               

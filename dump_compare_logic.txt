@@ -1,0 +1,80 @@
+      <div class="car-card__specs">
+        <span class="spec-pill">${car.consumption}</span>
+        <span class="spec-pill">${car.seats} ที่นั่ง</span>
+        <span class="spec-pill">${FUEL_LABEL[car.fuelType]}</span>
+        ${extraSpecPills(car)}
+      </div>
+      ${rangeHTML}
+      <p class="car-card__reason"><strong class="${tier.cls}">${tier.label}</strong> — ${reasons.join(" · ")}</p>
+      
+      ${detailsAccordionHTML}
+    `;
+    resultsGrid.appendChild(card);
+  });
+  wirePhotoFallbacks(resultsGrid);
+}
+
+let selectedCompareIds = [];
+
+function generateCarDetails(car) {
+  const brand = car.name.split(" ")[0];
+  const transText = getTransmissionOptions(car);
+  
+  let intro = "";
+  let highlights = [];
+  let colors = [];
+  let specs = "";
+  let exterior = [];
+  let interior = [];
+  let safety = [];
+
+  if (car.name.includes("BRZ") || car.name.includes("GR86")) {
+    intro = `รถสปอร์ตคูเป้เครื่องยนต์ Boxer วางหน้า ขับเคลื่อนล้อหลัง (FR Layout) ที่เกิดจากความร่วมมือของ Subaru และ Toyota ให้ความสนุกเร้าใจสไตล์สปอร์ตพันธุ์แท้`;
+    highlights = [
+      "จุดศูนย์ถ่วงเครื่องยนต์ต่ำเป็นพิเศษ (Boxer Engine) ให้การเกาะโค้งที่สมดุลยอดเยี่ยม",
+      "การกระจายน้ำหนักหน้า-หลังดีเยี่ยม ขับสนุก ควบคุมง่าย ตอบสนองรวดเร็วทันใจ",
+      "มีให้เลือกทั้งระบบเกียร์ธรรมดา 6 สปีดดิบ ๆ และเกียร์อัตโนมัติพร้อม Paddle Shift"
+    ];
+    colors = car.name.includes("BRZ") 
+      ? ["🔵 WR Blue Pearl (น้ำเงินสปอร์ต)", "⚪ Crystal White Pearl (ขาว)", "⚫ Crystal Black Silica (ดำ)", "🩶 Magnetite Gray Metallic (เทาเข้ม)"]
+      : ["🔴 Ignition Red (แดงสปอร์ต)", "⚪ White Liquid (ขาว)", "⚫ Raven Black (ดำ)", "🩶 Magnetic Gray (เทา)"];
+    specs = `เครื่องยนต์เบนซิน 4 สูบนอน Boxer D-4S ขนาด 2.4 ลิตร, พละกำลังสูงสุด ${car.horsepower} แรงม้า, ระบบส่งกำลัง: ${transText}`;
+    exterior = [
+      "ไฟหน้า LED อัจฉริยะปรับทิศทางตามวงเลี้ยวโค้ง (SRH)",
+      "ช่องระบายอากาศซุ้มล้อหน้าช่วยจัดระเบียบทิศทางลมขณะขับขี่ความเร็วสูง",
+      "ล้ออัลลอยสปอร์ตสีดำด้านขนาด 18 นิ้วลายสิบก้านน้ำหนักเบาพิเศษ"
+    ];
+    interior = [
+      "เบาะนั่งกึ่งหนังแท้และ Alcantara ตกแต่งด้วยด้ายสีแดงเพิ่มอารมณ์สปอร์ต",
+      "หน้าจออินโฟเทนเมนต์แบบสัมผัสขนาด 8 นิ้ว รองรับ Apple CarPlay และ Android Auto",
+      "มาตรวัดดิจิทัล TFT ขนาด 7 นิ้วพร้อมโหมดสนามแข่ง Track Mode แสดงกราฟแรงเหวี่ยง G-Force"
+    ];
+    safety = [
+      "ระบบความปลอดภัยอัจฉริยะ Subaru EyeSight / Toyota Safety Sense เจเนอเรชันล่าสุด",
+      "ระบบเตือนมุมอับสายตาด้านข้าง (BSD) และเตือนขณะถอยจอดรถ (RCTA)",
+      "ระบบควบคุมการทรงตัว VDC ปรับแต่งความไวได้ 5 ระดับพร้อม Track Mode"
+    ];
+    return { intro, highlights, colors, specs, exterior, interior, safety };
+  }
+
+  let fuelEngine = "";
+  if (car.fuelType === "ev") {
+    fuelEngine = "มอเตอร์ไฟฟ้ากระแสสลับ PMSM แบตเตอรี่ Lithium Iron Phosphate (LFP)";
+  } else if (car.fuelType === "hybrid") {
+    fuelEngine = `เครื่องยนต์เบนซิน Atkinson Cycle ทำงานคู่กับมอเตอร์ไฟฟ้าไฮบริด`;
+  } else if (car.fuelType === "diesel") {
+    fuelEngine = `เครื่องยนต์ดีเซล Commonrail Direct Injection พร้อมระบบอัดอากาศเทอร์โบแปรผัน`;
+  } else {
+    fuelEngine = `เครื่องยนต์เบนซิน DOHC 4 สูบแถวเรียง DOHC 16 วาล์ว`;
+  }
+
+  if (car.bodyType === "sedan" || car.bodyType === "hatchback") {
+    intro = `รถยนต์นั่งส่วนบุคคลขนาดเล็กแบบ ${BODYTYPE_LABEL[car.bodyType]} เหมาะอย่างยิ่งสำหรับการใช้งานทั่วไป ประหยัดน้ำมัน คล่องตัว คุ้มราคา`;
+    highlights = [
+      `อัตราประหยัดน้ำมันยอดเยี่ยมถึง ${car.consumption} ขับง่ายจ่ายสบาย`,
+      "วงเลี้ยวแคบ ควบคุมง่าย ลัดเลาะในเมืองได้อย่างสะดวกสบาย",
+      "มีระบบความบันเทิงครบครัน รองรับเชื่อมต่อสมาร์ทโฟนเต็มระบบ"
+    ];
+    colors = ["⚪ Platinum White Pearl (ขาว)", "⚫ Attitude Black Mica (ดำ)", "🩶 Gray Metallic (เทา)", "🔴 Red Mica (แดง)"];
+    specs = `${fuelEngine}, พละกำลังสูงสุด ${car.horsepower} แรงม้า, เกียร์${transText}`;
+    exterior = [
