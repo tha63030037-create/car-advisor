@@ -511,6 +511,28 @@ export default function MatchV2() {
         .num { font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; }
         .lbl { font-size: 12px; color: #94a3b8; }
         .foot { font-size: 12px; color: #64748b; margin-top: 14px; }
+        .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: rgba(30,41,59,.7); padding: 4px; border-radius: 12px; margin-bottom: 14px; }
+        .tabs button { min-height: 40px; border: 0; border-radius: 9px; background: transparent; color: #94a3b8; font: inherit; font-size: 14px; cursor: pointer; }
+        .tabs button.on { background: rgba(139,92,246,.3); color: #fff; }
+        .chat { display: flex; flex-direction: column; gap: 10px; }
+        .msgs { display: flex; flex-direction: column; gap: 8px; max-height: 46vh; min-height: 200px; overflow-y: auto; padding-right: 4px; }
+        .bubble { max-width: 88%; padding: 10px 13px; border-radius: 14px; font-size: 14px; line-height: 1.55; white-space: pre-wrap; }
+        .bubble.assistant { align-self: flex-start; background: rgba(30,41,59,.95); border: 1px solid rgba(255,255,255,.08); border-bottom-left-radius: 4px; }
+        .bubble.user { align-self: flex-end; background: linear-gradient(135deg, #7c3aed, #6d28d9); border-bottom-right-radius: 4px; }
+        .typing { display: flex; gap: 4px; }
+        .typing span { width: 6px; height: 6px; border-radius: 50%; background: #94a3b8; animation: blink 1.2s infinite; }
+        .typing span:nth-child(2) { animation-delay: .2s; } .typing span:nth-child(3) { animation-delay: .4s; }
+        @keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
+        .quick { margin-top: 0; }
+        .ask { display: flex; gap: 8px; }
+        .ask input { flex: 1; min-height: 44px; border-radius: 12px; border: 1px solid rgba(255,255,255,.14); background: rgba(15,23,42,.8); color: inherit; font: inherit; padding: 0 12px; }
+        .ask input:focus { outline: 2px solid #8b5cf6; }
+        .ask button { min-height: 44px; padding: 0 18px; border-radius: 12px; border: 0; background: #8b5cf6; color: #fff; font: inherit; cursor: pointer; }
+        .ask button:disabled { opacity: .45; cursor: default; }
+        .hint { font-size: 12px; color: #64748b; margin: 0; }
+        .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 11px; color: #94a3b8; margin-top: 6px; }
+        .legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px; }
+        .excl { margin-top: 12px; font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
       `}</style>
     </main>
   );
