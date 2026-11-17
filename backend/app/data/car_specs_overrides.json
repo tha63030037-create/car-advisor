@@ -1,0 +1,13 @@
+{
+  "_readme": "ใส่ค่าที่ตรวจจากโบรชัวร์/เว็บผู้ผลิตแล้ว คีย์คือ id รถ ค่าที่ใส่ที่นี่จะถูกเอาออกจากรายการ estimated อัตโนมัติ แล้วรัน python scripts/build_car_specs.py ใหม่",
+  "_example": {
+    "1": {
+      "ground_clearance_mm": 133,
+      "cargo_l": 486,
+      "adas": {"aeb": true, "lane_assist": true, "adaptive_cruise": false},
+      "maintenance_5y_thb": 32000,
+      "source": "toyota.co.th spec sheet",
+      "collected_on": "2026-11-20"
+    }
+  }
+}

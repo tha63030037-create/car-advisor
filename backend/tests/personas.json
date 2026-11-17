@@ -1,0 +1,117 @@
+{
+  "_readme": "ผู้ใช้สมมติ 8 คนตามสเปกหัวข้อ 7 — แต่ละคนทดสอบคนละจุด. criteria = เงื่อนไขของระบบใหม่ (โครง 5.2). old_quiz = คำตอบเดียวกันในรูปแบบควิซของระบบเดิม ใช้เก็บผลฐานเทียบ. hard_rules = กฎที่ผลของระบบใหม่ต้องผ่านทุกคัน (ใช้ตรวจตัวกรองอัตโนมัติ)",
+  "personas": [
+    {
+      "id": "P1",
+      "name": "พนักงานจบใหม่ งบจำกัด ไม่ยืดงบเลย",
+      "tests": "เพดานยืด 0% และค่าใช้จ่ายระยะยาว",
+      "story": "อายุ 23 เงินเดือน 25,000 ขับไปทำงานในกรุงเทพฯ อยากได้รถประหยัด งบ 600,000 ห้ามเกิน",
+      "criteria": {
+        "budget": 600000, "budget_stretch": 0.0, "brand_only": [], "brand_exclude": [],
+        "seats_min": null, "fuel_only": null, "body_preferred": [], "lifestyles": ["city"],
+        "km_per_year": 15000,
+        "priorities": {"budget": 3, "lifestyle": 2, "running_cost": 3, "safety": 2, "design": 1}
+      },
+      "old_quiz": {"budget": 600000, "income": 25000, "pains": ["pain1"], "gains": ["gain1"], "lifestyle": [], "bodytype": "unsure", "fuel": "any", "brands": ["any"], "priority": "budget"},
+      "hard_rules": {"max_price": 600000}
+    },
+    {
+      "id": "P2",
+      "name": "ผู้บริหารที่ไม่สนงบ เน้นดีไซน์",
+      "tests": "น้ำหนักงบต่ำ (กรณีที่อาจารย์ยก)",
+      "story": "ผู้บริหาร งบ 2.5 ล้านแต่ไม่ซีเรียส อยากได้ SUV สวย ปลอดภัย ใช้เดินทางไกลบ่อย",
+      "criteria": {
+        "budget": 2500000, "budget_stretch": 0.2, "brand_only": [], "brand_exclude": [],
+        "seats_min": null, "fuel_only": null, "body_preferred": ["suv"], "lifestyles": ["long_trips"],
+        "km_per_year": 20000,
+        "priorities": {"budget": 1, "lifestyle": 2, "running_cost": 1, "safety": 3, "design": 3}
+      },
+      "old_quiz": {"budget": 2500000, "income": 300000, "pains": ["pain4"], "gains": ["gain3"], "lifestyle": [], "bodytype": "suv", "fuel": "any", "brands": ["any"], "priority": "bodytype"},
+      "hard_rules": {"max_price": 3000000}
+    },
+    {
+      "id": "P3",
+      "name": "คนที่เอาเฉพาะแบรนด์เดียว",
+      "tests": "แบรนด์เป็นตัวกรอง (กรณีที่อาจารย์ยก)",
+      "story": "ใช้ Honda มาทั้งชีวิต ไม่เอายี่ห้ออื่น งบ 1 ล้าน ครอบครัว 4 คน ขับในเมือง",
+      "criteria": {
+        "budget": 1000000, "budget_stretch": 0.15, "brand_only": ["Honda"], "brand_exclude": [],
+        "seats_min": 5, "fuel_only": null, "body_preferred": [], "lifestyles": ["city", "school_run"],
+        "km_per_year": 15000,
+        "priorities": {"budget": 2, "lifestyle": 3, "running_cost": 2, "safety": 2, "design": 2}
+      },
+      "old_quiz": {"budget": 1000000, "income": 60000, "pains": ["pain1", "pain3"], "gains": ["gain2"], "lifestyle": [], "bodytype": "unsure", "fuel": "any", "brands": ["honda"], "priority": "brand"},
+      "hard_rules": {"brand_only": ["Honda"], "min_seats": 5, "max_price": 1150000}
+    },
+    {
+      "id": "P4",
+      "name": "ครอบครัวส่งลูกไปเรียน",
+      "tests": "ไลฟ์สไตล์ส่งลูกและความปลอดภัย",
+      "story": "พ่อแม่ลูก 2 ส่งลูกไปโรงเรียนทุกเช้า รถติด จอดหน้าโรงเรียนยาก งบ 900,000 ความปลอดภัยต้องมาก่อน",
+      "criteria": {
+        "budget": 900000, "budget_stretch": 0.1, "brand_only": [], "brand_exclude": [],
+        "seats_min": 5, "fuel_only": null, "body_preferred": [], "lifestyles": ["school_run", "city"],
+        "km_per_year": 15000,
+        "priorities": {"budget": 2, "lifestyle": 3, "running_cost": 2, "safety": 3, "design": 1}
+      },
+      "old_quiz": {"budget": 900000, "income": 70000, "pains": ["pain1", "pain3"], "gains": ["gain2"], "lifestyle": [], "bodytype": "unsure", "fuel": "any", "brands": ["any"], "priority": "lifestyle"},
+      "hard_rules": {"min_seats": 5, "max_price": 990000}
+    },
+    {
+      "id": "P5",
+      "name": "ครอบครัวสายแคมป์ปิ้งที่เลี้ยงหมา",
+      "tests": "ไลฟ์สไตล์ 2 แบบพร้อมกัน",
+      "story": "สามีภรรยาลูก 1 หมาโกลเด้น 1 ตัว ออกแคมป์เดือนละครั้ง ทางลูกรัง งบ 1.3 ล้าน",
+      "criteria": {
+        "budget": 1300000, "budget_stretch": 0.15, "brand_only": [], "brand_exclude": [],
+        "seats_min": 5, "fuel_only": null, "body_preferred": ["suv", "ppv"], "lifestyles": ["camping", "pets"],
+        "km_per_year": 20000,
+        "priorities": {"budget": 2, "lifestyle": 3, "running_cost": 1, "safety": 2, "design": 2}
+      },
+      "old_quiz": {"budget": 1300000, "income": 90000, "pains": ["pain5", "pain3"], "gains": ["gain4", "gain2"], "lifestyle": [], "bodytype": "suv", "fuel": "any", "brands": ["any"], "priority": "lifestyle"},
+      "hard_rules": {"min_seats": 5, "max_price": 1495000}
+    },
+    {
+      "id": "P6",
+      "name": "ครอบครัวใหญ่พาผู้ใหญ่ไปทำบุญ",
+      "tests": "ตัวกรองที่นั่ง 7 ที่",
+      "story": "พาพ่อแม่และยายไปวัดทุกสุดสัปดาห์ บ้านละ 7 คน ผู้ใหญ่ขึ้นรถสูงลำบาก งบ 1.2 ล้าน",
+      "criteria": {
+        "budget": 1200000, "budget_stretch": 0.15, "brand_only": [], "brand_exclude": [],
+        "seats_min": 7, "fuel_only": null, "body_preferred": [], "lifestyles": ["merit_family"],
+        "km_per_year": 15000,
+        "priorities": {"budget": 2, "lifestyle": 3, "running_cost": 2, "safety": 2, "design": 1}
+      },
+      "old_quiz": {"budget": 1200000, "income": 80000, "pains": ["pain3"], "gains": ["gain2"], "lifestyle": [], "bodytype": "mpv", "fuel": "any", "brands": ["any"], "priority": "lifestyle"},
+      "hard_rules": {"min_seats": 7, "max_price": 1380000}
+    },
+    {
+      "id": "P7",
+      "name": "คนงบ 500,000 ที่ยืดได้ถ้าคุ้ม",
+      "tests": "งบยืดได้ในงบต่ำ",
+      "story": "งบ 500,000 แต่ถ้าคุ้มจริงยอมจ่ายเพิ่มได้ อยากได้รถคันแรกขับในเมือง",
+      "criteria": {
+        "budget": 500000, "budget_stretch": 0.2, "brand_only": [], "brand_exclude": [],
+        "seats_min": null, "fuel_only": null, "body_preferred": [], "lifestyles": ["city"],
+        "km_per_year": 12000,
+        "priorities": {"budget": 3, "lifestyle": 2, "running_cost": 2, "safety": 2, "design": 1}
+      },
+      "old_quiz": {"budget": 500000, "income": 22000, "pains": ["pain1"], "gains": ["gain1"], "lifestyle": [], "bodytype": "unsure", "fuel": "any", "brands": ["any"], "priority": "budget"},
+      "hard_rules": {"max_price": 600000}
+    },
+    {
+      "id": "P8",
+      "name": "คนงบ 900,000 ที่ยืดได้ถ้าคุ้ม",
+      "tests": "งบยืดได้ในงบสูง เทียบกับคนก่อนหน้า",
+      "story": "งบ 900,000 ยอมจ่ายเพิ่มได้ถ้าคุ้ม ใช้ในเมืองเป็นหลัก ต่างจังหวัดบ้าง",
+      "criteria": {
+        "budget": 900000, "budget_stretch": 0.2, "brand_only": [], "brand_exclude": [],
+        "seats_min": null, "fuel_only": null, "body_preferred": [], "lifestyles": ["city", "long_trips"],
+        "km_per_year": 18000,
+        "priorities": {"budget": 3, "lifestyle": 2, "running_cost": 2, "safety": 2, "design": 1}
+      },
+      "old_quiz": {"budget": 900000, "income": 60000, "pains": ["pain1", "pain4"], "gains": ["gain1", "gain3"], "lifestyle": [], "bodytype": "unsure", "fuel": "any", "brands": ["any"], "priority": "budget"},
+      "hard_rules": {"max_price": 1080000}
+    }
+  ]
+}
