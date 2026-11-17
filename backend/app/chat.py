@@ -168,9 +168,17 @@ def rules_extract(text, crit):
         c["budget_stretch"] = 0.1
     elif re.search(r"ถ้าคุ้ม|เกินได้", text):
         c["budget_stretch"] = 0.2
-    m = re.search(r"(\d+|" + "|".join(THAI_NUM) + r")\s*(คน|ที่นั่ง)", text)
+    num = r"(\d+|" + "|".join(THAI_NUM) + r")"
+    # riders, not people mentioned in passing: "บ้านมี 6 คน", "นั่ง 5 คน", "7 ที่นั่ง", "ครอบครัว 4 คน"
+    m = re.search(r"(?:บ้านมี|ครอบครัว|นั่ง(?:ประจำ)?|ไปด้วยกัน|ทั้งหมด)\s*" + num + r"\s*คน", text) or \
+        re.search(num + r"\s*ที่นั่ง", text)
     if m and _num(m.group(1)):
         c["seats_min"] = int(_num(m.group(1)))
+    else:
+        kids = re.search(r"ลูก\s*" + num + r"\s*คน", text)
+        if kids and _num(kids.group(1)):
+            # n kids + 2 parents, unless we already know a bigger number
+            c["seats_min"] = max(c.get("seats_min") or 0, int(_num(kids.group(1))) + 2)
     if "7 ที่นั่ง" in text or "เจ็ดที่นั่ง" in text:
         c["seats_min"] = 7
 

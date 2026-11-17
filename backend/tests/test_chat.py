@@ -46,3 +46,9 @@ def test_chat_endpoint_flow_without_key():
                                        "criteria": r["criteria"], "asked": r["asked"]}).json()
     assert r["criteria"]["budget"] == 800000 and r["ready"] is True
     assert "city" in r["criteria"]["lifestyles"]
+
+
+def test_kids_count_is_not_seat_count():
+    assert rules_extract("มีลูก 2 คน เลี้ยงหมา", {})["seats_min"] == 4
+    assert rules_extract("บ้านมี 6 คน", {})["seats_min"] == 6
+    assert rules_extract("อยากได้ 7 ที่นั่ง", {})["seats_min"] == 7
