@@ -8,6 +8,7 @@ from app.models import QuizState, RecommendationResult, Car
 from app.services import generate_recommendations
 from app import matching_config as match_cfg
 from app.matching import Criteria, recommend as recommend_v2
+from app.chat import ChatRequest, ChatResponse, chat_turn
 from app.feedback_db import init_db
 from app.feedback_router import router as feedback_router
 
@@ -177,3 +178,14 @@ def get_v2_options():
         "default_stretch": match_cfg.DEFAULT_STRETCH,
         "default_km_per_year": match_cfg.DEFAULT_KM_PER_YEAR,
     }
+
+
+@app.post("/api/chat", response_model=ChatResponse)
+def chat(req: ChatRequest):
+    """
+    AI sales-advisor chat (spec 5): turns what the user types into criteria and asks
+    the next question. Never picks cars itself — the frontend sends the returned
+    criteria to /api/v2/recommend. Uses the LLM when ANTHROPIC_API_KEY is set,
+    otherwise a Thai keyword extractor, so the demo works without AI.
+    """
+    return chat_turn(req)

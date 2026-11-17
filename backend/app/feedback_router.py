@@ -20,7 +20,9 @@ from app.feedback_schemas import (
 
 router = APIRouter(tags=["feedback"])
 
-ADMIN_KEY = os.getenv("FEEDBACK_ADMIN_KEY", "car-advisor-admin-secret")
+def _admin_key():
+    """Read at request time so a changed FEEDBACK_ADMIN_KEY takes effect without a code change."""
+    return os.getenv("FEEDBACK_ADMIN_KEY", "car-advisor-admin-secret")
 RATE_LIMIT_PER_HOUR = 20
 
 
@@ -104,7 +106,7 @@ def get_feedback_summary(
     Supports X-API-Key header or ?api_key= query parameter.
     """
     token = x_api_key or api_key
-    if not token or token != ADMIN_KEY:
+    if not token or token != _admin_key():
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Unauthorized: Missing or invalid X-API-Key.",
@@ -227,7 +229,7 @@ def list_feedback(
     Supports ?api_key= query parameter or X-API-Key header.
     """
     token = x_api_key or api_key
-    if not token or token != ADMIN_KEY:
+    if not token or token != _admin_key():
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Unauthorized: Missing or invalid API key.",

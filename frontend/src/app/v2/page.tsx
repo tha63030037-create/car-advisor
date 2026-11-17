@@ -109,6 +109,17 @@ export default function MatchV2() {
   const [brandOnly, setBrandOnly] = useState<string[]>([]);
   const [seatsMin, setSeatsMin] = useState<number | null>(null);
   const [noEv, setNoEv] = useState(false);
+  const [brandExclude, setBrandExclude] = useState<string[]>([]);
+
+  // chat (spec 5): the bot fills these same controls, so both modes drive one engine
+  const [mode, setMode] = useState<"chat" | "manual">("chat");
+  const [chatMsgs, setChatMsgs] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
+  const [asked, setAsked] = useState<string[]>([]);
+  const [quick, setQuick] = useState<string[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatBusy, setChatBusy] = useState(false);
+  const [chatEngine, setChatEngine] = useState<string>("");
+  const chatEnd = useRef<HTMLDivElement | null>(null);
 
   const [data, setData] = useState<Resp | null>(null);
   const [prevRank, setPrevRank] = useState<Record<number, number>>({});
@@ -127,7 +138,7 @@ export default function MatchV2() {
     budget: budgetK * 1000,
     budget_stretch: stretch,
     brand_only: brandOnly,
-    brand_exclude: [],
+    brand_exclude: brandExclude,
     seats_min: seatsMin,
     fuel_only: null,
     fuel_exclude: noEv ? ["ev"] : [],
@@ -136,7 +147,56 @@ export default function MatchV2() {
     km_per_year: 15000,
     priorities: zones,
     top_n: 10,
-  }), [budgetK, stretch, brandOnly, seatsMin, noEv, bodies, lifestyles, zones]);
+  }), [budgetK, stretch, brandOnly, brandExclude, seatsMin, noEv, bodies, lifestyles, zones]);
+
+  // ---------------------------------------------------------------- chat
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const applyChatCriteria = (c: any) => {
+    if (c.budget) setBudgetK(Math.round(c.budget / 1000));
+    if (typeof c.budget_stretch === "number") setStretch(c.budget_stretch);
+    if (Array.isArray(c.lifestyles)) setLifestyles(c.lifestyles);
+    if (Array.isArray(c.body_preferred)) setBodies(c.body_preferred);
+    if (Array.isArray(c.brand_only)) setBrandOnly(c.brand_only);
+    if (Array.isArray(c.brand_exclude)) setBrandExclude(c.brand_exclude);
+    if (c.seats_min !== undefined) setSeatsMin(c.seats_min ?? null);
+    if (Array.isArray(c.fuel_exclude)) setNoEv(c.fuel_exclude.includes("ev"));
+    if (c.priorities) setZones(c.priorities);
+  };
+
+  const sendChat = async (text: string | null) => {
+    const msgs = text ? [...chatMsgs, { role: "user" as const, content: text }] : chatMsgs;
+    if (text) setChatMsgs(msgs);
+    setChatInput("");
+    setQuick([]);
+    setChatBusy(true);
+    try {
+      const res = await fetch(`${apiBase()}/api/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // send what the controls show now, so manual edits and chat stay in sync
+        body: JSON.stringify({ messages: msgs, criteria: { ...criteria, priorities: zones }, asked }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const r = await res.json();
+      setChatMsgs([...msgs, { role: "assistant", content: r.reply }]);
+      setAsked(r.asked);
+      setQuick(r.quick_replies || []);
+      setChatEngine(r.engine);
+      applyChatCriteria(r.criteria);
+    } catch {
+      setChatMsgs([...msgs, { role: "assistant", content: "ขอโทษค่ะ ตอนนี้ที่ปรึกษาตอบไม่ได้ ลองพิมพ์ใหม่ หรือสลับไปแท็บ \"ตั้งค่าเอง\" ได้เลยค่ะ" }]);
+    } finally {
+      setChatBusy(false);
+    }
+  };
+
+  // greet once when the chat tab first opens
+  useEffect(() => {
+    if (mode === "chat" && chatMsgs.length === 0 && !chatBusy) sendChat(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
+
+  useEffect(() => { chatEnd.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }); }, [chatMsgs, chatBusy]);
 
   // re-rank automatically whenever anything changes — the demo moment in spec 6
   useEffect(() => {
@@ -183,6 +243,42 @@ export default function MatchV2() {
       <div className="layout">
         {/* ------------------------------------------------ left: controls */}
         <section className="panel">
+          <div className="tabs" role="tablist">
+            <button role="tab" aria-selected={mode === "chat"} className={mode === "chat" ? "on" : ""} onClick={() => setMode("chat")}>💬 คุยกับที่ปรึกษา</button>
+            <button role="tab" aria-selected={mode === "manual"} className={mode === "manual" ? "on" : ""} onClick={() => setMode("manual")}>🎛️ ตั้งค่าเอง</button>
+          </div>
+
+          {mode === "chat" && (
+            <div className="chat">
+              <div className="msgs" aria-live="polite">
+                {chatMsgs.map((m, i) => (
+                  <div key={i} className={`bubble ${m.role}`}>{m.content}</div>
+                ))}
+                {chatBusy && <div className="bubble assistant typing"><span /><span /><span /></div>}
+                <div ref={chatEnd} />
+              </div>
+              {quick.length > 0 && !chatBusy && (
+                <div className="chips quick">
+                  {quick.map((q) => <button key={q} className="chip" onClick={() => sendChat(q)}>{q}</button>)}
+                </div>
+              )}
+              <form className="ask" onSubmit={(e) => { e.preventDefault(); if (chatInput.trim() && !chatBusy) sendChat(chatInput.trim()); }}>
+                <input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="พิมพ์เล่าได้เลย เช่น มีลูก 2 คน งบ 9 แสน" maxLength={500} aria-label="ข้อความถึงที่ปรึกษา" />
+                <button type="submit" disabled={chatBusy || !chatInput.trim()}>ส่ง</button>
+              </form>
+              <p className="hint">ที่ปรึกษาจะกรอกเงื่อนไขให้ในแท็บ &quot;ตั้งค่าเอง&quot; และจัดอันดับรถด้านข้างทันที {chatEngine === "rules" && "· โหมดอ่านคำสำคัญ (ยังไม่ได้เชื่อม AI)"}</p>
+              <div className="mini">
+                <div className="wbar" aria-label="น้ำหนักแต่ละเกณฑ์">
+                  {CARDS.map((c) => (
+                    <div key={c.key} style={{ width: `${weights[c.key]}%`, background: CRIT_COLOR[c.key] }} title={`${c.label} ${weights[c.key]}%`} />
+                  ))}
+                </div>
+                <div className="legend">{CARDS.map((c) => <span key={c.key}><i style={{ background: CRIT_COLOR[c.key] }} />{c.label} {weights[c.key]}%</span>)}</div>
+              </div>
+            </div>
+          )}
+
+          {mode === "manual" && (<>
           <h2>1. จัดการ์ดความสำคัญ</h2>
           <div className="zones">
             {ZONES.map(({ z, label }) => (
@@ -267,6 +363,13 @@ export default function MatchV2() {
               <button key={b.key} className={`chip ${bodies.includes(b.key) ? "on" : ""}`} onClick={() => toggle(bodies, b.key, setBodies)}>{b.label}</button>
             ))}
           </div>
+          {brandExclude.length > 0 && (
+            <div className="excl">
+              ไม่เอาแบรนด์: {brandExclude.join(", ")}
+              <button className="chip" onClick={() => setBrandExclude([])}>ล้าง</button>
+            </div>
+          )}
+          </>)}
         </section>
 
         {/* ------------------------------------------------ right: results */}
