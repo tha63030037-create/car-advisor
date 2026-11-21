@@ -119,7 +119,12 @@ export default function MatchV2() {
   const [chatInput, setChatInput] = useState("");
   const [chatBusy, setChatBusy] = useState(false);
   const [chatEngine, setChatEngine] = useState<string>("");
+  const [chatDone, setChatDone] = useState(false);
+  const [explainText, setExplainText] = useState<string>("");
+  const [explainBusy, setExplainBusy] = useState(false);
   const chatEnd = useRef<HTMLDivElement | null>(null);
+  const chatTop = useRef<HTMLDivElement | null>(null);
+  const resultsTop = useRef<HTMLElement | null>(null);
 
   const [data, setData] = useState<Resp | null>(null);
   const [prevRank, setPrevRank] = useState<Record<number, number>>({});
@@ -182,6 +187,7 @@ export default function MatchV2() {
       setAsked(r.asked);
       setQuick(r.quick_replies || []);
       setChatEngine(r.engine);
+      if (r.done) setChatDone(true);
       applyChatCriteria(r.criteria);
     } catch {
       setChatMsgs([...msgs, { role: "assistant", content: "ขอโทษค่ะ ตอนนี้ที่ปรึกษาตอบไม่ได้ ลองพิมพ์ใหม่ หรือสลับไปแท็บ \"ตั้งค่าเอง\" ได้เลยค่ะ" }]);
@@ -196,7 +202,44 @@ export default function MatchV2() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
 
-  useEffect(() => { chatEnd.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }); }, [chatMsgs, chatBusy]);
+  useEffect(() => { chatEnd.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }); }, [chatMsgs, chatBusy, explainText]);
+
+  // once the chat has covered every topic, the advisor explains the top 3 in the chat (spec 5.4)
+  // and re-explains whenever the user changes something afterwards
+  useEffect(() => {
+    if (!chatDone || !data || data.results.length === 0) return;
+    const t = setTimeout(async () => {
+      setExplainBusy(true);
+      try {
+        const res = await fetch(`${apiBase()}/api/explain`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(criteria),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const r = await res.json();
+        setExplainText(r.text);
+      } catch {
+        setExplainText("");
+      } finally {
+        setExplainBusy(false);
+      }
+    }, 400);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatDone, data]);
+
+  // the phone "see results" button hides while the results are already on screen
+  const [resultsInView, setResultsInView] = useState(false);
+  useEffect(() => {
+    const el = resultsTop.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([e]) => setResultsInView(e.isIntersecting), { threshold: 0.05 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const scrollTo = (el: HTMLElement | null) => el?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   // re-rank automatically whenever anything changes — the demo moment in spec 6
   useEffect(() => {
@@ -249,12 +292,27 @@ export default function MatchV2() {
           </div>
 
           {mode === "chat" && (
-            <div className="chat">
+            <div className="chat" ref={chatTop}>
               <div className="msgs" aria-live="polite">
                 {chatMsgs.map((m, i) => (
                   <div key={i} className={`bubble ${m.role}`}>{m.content}</div>
                 ))}
                 {chatBusy && <div className="bubble assistant typing"><span /><span /><span /></div>}
+                {chatDone && data && data.results.length > 0 && (
+                  <div className="picks" aria-label="รถ 3 อันดับแรก">
+                    <div className="picks-head">รถ 3 อันดับแรกสำหรับคุณ</div>
+                    {data.results.slice(0, 3).map((r) => (
+                      <button key={r.id} className="pick" onClick={() => { setOpen(r.id); scrollTo(resultsTop.current); }}>
+                        <span className="pr">#{r.rank}</span>
+                        <span className="pn">{r.name}<small>{baht(r.price)} บาท{r.over_budget ? ` · ${r.over_budget.label}` : ""}</small></span>
+                        <span className="ps">{Math.round(r.score)}%</span>
+                      </button>
+                    ))}
+                    {explainBusy && !explainText && <div className="bubble assistant typing"><span /><span /><span /></div>}
+                    {explainText && <div className="bubble assistant explain">{explainText}</div>}
+                    <button className="see-all" onClick={() => scrollTo(resultsTop.current)}>ดูที่มาคะแนนและอันดับ 4–10 ↓</button>
+                  </div>
+                )}
                 <div ref={chatEnd} />
               </div>
               {quick.length > 0 && !chatBusy && (
@@ -263,10 +321,10 @@ export default function MatchV2() {
                 </div>
               )}
               <form className="ask" onSubmit={(e) => { e.preventDefault(); if (chatInput.trim() && !chatBusy) sendChat(chatInput.trim()); }}>
-                <input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="พิมพ์เล่าได้เลย เช่น มีลูก 2 คน งบ 9 แสน" maxLength={500} aria-label="ข้อความถึงที่ปรึกษา" />
+                <input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="พิมพ์เล่าได้เลย เช่น มีลูก 2 คน งบ 9 แสน" maxLength={500} aria-label="ข้อความถึงที่ปรึกษา" enterKeyHint="send" autoComplete="off" />
                 <button type="submit" disabled={chatBusy || !chatInput.trim()}>ส่ง</button>
               </form>
-              <p className="hint">ที่ปรึกษาจะกรอกเงื่อนไขให้ในแท็บ &quot;ตั้งค่าเอง&quot; และจัดอันดับรถด้านข้างทันที {chatEngine === "rules" && "· โหมดอ่านคำสำคัญ (ยังไม่ได้เชื่อม AI)"}</p>
+              <p className="hint">ที่ปรึกษาจะกรอกเงื่อนไขให้ในแท็บ &quot;ตั้งค่าเอง&quot; และจัดอันดับรถให้ทันที {chatEngine === "rules" && "· โหมดอ่านคำสำคัญ (ยังไม่ได้เชื่อม AI)"}</p>
               <div className="mini">
                 <div className="wbar" aria-label="น้ำหนักแต่ละเกณฑ์">
                   {CARDS.map((c) => (
@@ -373,9 +431,10 @@ export default function MatchV2() {
         </section>
 
         {/* ------------------------------------------------ right: results */}
-        <section className="results">
+        <section className="results" ref={resultsTop}>
           <div className="rhead">
             <h2>ผลการจับคู่</h2>
+            {mode === "chat" && <button className="back-chat" onClick={() => scrollTo(chatTop.current)}>↑ กลับไปคุยต่อ</button>}
             {data && <span className="count">ผ่านเงื่อนไข {data.passed_filters} จาก {data.total_cars} คัน {loading && "· กำลังจัดอันดับ…"}</span>}
           </div>
 
@@ -445,6 +504,12 @@ export default function MatchV2() {
           <p className="foot">รูปรถเป็นภาพประกอบที่สร้างด้วย AI ไม่ใช่ภาพถ่ายจริง</p>
         </section>
       </div>
+
+      {mode === "chat" && !resultsInView && data && data.results.length > 0 && (
+        <button className="jump" onClick={() => scrollTo(resultsTop.current)}>
+          ดูผล: #{data.results[0].rank} {data.results[0].name} {Math.round(data.results[0].score)}%
+        </button>
+      )}
 
       <style jsx>{`
         .v2 { min-height: 100vh; background: var(--ink, #0b0f19); color: var(--cream, #f8fafc); font-family: 'Prompt', sans-serif; padding: 24px clamp(12px, 3vw, 40px) 60px; }
@@ -525,13 +590,29 @@ export default function MatchV2() {
         @keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
         .quick { margin-top: 0; }
         .ask { display: flex; gap: 8px; }
-        .ask input { flex: 1; min-height: 44px; border-radius: 12px; border: 1px solid rgba(255,255,255,.14); background: rgba(15,23,42,.8); color: inherit; font: inherit; padding: 0 12px; }
+        .ask input { flex: 1; min-width: 0; font-size: 16px !important; min-height: 44px; border-radius: 12px; border: 1px solid rgba(255,255,255,.14); background: rgba(15,23,42,.8); color: inherit; font: inherit; padding: 0 12px; }
         .ask input:focus { outline: 2px solid #8b5cf6; }
         .ask button { min-height: 44px; padding: 0 18px; border-radius: 12px; border: 0; background: #8b5cf6; color: #fff; font: inherit; cursor: pointer; }
         .ask button:disabled { opacity: .45; cursor: default; }
         .hint { font-size: 12px; color: #64748b; margin: 0; }
         .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 11px; color: #94a3b8; margin-top: 6px; }
         .legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px; }
+        .picks { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; padding: 10px; border-radius: 14px; border: 1px solid rgba(192,132,252,.35); background: rgba(139,92,246,.08); }
+        .picks-head { font-size: 13px; color: #c084fc; font-weight: 600; }
+        .pick { display: grid; grid-template-columns: 34px 1fr auto; gap: 8px; align-items: center; min-height: 48px; padding: 6px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,.08); background: rgba(15,23,42,.7); color: inherit; font: inherit; text-align: left; cursor: pointer; }
+        .pr { font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: #c084fc; }
+        .pn { font-size: 14px; font-weight: 600; display: flex; flex-direction: column; }
+        .pn small { font-weight: 400; font-size: 12px; color: #94a3b8; }
+        .ps { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 18px; }
+        .explain { max-width: 100%; }
+        .see-all { align-self: flex-start; background: none; border: 0; color: #c084fc; font: inherit; font-size: 13px; padding: 6px 0; cursor: pointer; min-height: 36px; }
+        .back-chat, .jump { display: none; }
+        @media (max-width: 900px) {
+          .msgs { max-height: 62dvh; }
+          .back-chat { display: inline-block; background: none; border: 1px solid rgba(255,255,255,.14); color: #cbd5e1; border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 13px; min-height: 36px; }
+          .jump { display: block; position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 20; min-height: 48px; border: 0; border-radius: 14px; background: #8b5cf6; color: #fff; font: inherit; font-size: 15px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,.45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 16px; }
+          .v2 { padding-bottom: 90px; }
+        }
         .excl { margin-top: 12px; font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
       `}</style>
     </main>

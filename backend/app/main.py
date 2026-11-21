@@ -8,6 +8,8 @@ from app.models import QuizState, RecommendationResult, Car
 from app.services import generate_recommendations
 from app import matching_config as match_cfg
 from app.matching import Criteria, recommend as recommend_v2
+from app.explain import explain as explain_top3
+from app.chat import pick_provider
 from app.chat import ChatRequest, ChatResponse, chat_turn
 from app.feedback_db import init_db
 from app.feedback_router import router as feedback_router
@@ -111,7 +113,9 @@ def root():
 
 @app.get("/api/health")
 def health_check():
-    return {"status": "ok", "message": "Car Advisor API is up and running."}
+    provider, _ = pick_provider()
+    # shows WHICH AI provider is configured (never the key) so a deploy can be checked from a phone
+    return {"status": "ok", "message": "Car Advisor API is up and running.", "llm": provider or "none (rules mode)"}
 
 @app.get("/api/cars", response_model=List[Car])
 def get_all_cars():
@@ -189,3 +193,13 @@ def chat(req: ChatRequest):
     otherwise a Thai keyword extractor, so the demo works without AI.
     """
     return chat_turn(req)
+
+
+@app.post("/api/explain")
+def explain_endpoint(criteria: Criteria):
+    """
+    Salesperson-style reasons for the top 3 (spec 5.4). The ranking is recomputed from
+    the criteria, the LLM only sees those 3 cars' data, and its text is checked to name
+    exactly those cars; otherwise a template from the same numbers is returned.
+    """
+    return explain_top3(criteria)

@@ -64,6 +64,7 @@ class ChatResponse(BaseModel):
     asked: List[str]
     quick_replies: List[str]
     engine: str
+    done: bool = False   # every topic covered: the frontend shows the top 3 in the chat
 
 
 # Conversation order (spec 5.5). budget is the only hard requirement to show results.
@@ -78,7 +79,7 @@ QUESTIONS = {
                 ["ห้ามเกินเลย", "เกินได้นิดหน่อย", "เกินได้ถ้าคุ้มจริง"]),
     "brand": ("มียี่ห้อที่อยากได้เป็นพิเศษ หรือยี่ห้อที่ไม่เอาไหมคะ",
               ["ไม่จำกัดยี่ห้อ", "เอาแต่ Toyota", "ไม่เอารถจีน"]),
-    "priorities": ("ข้อสุดท้ายค่ะ ระหว่าง งบ / การใช้งาน / ค่าใช้จ่ายระยะยาว / ความปลอดภัย / ดีไซน์ เรื่องไหนสำคัญที่สุดคะ (ปรับการ์ดด้านข้างเองก็ได้นะคะ)",
+    "priorities": ("ข้อสุดท้ายค่ะ ระหว่าง งบ / การใช้งาน / ค่าใช้จ่ายระยะยาว / ความปลอดภัย / ดีไซน์ เรื่องไหนสำคัญที่สุดคะ (หรือแตะแท็บ “ตั้งค่าเอง” เพื่อจัดการ์ดเองก็ได้นะคะ)",
                    ["ความปลอดภัยสำคัญสุด", "งบสำคัญสุด", "ค่าใช้จ่ายระยะยาวสำคัญสุด", "ดีไซน์สำคัญสุด"]),
 }
 
@@ -290,7 +291,7 @@ def rules_turn(req):
         reply = (("รับทราบค่ะ ตอนนี้เข้าใจว่า " + got + "\n\n") if got and last_user else "") + q
     else:
         reply = "สรุปที่เข้าใจนะคะ: " + (summarize(c) or "ยังไม่มีเงื่อนไข") + \
-                "\n\nจัดอันดับรถให้ด้านข้างแล้วค่ะ อยากปรับอะไรพิมพ์ต่อได้เลย เช่น \"ถ้าเพิ่มงบอีก 5 หมื่นล่ะ\""
+                "\n\nจัดอันดับรถให้แล้วค่ะ อยากปรับอะไรพิมพ์ต่อได้เลย เช่น \"ถ้าเพิ่มงบอีก 5 หมื่นล่ะ\""
         quick = ["เพิ่มงบอีก 5 หมื่น", "ไม่เอารถไฟฟ้า", "ต้องนั่งได้ 7 คน"]
     return c, reply, nt, asked, quick
 
@@ -396,4 +397,5 @@ def chat_turn(req):
     return ChatResponse(
         reply=reply, criteria=crit, missing=missing, ready=not missing,
         next_topic=nt, asked=asked, quick_replies=quick, engine=engine,
+        done=bool(crit.get("budget")) and nt is None,
     )
