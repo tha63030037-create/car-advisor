@@ -28,9 +28,12 @@ from app import matching_config as cfg
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 # OpenAI-compatible chat endpoints (Gemini and Groq both offer one)
 OPENAI_COMPAT = {
-    "gemini": ("GEMINI_API_KEY", "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", "gemini-3.8-flash"),  # 2.5-flash closed to new keys (Nov 2026)
+    "gemini": ("GEMINI_API_KEY", "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", "gemini-3.5-flash-lite"),
     "groq": ("GROQ_API_KEY", "https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-120b"),
 }
+
+# tried in order after CHAT_MODEL / the default when a model is busy or closed
+GEMINI_FALLBACKS = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.5-flash", "gemini-3.8-flash"]
 
 
 def pick_provider():
@@ -347,30 +350,40 @@ def _call_llm(provider, api_key, system, history):
         r.raise_for_status()
         return "".join(p.get("text", "") for p in r.json().get("content", []))
     _, url, default_model = OPENAI_COMPAT[provider]
-    model = os.getenv("CHAT_MODEL", default_model)
-    body = {"model": model, "temperature": 0, "max_tokens": 1200,
-            "messages": [{"role": "system", "content": system}] + history}
+    models = [os.getenv("CHAT_MODEL", default_model)]
     if provider == "gemini":
-        # Gemini models "think" by default and the thinking tokens count against max_tokens,
-        # which can leave the answer empty: give room, and switch thinking off where supported
-        body["max_tokens"] = 4096
-        # 2.5 can switch thinking off; newer models only go down to "low". Thinking made
-        # the first live calls time out, and JSON extraction does not need it.
-        body["reasoning_effort"] = "none" if model.startswith("gemini-2.5") else os.getenv("GEMINI_REASONING", "low")
-    for wait in (1.5, 3, None):
-        r = httpx.post(url, json=body, headers={"Authorization": "Bearer " + api_key}, timeout=45)
-        # free-tier models answer 503 "high demand" / 429 in bursts: wait and try again twice
-        if r.status_code in (429, 503) and wait:
-            time.sleep(wait)
+        # free-tier Gemini models return 503 "high demand" in bursts and older ones get closed
+        # to new keys (2.5-flash in Nov 2026): walk a short list instead of failing on one
+        models += [m for m in GEMINI_FALLBACKS if m not in models]
+    last = None
+    for model in models:
+        body = {"model": model, "temperature": 0, "max_tokens": 1200,
+                "messages": [{"role": "system", "content": system}] + history}
+        if provider == "gemini":
+            # thinking tokens count against max_tokens and slow the reply; keep them low
+            body["max_tokens"] = 4096
+            body["reasoning_effort"] = "low"
+        for attempt in range(2):
+            r = httpx.post(url, json=body, headers={"Authorization": "Bearer " + api_key}, timeout=40)
+            if r.status_code == 400 and "reasoning" in r.text.lower() and "reasoning_effort" in body:
+                body.pop("reasoning_effort")  # model without thinking control
+                continue
+            if r.status_code in (429, 503) and attempt == 0:
+                time.sleep(1.5)
+                continue
+            break
+        if r.status_code < 400:
+            content = r.json()["choices"][0]["message"].get("content") or ""
+            if content.strip():
+                return content
+            last = "%s/%s returned an empty answer" % (provider, model)
             continue
-        break
-    if r.status_code >= 400:
         # status + the provider's own error text (never the key) so failures show in Vercel logs
-        raise RuntimeError("%s HTTP %d: %s" % (provider, r.status_code, r.text[:300]))
-    content = r.json()["choices"][0]["message"].get("content") or ""
-    if not content.strip():
-        raise RuntimeError("%s returned an empty answer" % provider)
-    return content
+        last = "%s/%s HTTP %d: %s" % (provider, model, r.status_code, r.text[:200])
+        print("[llm]", last)
+        if r.status_code not in (404, 429, 503):
+            break
+    raise RuntimeError(last or "%s failed" % provider)
 
 
 def llm_turn(req, provider, api_key):
