@@ -353,9 +353,10 @@ def _call_llm(provider, api_key, system, history):
         # Gemini models "think" by default and the thinking tokens count against max_tokens,
         # which can leave the answer empty: give room, and switch thinking off where supported
         body["max_tokens"] = 4096
-        if model.startswith("gemini-2.5"):
-            body["reasoning_effort"] = "none"
-    r = httpx.post(url, json=body, headers={"Authorization": "Bearer " + api_key}, timeout=25)
+        # 2.5 can switch thinking off; newer models only go down to "low". Thinking made
+        # the first live calls time out, and JSON extraction does not need it.
+        body["reasoning_effort"] = "none" if model.startswith("gemini-2.5") else os.getenv("GEMINI_REASONING", "low")
+    r = httpx.post(url, json=body, headers={"Authorization": "Bearer " + api_key}, timeout=45)
     if r.status_code >= 400:
         # status + the provider's own error text (never the key) so failures show in Vercel logs
         raise RuntimeError("%s HTTP %d: %s" % (provider, r.status_code, r.text[:300]))
