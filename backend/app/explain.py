@@ -114,6 +114,7 @@ def explain(criteria: Criteria) -> Dict[str, Any]:
             text = re.sub(r"[*#`]", "", text)[:2500]
             if text and text_is_grounded(text, top):
                 return {"text": text, "engine": "llm:" + provider, "ids": [r["id"] for r in top]}
-        except Exception:
-            pass
+            print("[explain] LLM text failed the grounding check, using template")
+        except Exception as e:
+            print("[explain] LLM failed, using template:", repr(e)[:400])
     return {"text": template_text(top), "engine": "template", "ids": [r["id"] for r in top]}

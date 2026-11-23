@@ -348,9 +348,18 @@ def _call_llm(provider, api_key, system, history):
     _, url, default_model = OPENAI_COMPAT[provider]
     body = {"model": os.getenv("CHAT_MODEL", default_model), "temperature": 0, "max_tokens": 1200,
             "messages": [{"role": "system", "content": system}] + history}
+    if provider == "gemini":
+        # Gemini 2.5 "thinks" by default and the thinking tokens eat max_tokens, which can leave
+        # the answer empty; JSON extraction needs no thinking
+        body["reasoning_effort"] = os.getenv("GEMINI_REASONING", "none")
     r = httpx.post(url, json=body, headers={"Authorization": "Bearer " + api_key}, timeout=25)
-    r.raise_for_status()
-    return r.json()["choices"][0]["message"]["content"] or ""
+    if r.status_code >= 400:
+        # status + the provider's own error text (never the key) so failures show in Vercel logs
+        raise RuntimeError("%s HTTP %d: %s" % (provider, r.status_code, r.text[:300]))
+    content = r.json()["choices"][0]["message"].get("content") or ""
+    if not content.strip():
+        raise RuntimeError("%s returned an empty answer" % provider)
+    return content
 
 
 def llm_turn(req, provider, api_key):
@@ -388,7 +397,8 @@ def chat_turn(req):
             nt = next_topic(crit, asked)
             if nt:
                 asked.append(nt)
-        except Exception:
+        except Exception as e:
+            print("[chat] LLM failed, using rules:", repr(e)[:400])
             crit, reply, nt, asked, quick = rules_turn(req)
     else:
         crit, reply, nt, asked, quick = rules_turn(req)
