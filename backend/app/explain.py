@@ -111,7 +111,9 @@ def explain(criteria: Criteria) -> Dict[str, Any]:
         msgs = [{"role": "user", "content": json.dumps(payload, ensure_ascii=False)}]
         try:
             text = _call_llm(provider, key, EXPLAIN_PROMPT, msgs).strip()
-            text = re.sub(r"[*#`]", "", text)[:2500]
+            text = re.sub(r"[*#`]", "", text)
+            # small models sometimes emit a stray glyph from another script inside Thai words
+            text = re.sub(r"[^\u0000-\u024F\u0E00-\u0E7F\u2000-\u206F\u20AC\u0E3F]", "", text)[:2500]
             if text and text_is_grounded(text, top):
                 return {"text": text, "engine": "llm:" + provider, "ids": [r["id"] for r in top]}
             print("[explain] LLM text failed the grounding check, using template")

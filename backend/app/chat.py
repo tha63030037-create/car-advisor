@@ -363,8 +363,14 @@ def _call_llm(provider, api_key, system, history):
             # thinking tokens count against max_tokens and slow the reply; keep them low
             body["max_tokens"] = 4096
             body["reasoning_effort"] = "low"
+        r = None
         for attempt in range(2):
-            r = httpx.post(url, json=body, headers={"Authorization": "Bearer " + api_key}, timeout=40)
+            try:
+                r = httpx.post(url, json=body, headers={"Authorization": "Bearer " + api_key},
+                               timeout=float(os.getenv("LLM_TIMEOUT", "18")))
+            except httpx.TimeoutException:
+                r = None
+                break  # a slow model: try the next one instead of waiting
             if r.status_code == 400 and "reasoning" in r.text.lower() and "reasoning_effort" in body:
                 body.pop("reasoning_effort")  # model without thinking control
                 continue
@@ -372,9 +378,14 @@ def _call_llm(provider, api_key, system, history):
                 time.sleep(1.5)
                 continue
             break
+        if r is None:
+            last = "%s/%s timed out" % (provider, model)
+            print("[llm]", last)
+            continue
         if r.status_code < 400:
             content = r.json()["choices"][0]["message"].get("content") or ""
             if content.strip():
+                print("[llm] answered by %s/%s" % (provider, model))
                 return content
             last = "%s/%s returned an empty answer" % (provider, model)
             continue
@@ -399,7 +410,8 @@ def llm_turn(req, provider, api_key):
             data = _extract_json(text)
             crit = dict(req.criteria)
             crit.update(_clean_criteria(data.get("criteria", {})))
-            reply = str(data.get("reply", "")).strip()[:1500]
+            reply = re.sub(r"[^\u0000-\u024F\u0E00-\u0E7F\u2000-\u206F\u0E3F]", "",
+                           str(data.get("reply", ""))).strip()[:1500]
             quick = [str(q)[:40] for q in (data.get("quick_replies") or [])][:4]
             if not reply:
                 raise ValueError("empty reply")
