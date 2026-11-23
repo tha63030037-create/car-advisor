@@ -4,10 +4,61 @@
     "1": {
       "ground_clearance_mm": 133,
       "cargo_l": 486,
-      "adas": {"aeb": true, "lane_assist": true, "adaptive_cruise": false},
+      "adas": {
+        "aeb": true,
+        "lane_assist": true,
+        "adaptive_cruise": false
+      },
       "maintenance_5y_thb": 32000,
       "source": "toyota.co.th spec sheet",
       "collected_on": "2026-11-20"
     }
+  },
+  "83": {
+    "price_thb_entry": 899900,
+    "ground_clearance_mm": 150,
+    "isofix": true,
+    "adas": {
+      "aeb": true,
+      "lane_assist": true,
+      "adaptive_cruise": true,
+      "parking_sensors": true,
+      "camera_360": true
+    },
+    "source": "Price: autospinn.com/2025/01/byd-atto-3-thailand-official-price-and-spec-141148 (Dynamic 899,900) · Safety/ADAS: reverautomotive.com/en/model/newatto3/tech-spec (BYD Thailand distributor) · Ground clearance: zigwheels.co.th/new-cars/byd/atto-3/specifications",
+    "collected_on": "2026-11-23"
+  },
+  "96": {
+    "price_thb_entry": 769900,
+    "ground_clearance_mm": 150,
+    "source": "Price: 9carthai.com/new-aion-y-plus-price (410 Premium 769,900 / 490 Premium 829,900) · Ground clearance: zigwheels.co.th/new-cars/aion/y-plus · Thai model name is AION Y Plus",
+    "collected_on": "2026-11-23"
+  },
+  "95": {
+    "price_thb_entry": 739000,
+    "ground_clearance_mm": 156,
+    "cargo_l": 508,
+    "adas": {
+      "lane_assist": true,
+      "adaptive_cruise": true
+    },
+    "estimated": [
+      "adas"
+    ],
+    "source": "Price/ground clearance: zigwheels.co.th/new-cars/neta/x (739,000–799,000, 156 mm) · Cargo: pcauto.com/th/cars/neta/x (508 L) · ACC + lane keeping: pptvhd36.com/automotive/news/229207 · AEB not confirmed",
+    "collected_on": "2026-11-23"
+  },
+  "62": {
+    "ground_clearance_mm": 150,
+    "cargo_l": 104,
+    "source": "headlightmag.com/?p=258073 (official price 479,000; ground clearance 150 mm; 104 L with rear seats folded)",
+    "collected_on": "2026-11-23"
+  },
+  "78": {
+    "price_thb_entry": 709900,
+    "ground_clearance_mm": 117,
+    "isofix": true,
+    "source": "Price/ground clearance: headlightmag.com/?p=289415 (Standard Range D 709,900; 117 mm) · ISOFIX: whichcar.com.au 2024 MG4 review (global spec)",
+    "collected_on": "2026-11-23"
   }
 }

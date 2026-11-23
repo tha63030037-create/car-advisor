@@ -1123,14 +1123,9 @@ function computeClientRecommendations(state: {
     const rangeInfo = getRangeEstimate(car);
     const risk = riskNotes(car);
 
-    const reviews: Review[] = [
-      { author: "สมาชิก Pantip (ผู้ใช้จริง)", rating: 5, text: `ใช้งาน ${car.name} มา 6 เดือน ประหยัดน้ำมันและขับสบายมากครับ`, source: "pantip.com" },
-      { author: "HeadlightMag Forum", rating: 4.5, text: `ช่วงล่างของ ${car.name} ซับแรงกระแทกได้ดี คุ้มค่าเงิน`, source: "headlightmag.com" }
-    ];
-    const complaints: Complaint[] = [
-      { issue: "เสียงลมปะทะช่วงความเร็ว 110+ กม./ชม.", frequency: "พบบ่อยในคลับผู้ใช้" },
-      { issue: "หน้าจอสัมผัสตอบสนองช้าเล็กน้อยช่วงสตาร์ทรถ", frequency: "พบบางคัน" }
-    ];
+    // no invented owner reviews: only text with a citable source may be shown
+    const reviews: Review[] = [];
+    const complaints: Complaint[] = [];
 
     results.push({
       car,
@@ -1977,7 +1972,7 @@ export default function CarAdvisor() {
                           </div>
                         </details>
                         <details className="card-details-item" open>
-                          <summary className="card-details-summary">🗣️ รีวิวสดจากผู้ใช้จริง &amp; ข้อพิจารณา</summary>
+                          <summary className="card-details-summary">🗣️ รีวิวและข้อพิจารณา</summary>
                           <div className="card-details-content">
                             <p><strong>🌐 รีวิวสดจากเว็บชั้นนำ (Pantip / HeadlightMag / One2Car):</strong></p>
                             <ul style={{ marginBottom: "14px", listStyle: "none", paddingLeft: 0 }}>

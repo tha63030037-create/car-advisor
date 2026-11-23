@@ -268,118 +268,18 @@ def get_risk_notes(car: Dict[str, Any]) -> List[Dict[str, str]]:
 
     return notes
 
-import random
-
-REAL_MODEL_FEEDBACK = {
-    "Toyota Yaris Ativ": {
-        "reviews": [
-            {"author": "คุณภัทร", "rating": 5, "text": "ประหยัดน้ำมันมาก ขับในเมืองได้ 20-22 กม./ลิตร ออปชั่นความปลอดภัยครบเกินราคา คุ้มค่าที่สุดครับ", "source": "Yaris Ativ Club Thailand"},
-            {"author": "คุณมายด์", "rating": 4, "text": "ห้องโดยสารเงียบระดับหนึ่ง แต่เวลาเร่งแซงขึ้นเขาต้องกดคิ๊กดาวน์ลึกหน่อย อัตราเร่งพอตัวแต่เน้นประหยัดค่ะ", "source": "กระทู้รีวิว Pantip รัชดา"}
-        ],
-        "complaints": [
-            {"issue": "เสียงน้ำฝนกระทบหลังคาค่อนข้างดัง (วัสดุซับเสียงหลังคาบาง)", "frequency": "ผู้ใช้ 70% พูดถึงตรงกัน", "source": "HeadlightMag Forum"},
-            {"issue": "แอร์อัตโนมัติเย็นจัด ตัดทำงานค่อนข้างบ่อย", "frequency": "พบบ่อยในสภาพอากาศร้อนจัด", "source": "Yaris Ativ Club Thailand"}
-        ]
-    },
-    "Honda City": {
-        "reviews": [
-            {"author": "คุณต้น", "rating": 5, "text": "เครื่องยนต์ 1.0 Turbo จี๊ดจ๊าดมากครับ อัตราเร่งดื้อๆ แซงขาด ทรงสวยแต่งขึ้นมาก", "source": "City Turbo Thailand"},
-            {"author": "คุณกอล์ฟ", "rating": 4, "text": "ขับสนุก พวงมาลัยคม แต่ต้องขยันเช็คระยะน้ำมันเครื่องตามกำหนดครับ", "source": "Pantip รัชดา"}
-        ],
-        "complaints": [
-            {"issue": "ชุดแร็คพวงมาลัยมีเสียงดังดังกึกๆ ตอนเลี้ยวสุด (ศูนย์มีรับประกันเปลี่ยนฟรี)", "frequency": "พบบ่อยในล็อตปี 2020-2022", "source": "City Turbo Thailand (ศูนย์เคลมฟรี)"},
-            {"issue": "งานประกอบขอบยางประตูมีเสียงลมเข้าที่ความเร็วเกิน 110 กม./ชม.", "frequency": "ผู้ใช้ 50% พบปัญหานี้", "source": "HeadlightMag User Report"}
-        ]
-    },
-    "Honda City e:HEV": {
-        "reviews": [
-            {"author": "คุณปอนด์", "rating": 5, "text": "ประหยัดน้ำมันสะใจมากครับ รถติดในเมืองได้ 23-25 กม./ลิตร ออกตัวด้วยไฟฟ้าเงียบกริบ", "source": "City e:HEV Club TH"},
-            {"author": "คุณเมย์", "rating": 5, "text": "ชอบระบบ Honda SENSING มาก อะแดปทีฟครูสคอนโทรลช่วยลดความเมื่อยล้าได้เยอะค่ะ", "source": "HeadlightMag Forum"}
-        ],
-        "complaints": [
-            {"issue": "พัดลมระบายความร้อนแบตเตอรี่ไฮบริดใต้เบาะหลังเสียงดังเมื่อจอดตากแดด", "frequency": "พบบ่อยช่วงหน้าร้อน", "source": "City e:HEV Club TH"},
-            {"issue": "พื้นที่ห้องเก็บสัมภาระท้ายรถลดลงเล็กน้อยเพราะต้องเว้นที่ให้แบตเตอรี่", "frequency": "เป็นข้อจำกัดตามสเปค", "source": "Honda Official Spec Sheet"}
-        ]
-    },
-    "BYD Atto 3": {
-        "reviews": [
-            {"author": "คุณเอส", "rating": 5, "text": "อัตราเร่งหลังติดเบาะ ค่าไฟกิโลเมตรละไม่ถึง 60 สตางค์ ประหยัดกว่าน้ำมันหลายเท่าตัว", "source": "BYD Owner Club TH"},
-            {"author": "คุณวิว", "rating": 4, "text": "แบตเตอรี่ Blade Battery อุ่นใจดีมากครับ เดินทางไกลชาร์จ DC 30 นาทีก็ไปต่อได้แล้ว", "source": "EV Thailand User Community"}
-        ],
-        "complaints": [
-            {"issue": "โช๊คอัพเดิมติดรถมีความนุ่มย้วยเกินไปเมื่อขับความเร็วสูงเกิน 120 กม./ชม.", "frequency": "สายขับเร็วแนะนำเปลี่ยนโช๊คแต่ง", "source": "BYD Owner Club TH"},
-            {"issue": "ระบบช่วยรักษาช่องทางจราจร (LKA) ดึงพวงมาลัยค่อนข้างแรงเกินไปในบางจังหวะ", "frequency": "ผู้ใช้ส่วนใหญ่เลือกปิดฟังก์ชันนี้", "source": "Pantip รัชดา"}
-        ]
-    },
-    "Haval H6": {
-        "reviews": [
-            {"author": "คุณธีระ", "rating": 5, "text": "ภายในหรูหราอลังการเทียบเท่ารถยุโรปราคา 2 ล้าน เบาะนวดและหลังคาซันรูฟพาโนรามิคดีเยี่ยม", "source": "Haval Thailand Fanpage"},
-            {"author": "คุณโอ๋", "rating": 4, "text": "เบาะหลังกว้างมาก ตัวถังใหญ่แข็งแรง ปลอดภัยดีครับ", "source": "HeadlightMag User Review"}
-        ],
-        "complaints": [
-            {"issue": "การตอบสนองเกียร์ DHT สลับน้ำมันกับไฟฟ้ามีอาการกระตุกเบาๆ ในช่วงความเร็วต่ำ", "frequency": "พบประปรายในจังหวะชะลอตัว", "source": "Haval Thailand Fanpage"},
-            {"issue": "หน้าจอ Infotainment บางครั้งเชื่อมต่อ Apple CarPlay หลุดชั่วคราว", "frequency": "รออัปเดตซอฟต์แวร์ OTA", "source": "Pantip รัชดา"}
-        ]
-    },
-    "Mazda2 Hatchback": {
-        "reviews": [
-            {"author": "คุณบิว", "rating": 5, "text": "ช่วงล่างดีที่สุดในเกรดเดียวกัน เข้าโค้งหนึบแน่น วัสดุในห้องโดยสารพรีเมียมมาก", "source": "Mazda 2 Club TH"},
-            {"author": "คุณโบว์", "rating": 4, "text": "หาที่จอดง่าย คล่องตัว ค่าน้ำมันไม่แพงค่ะ", "source": "Pantip รัชดา"}
-        ],
-        "complaints": [
-            {"issue": "พื้นที่เบาะหลังแคบ ผู้ใหญ่ตัวสูงนั่งเดินทางไกลจะรู้สึกอึดอัด", "frequency": "ผู้ใช้ทุกคนพูดตรงกัน", "source": "HeadlightMag Forum"},
-            {"issue": "ศูนย์บริการและราคาอะไหล่บางชิ้นสูงกว่าแบรนด์เจ้าตลาดเล็กน้อย", "frequency": "ผู้ใช้ระยะยาวพบบ่อย", "source": "Mazda 2 Club TH"}
-        ]
-    }
-}
-
 def get_reviews(car: Dict[str, Any]) -> List[Dict[str, Any]]:
-    car_name = car.get('name', '')
-    if car_name in REAL_MODEL_FEEDBACK:
-        return REAL_MODEL_FEEDBACK[car_name]['reviews']
-        
-    reviews = []
-    if car['bodyType'] in ['suv', 'ppv', 'mpv']:
-        reviews.append({"author": "คุณวิชาญ (ผู้ใช้จริง Pantip/HeadlightMag)", "rating": 5, "text": "ห้องโดยสารกว้างขวาง ขนของและครอบครัวไปเที่ยวต่างจังหวัดสบาย ไม่เหนื่อยล้า"})
-    elif car['bodyType'] in ['sedan', 'hatchback']:
-        reviews.append({"author": "คุณแนน (ผู้ใช้จริง Car Club)", "rating": 5, "text": "ขับขี่คล่องตัว ตัวถังขนาดกำลังดี หาที่จอดง่าย ทัศนวิสัยดีมากค่ะ"})
-    elif car['bodyType'] == 'pickup':
-        reviews.append({"author": "คุณสมคิด (กลุ่มผู้ใช้รถกระบะใช้งาน)", "rating": 4, "text": "บรรทุกหนักได้ดี อัตราเร่งดี ช่วงล่างทนทาน ทนทานไม่จุกจิกครับ"})
-        
-    if car['fuelType'] == 'ev':
-        reviews.append({"author": "คุณเอก (EV Thailand User)", "rating": 5, "text": "ประหยัดค่าชาร์จไฟไปเยอะมาก อัตราเร่งมาไวทันใจ นุ่มเงียบเงียบสงบ"})
-    elif car['fuelType'] in ['hybrid', 'phev']:
-        reviews.append({"author": "คุณพลอย (Hybrid User TH)", "rating": 4, "text": "ประหยัดน้ำมันมากตอนรถติดสลับหยุดนิ่ง ออกตัวเงียบและนุ่มนวลดีมากค่ะ"})
-    else:
-        reviews.append({"author": "คุณบอย (ผู้ใช้รถยนต์เบนซิน/ดีเซล)", "rating": 4, "text": "เครื่องยนต์ตอบสนองดี ขับทางไกลเร่งแซงมั่นใจ อะไหล่และการดูแลไม่ซับซ้อนครับ"})
-        
-    return reviews
+    """
+    No owner reviews are shown. The earlier version shipped invented quotes labelled as
+    real users; they were removed so every text the app shows can be traced to a source.
+    Real reviews can come back only with a citable source per quote.
+    """
+    return []
+
 
 def get_complaints(car: Dict[str, Any]) -> List[Dict[str, str]]:
-    car_name = car.get('name', '')
-    if car_name in REAL_MODEL_FEEDBACK:
-        return REAL_MODEL_FEEDBACK[car_name]['complaints']
-        
-    complaints = []
-    if car['fuelType'] == 'ev':
-        complaints.append({"issue": "การรอคิวสถานีชาร์จตามตู้ชาร์จสาธารณะช่วงเทศกาลวันหยุดยาว", "frequency": "รายงานบ่อยในกลุ่ม EV TH"})
-        complaints.append({"issue": "เบี้ยประกันภัยชั้น 1 ค่อนข้างแพงกว่ารถยนต์เครื่องยนต์น้ำมัน", "frequency": "ผู้ใช้ส่วนใหญ่พบเจอ"})
-    
-    if car['bodyType'] in ['ppv', 'suv'] and car['fuelType'] in ['petrol', 'diesel']:
-        complaints.append({"issue": "อัตรากินน้ำมันค่อนข้างสูงเมื่อเจอการจราจรติดขัดในเมืองหลวง", "frequency": "ผู้ใช้ในเมืองรายงานตรงกัน"})
-        
-    if car['nationality'] == 'chinese':
-        complaints.append({"issue": "ระยะเวลาการรอเบิกอะไหล่ชิ้นส่วนตัวถัง/กระจกในบางศูนย์บริการ", "frequency": "พบในบางกรณีเมื่อเกิดอุบัติเหตุ"})
-    
-    if car['nationality'] == 'european':
-        complaints.append({"issue": "ค่าบำรุงรักษาและค่าอะไหล่หลังหมดระยะประกันภัย (BSI/Warranty) ค่อนข้างสูง", "frequency": "พบบ่อยในผู้ใช้ระยะยาวเกิน 5 ปี"})
-        
-    if not complaints:
-        complaints.append({"issue": "การซับเสียงลมบริเวณกระจกมองข้างที่ความเร็วเกิน 110 กม./ชม.", "frequency": "ผู้ใช้บางท่านสังเกตเห็น"})
-        complaints.append({"issue": "ความหน่วงของการตอบสนองหน้าจอ Touchscreen ตอนสตาร์ทรถใหม่ๆ", "frequency": "รอซอฟต์แวร์อัปเดต"})
-        
-    return complaints
-
+    """Same rule as get_reviews: nothing is shown without a citable source."""
+    return []
 def generate_recommendations(state: QuizState) -> List[RecommendationResult]:
     active_lifestyle = derive_lifestyles(state.pains, state.gains)
     
