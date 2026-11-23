@@ -20,6 +20,7 @@ import re
 from typing import Any, Dict, List, Optional
 
 import httpx
+import time
 from pydantic import BaseModel, Field
 
 from app import matching_config as cfg
@@ -356,7 +357,13 @@ def _call_llm(provider, api_key, system, history):
         # 2.5 can switch thinking off; newer models only go down to "low". Thinking made
         # the first live calls time out, and JSON extraction does not need it.
         body["reasoning_effort"] = "none" if model.startswith("gemini-2.5") else os.getenv("GEMINI_REASONING", "low")
-    r = httpx.post(url, json=body, headers={"Authorization": "Bearer " + api_key}, timeout=45)
+    for wait in (1.5, 3, None):
+        r = httpx.post(url, json=body, headers={"Authorization": "Bearer " + api_key}, timeout=45)
+        # free-tier models answer 503 "high demand" / 429 in bursts: wait and try again twice
+        if r.status_code in (429, 503) and wait:
+            time.sleep(wait)
+            continue
+        break
     if r.status_code >= 400:
         # status + the provider's own error text (never the key) so failures show in Vercel logs
         raise RuntimeError("%s HTTP %d: %s" % (provider, r.status_code, r.text[:300]))
