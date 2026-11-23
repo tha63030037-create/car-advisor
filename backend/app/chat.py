@@ -27,7 +27,7 @@ from app import matching_config as cfg
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 # OpenAI-compatible chat endpoints (Gemini and Groq both offer one)
 OPENAI_COMPAT = {
-    "gemini": ("GEMINI_API_KEY", "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", "gemini-2.5-flash"),
+    "gemini": ("GEMINI_API_KEY", "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", "gemini-3.8-flash"),  # 2.5-flash closed to new keys (Nov 2026)
     "groq": ("GROQ_API_KEY", "https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-120b"),
 }
 
@@ -346,12 +346,15 @@ def _call_llm(provider, api_key, system, history):
         r.raise_for_status()
         return "".join(p.get("text", "") for p in r.json().get("content", []))
     _, url, default_model = OPENAI_COMPAT[provider]
-    body = {"model": os.getenv("CHAT_MODEL", default_model), "temperature": 0, "max_tokens": 1200,
+    model = os.getenv("CHAT_MODEL", default_model)
+    body = {"model": model, "temperature": 0, "max_tokens": 1200,
             "messages": [{"role": "system", "content": system}] + history}
     if provider == "gemini":
-        # Gemini 2.5 "thinks" by default and the thinking tokens eat max_tokens, which can leave
-        # the answer empty; JSON extraction needs no thinking
-        body["reasoning_effort"] = os.getenv("GEMINI_REASONING", "none")
+        # Gemini models "think" by default and the thinking tokens count against max_tokens,
+        # which can leave the answer empty: give room, and switch thinking off where supported
+        body["max_tokens"] = 4096
+        if model.startswith("gemini-2.5"):
+            body["reasoning_effort"] = "none"
     r = httpx.post(url, json=body, headers={"Authorization": "Bearer " + api_key}, timeout=25)
     if r.status_code >= 400:
         # status + the provider's own error text (never the key) so failures show in Vercel logs
