@@ -247,7 +247,18 @@ def score_safety(car):
     parts = [min(1.0, car["airbags"] / float(cfg.MAX_AIRBAGS))]
     if known:
         parts.append(sum(known) / float(len(known)))
-    return sum(parts) / len(parts)
+    equipment = sum(parts) / len(parts)
+    stars = car.get("asean_ncap_stars")
+    if stars is None:
+        return equipment
+    return cfg.NCAP_SHARE * (stars / 5.0) + (1 - cfg.NCAP_SHARE) * equipment
+
+
+def safety_warning(car):
+    stars = car.get("asean_ncap_stars")
+    if stars is not None and stars <= cfg.NCAP_WARN_MAX_STARS:
+        return "ผลทดสอบชน ASEAN NCAP %d ดาว (เต็ม 5)" % stars
+    return None
 
 
 def score_design(car, preferred):
@@ -318,6 +329,8 @@ def recommend(c, cars=None):
             "contribution": {k: round(100 * v, 1) for k, v in contrib.items()},
             "top_criteria": [{"key": k, "label": cfg.CRITERIA_TH[k]} for k in top2],
             "over_budget": over,
+            "asean_ncap_stars": car.get("asean_ncap_stars"),
+            "safety_warning": safety_warning(car),
             "annual_cost": cost,
             "lifestyle_detail": life_detail,
             "estimated_fields": car.get("estimated", []),

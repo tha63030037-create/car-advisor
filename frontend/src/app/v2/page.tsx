@@ -30,6 +30,7 @@ interface Result {
   contribution: Partial<Record<Key, number>>;
   top_criteria: { key: Key; label: string }[];
   over_budget: { amount: number; pct: number; label: string } | null;
+  safety_warning?: string | null;
   annual_cost: { energy: number | null; maintenance: number | null; total: number } | null;
   lifestyle_detail: LifestyleDetail[];
   estimated_fields: string[];
@@ -304,7 +305,7 @@ export default function MatchV2() {
                     {data.results.slice(0, 3).map((r) => (
                       <button key={r.id} className="pick" onClick={() => { setOpen(r.id); scrollTo(resultsTop.current); }}>
                         <span className="pr">#{r.rank}</span>
-                        <span className="pn">{r.name}<small>{baht(r.price)} บาท{r.over_budget ? ` · ${r.over_budget.label}` : ""}</small></span>
+                        <span className="pn">{r.name}<small>{baht(r.price)} บาท{r.over_budget ? ` · ${r.over_budget.label}` : ""}{r.safety_warning ? ` · ⚠️ ${r.safety_warning}` : ""}</small></span>
                         <span className="ps">{Math.round(r.score)}%</span>
                       </button>
                     ))}
@@ -460,6 +461,7 @@ export default function MatchV2() {
                   <div className="name">{r.name}</div>
                   <div className="meta">{baht(r.price)} บาท · {FUEL_TH[r.fuelType] || r.fuelType} · {r.seats} ที่นั่ง</div>
                   {r.over_budget && <div className="over">⚠️ {r.over_budget.label}</div>}
+                  {r.safety_warning && <div className="over">⚠️ {r.safety_warning}</div>}
                   <div className="stack" title="คะแนนที่ได้จากแต่ละเกณฑ์">
                     {CARDS.map((c) => (r.contribution[c.key] ? (
                       <div key={c.key} style={{ width: `${r.contribution[c.key]}%`, background: CRIT_COLOR[c.key] }} />

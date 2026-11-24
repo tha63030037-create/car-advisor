@@ -56,7 +56,7 @@ def test_brand_only_is_a_filter():
 
 def test_brand_fix_mg_and_mazda_models():
     brands = {c["name"]: c["brand"] for c in CARS_V2}
-    assert brands["MG3"] == "MG"
+    assert brands["MG3 Hybrid+"] == "MG"
     assert brands["MG4 Electric"] == "MG"
     assert brands["Mazda2 Sedan"] == "Mazda"
     assert brands["Changan Deepal S07"] == "Deepal"
@@ -146,3 +146,21 @@ def test_api_v2_config_exposes_options():
 def test_old_engine_still_available():
     resp = client.post("/api/recommend", json=PERSONAS[0]["old_quiz"])
     assert resp.status_code == 200
+
+
+def test_ncap_result_counts_in_safety_and_warns():
+    from app.matching import score_safety, safety_warning
+    base = {"airbags": 6, "adas": {"aeb": True, "lane_assist": True}}
+    unknown = score_safety(dict(base))
+    zero = score_safety(dict(base, asean_ncap_stars=0))
+    five = score_safety(dict(base, asean_ncap_stars=5))
+    assert zero < unknown < five
+    assert safety_warning(dict(base, asean_ncap_stars=0)) is not None
+    assert safety_warning(dict(base, asean_ncap_stars=5)) is None
+    assert safety_warning(dict(base)) is None
+
+
+def test_discontinued_cars_are_not_recommended():
+    from app.database import DISCONTINUED
+    from app.matching import CARS_V2
+    assert not {c["id"] for c in CARS_V2} & set(DISCONTINUED)

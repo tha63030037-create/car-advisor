@@ -24,6 +24,7 @@ EXPLAIN_PROMPT = """คุณคือพนักงานขายรถที
 สิ่งที่ต้องเขียน
 - เหตุผลของแต่ละคัน 2–3 ประโยค โยงกับสิ่งที่ลูกค้าบอกว่าสำคัญที่สุด ขึ้นต้นแต่ละคันด้วย "อันดับ N <ชื่อรุ่นตามที่ให้มา>"
 - ถ้าคันใดเกินงบ ให้บอกตรง ๆ ว่าเกินเท่าไร และได้อะไรเพิ่มมา
+- ถ้าคันใดมี safety_warning ต้องบอกลูกค้าเรื่องผลทดสอบชนนั้นตรง ๆ ในเหตุผลของคันนั้น
 - บอกข้อด้อยของแต่ละคันอย่างน้อย 1 ข้อ
 - ปิดท้ายด้วย 1 ย่อหน้า เปรียบเทียบค่าใช้จ่ายต่อปี (พลังงาน + บำรุงรักษา) ของทั้ง 3 คัน
 
@@ -50,6 +51,8 @@ def _facts(r: Dict[str, Any]) -> Dict[str, Any]:
                                   for k, v in r["criteria"].items()},
         "best_at": [t["label"] for t in r["top_criteria"]],
         "over_budget": r["over_budget"],
+        "asean_ncap_stars": r.get("asean_ncap_stars"),
+        "safety_warning": r.get("safety_warning"),
         "annual_cost": r["annual_cost"],
         "lifestyle": [{"lifestyle": l["label"], "has": l["has"], "missing": l["missing"]}
                       for l in r["lifestyle_detail"]],
@@ -58,6 +61,8 @@ def _facts(r: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _weakness(r):
+    if r.get("safety_warning"):
+        return r["safety_warning"]
     if r["over_budget"]:
         return "ราคาเกินงบ %s" % r["over_budget"]["label"].replace("เกินงบ ", "")
     for l in r["lifestyle_detail"]:

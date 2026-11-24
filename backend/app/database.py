@@ -74,7 +74,7 @@ CARS = [
     {'id': 71, 'name': 'Kia EV5', 'bodyType': 'suv', 'fuelType': 'ev', 'price': 1399000, 'consumption': '6.0 km/kWh', 'seats': 5, 'lifestyle': ['family', 'city', 'adventure'], 'serviceNetwork': 'growing', 'nationality': 'korea', 'transmission': 'auto', 'horsepower': 217, 'warrantyYears': 7, 'warrantyKm': 150000, 'airbags': 7, 'photo': {'file': '71-kia-ev5.jpg', 'credit': 'Kia Press'}},
     {'id': 72, 'name': 'Kia EV9', 'bodyType': 'suv', 'fuelType': 'ev', 'price': 3499000, 'consumption': '4.8 km/kWh', 'seats': 7, 'lifestyle': ['family', 'business', 'adventure'], 'serviceNetwork': 'growing', 'nationality': 'korea', 'transmission': 'auto', 'horsepower': 384, 'warrantyYears': 7, 'warrantyKm': 150000, 'airbags': 8, 'photo': {'file': '72-kia-ev9.jpg', 'credit': 'Kia Press'}},
     {'id': 73, 'name': 'MG3', 'bodyType': 'hatchback', 'fuelType': 'petrol', 'price': 539000, 'consumption': '18 km/l', 'seats': 5, 'lifestyle': ['city', 'firstCar'], 'serviceNetwork': 'growing', 'nationality': 'china', 'transmission': 'auto', 'horsepower': 108, 'warrantyYears': 5, 'warrantyKm': 150000, 'airbags': 6, 'photo': {'file': '73-mg3.jpg', 'credit': None}},
-    {'id': 74, 'name': 'MG3 Hybrid+', 'bodyType': 'hatchback', 'fuelType': 'hybrid', 'price': 639000, 'consumption': '25 km/l', 'seats': 5, 'lifestyle': ['city', 'firstCar'], 'serviceNetwork': 'growing', 'nationality': 'china', 'transmission': 'auto', 'horsepower': 95, 'warrantyYears': 5, 'warrantyKm': 150000, 'airbags': 6, 'photo': {'file': '74-mg3-hybrid.jpg', 'credit': None}},
+    {'id': 74, 'name': 'MG3 Hybrid+', 'bodyType': 'hatchback', 'fuelType': 'hybrid', 'price': 579900, 'consumption': '25 km/l', 'seats': 5, 'lifestyle': ['city', 'firstCar'], 'serviceNetwork': 'growing', 'nationality': 'china', 'transmission': 'auto', 'horsepower': 95, 'warrantyYears': 5, 'warrantyKm': 150000, 'airbags': 6, 'photo': {'file': '74-mg3-hybrid.jpg', 'credit': None}},
     {'id': 75, 'name': 'MG5', 'bodyType': 'sedan', 'fuelType': 'petrol', 'price': 579000, 'consumption': '17 km/l', 'seats': 5, 'lifestyle': ['city', 'family'], 'serviceNetwork': 'growing', 'nationality': 'china', 'transmission': 'auto', 'horsepower': 115, 'warrantyYears': 5, 'warrantyKm': 150000, 'airbags': 4, 'photo': {'file': '75-mg5.jpg', 'credit': None}},
     {'id': 76, 'name': 'MG ZS', 'bodyType': 'suv', 'fuelType': 'petrol', 'price': 679000, 'consumption': '15 km/l', 'seats': 5, 'lifestyle': ['city', 'family'], 'serviceNetwork': 'growing', 'nationality': 'china', 'transmission': 'auto', 'horsepower': 113, 'warrantyYears': 5, 'warrantyKm': 150000, 'airbags': 6, 'photo': {'file': '76-mg-zs.jpg', 'credit': None}},
     {'id': 77, 'name': 'MG ZS EV', 'bodyType': 'suv', 'fuelType': 'ev', 'price': 949000, 'consumption': '6.0 km/kWh', 'seats': 5, 'lifestyle': ['family', 'city'], 'serviceNetwork': 'growing', 'nationality': 'china', 'transmission': 'auto', 'horsepower': 177, 'warrantyYears': 8, 'warrantyKm': 180000, 'airbags': 6, 'photo': {'file': '77-mg-zs-ev.jpg', 'credit': None}},
@@ -132,6 +132,8 @@ CARS = [
 # engine recommends them. Source + date in data/car_specs_overrides.json.
 DISCONTINUED = {
     90: 'GWM stopped selling ORA Good Cat in Thailand (Feb 2026)',
+    77: 'MG cleared the last ZS EV stock (THE LAST OFFER)',
+    73: 'MG Thailand now sells only MG3 Hybrid+ (no petrol MG3 on the 2026 price list)',
 }
 ALL_CARS = CARS
 CARS = [c for c in ALL_CARS if c['id'] not in DISCONTINUED]

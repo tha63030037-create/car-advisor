@@ -72,6 +72,10 @@ FUEL_PRICE_THB = {"petrol": 38.0, "hybrid": 38.0, "diesel": 32.0}
 EV_PRICE_THB_PER_KWH = 6.0   # home/public charging mix
 ADAS_ITEMS = ["aeb", "lane_assist", "adaptive_cruise", "parking_sensors", "camera_360"]
 MAX_AIRBAGS = 8              # most in the database; keeps safety scores stable across searches
+# ASEAN NCAP crash result, when known, is the strongest safety evidence: it takes this share of the
+# safety score and equipment (airbags + ADAS) the rest. Unknown = equipment only (never treated as 0).
+NCAP_SHARE = 0.5
+NCAP_WARN_MAX_STARS = 2      # at or below this, the result card and the explanation carry a warning
 
 # 4.5 Design: body types treated as "close" to each preference
 BODY_SIMILAR = {

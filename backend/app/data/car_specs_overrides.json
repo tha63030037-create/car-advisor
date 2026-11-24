@@ -96,8 +96,9 @@
   "28": {
     "price_thb_entry": 959000,
     "ground_clearance_mm": 196,
-    "source": "Price: HR-V e:HEV official 959,000–1,189,000 from 1 May 2026: autolifethailand.tv/tag/hr-v-ehev · Ground clearance: zigwheels.co.th/en/new-cars/honda/hr-v-ehev",
-    "collected_on": "2026-11-24"
+    "source": "Price: HR-V e:HEV official 959,000–1,189,000 from 1 May 2026: autolifethailand.tv/tag/hr-v-ehev · Ground clearance: zigwheels.co.th/en/new-cars/honda/hr-v-ehev · ASEAN NCAP 5 stars, 81.38 pts (Sep 2022): aseancap.org/v4/wp-json/wp/v2/posts/5692",
+    "collected_on": "2026-11-24",
+    "asean_ncap_stars": 5
   },
   "51": {
     "price_thb_entry": 909900,
@@ -126,8 +127,9 @@
   },
   "93": {
     "price_thb_entry": 899000,
-    "source": "Price: The New ZEEKR X 2026 from 899,000: autospinn.com/2026/06/zeekr-x-2026-official-price-and-specification-thailand-149770",
-    "collected_on": "2026-11-24"
+    "source": "Price: The New ZEEKR X 2026 from 899,000: autospinn.com/2026/06/zeekr-x-2026-official-price-and-specification-thailand-149770 · ASEAN NCAP 5 stars, 94.64 pts (Nov 2025): aseancap.org/v4/?p=12579",
+    "collected_on": "2026-11-24",
+    "asean_ncap_stars": 5
   },
   "94": {
     "price_thb_entry": 549000,
@@ -166,12 +168,28 @@
   "32": {
     "price_thb_entry": 915000,
     "ground_clearance_mm": 209,
-    "source": "Price 915,000–973,000, 7 seats, ground clearance 209 mm: zigwheels.co.th/new-cars/honda/br-v · Honda SENSING all variants: autolifethailand.tv/tag/brv",
-    "collected_on": "2026-11-24"
+    "source": "Price 915,000–973,000, 7 seats, ground clearance 209 mm: zigwheels.co.th/new-cars/honda/br-v · Honda SENSING all variants: autolifethailand.tv/tag/brv · ASEAN NCAP 5 stars, 77.02 pts (Sep 2022): aseancap.org/v4/wp-json/wp/v2/posts/5692",
+    "collected_on": "2026-11-24",
+    "asean_ncap_stars": 5
   },
   "8": {
     "price_thb_entry": 795000,
     "source": "Price: official 795,000 base (autolifethailand.tv/tag/โตโยต้า-เวลอซ, Nov 2023 list; car250.com 2026 says petrol Veloz now ~790–870k and being cleared ahead of a hybrid)",
+    "collected_on": "2026-11-24"
+  },
+  "77": {
+    "discontinued": true,
+    "source": "MG ran 'THE LAST OFFER' stock clearance of the last 117 ZS EV units (X, from 899,900 to 499,900): sanook.com/auto/96888",
+    "collected_on": "2026-11-24"
+  },
+  "73": {
+    "discontinued": true,
+    "source": "Inferred: MG Thailand's 2026 price lists show only ALL NEW MG3 HYBRID+ (D 579,900 / X 619,000), no petrol MG3: telecomlover.com/?p=93181, car250.com/?p=70714",
+    "collected_on": "2026-11-24"
+  },
+  "74": {
+    "price_thb_entry": 579900,
+    "source": "Price: ALL NEW MG3 HYBRID+ D 579,900 / X 619,000: telecomlover.com/?p=93181; official 579,900–619,900: autolifethailand.tv/tag/ราคา-mg-3",
     "collected_on": "2026-11-24"
   }
 }
