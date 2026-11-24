@@ -190,7 +190,7 @@ def derive(car):
 
     out["year"] = 2026
     est.append("year")
-    out["photo_is_ai_generated"] = True
+    out["photo_is_ai_generated"] = "Wikimedia" not in ((car.get("photo") or {}).get("credit") or "")
     out["source"] = RULE_SOURCE
     out["collected_on"] = TODAY
     return out, est

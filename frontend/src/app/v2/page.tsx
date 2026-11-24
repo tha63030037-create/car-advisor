@@ -464,6 +464,7 @@ export default function MatchV2() {
                 <div className="info">
                   <div className="name">{r.name}</div>
                   <div className="meta">{baht(r.price)} บาท · {FUEL_TH[r.fuelType] || r.fuelType} · {r.seats} ที่นั่ง</div>
+                  <PhotoCredit credit={r.photo.credit} />
                   {r.over_budget && <div className="over">⚠️ {r.over_budget.label}</div>}
                   {r.safety_warning && <div className="over">⚠️ {r.safety_warning}</div>}
                   <div className="stack" title="คะแนนที่ได้จากแต่ละเกณฑ์">
@@ -507,7 +508,7 @@ export default function MatchV2() {
               </article>
             );
           })}
-          <p className="foot">รูปรถเป็นภาพประกอบที่สร้างด้วย AI ไม่ใช่ภาพถ่ายจริง</p>
+          <p className="foot">รูปรถส่วนใหญ่เป็นภาพถ่ายจริงจาก Wikimedia Commons ใช้ตามสัญญาอนุญาต Creative Commons (ชื่อผู้ถ่ายอยู่ใต้ชื่อรถ) รุ่นที่ยังไม่มีภาพถ่ายใช้ภาพประกอบจาก AI</p>
         </section>
       </div>
 
@@ -623,4 +624,16 @@ export default function MatchV2() {
       `}</style>
     </main>
   );
+}
+
+function PhotoCredit({ credit }: { credit?: string | null }) {
+  if (credit && credit.includes("Wikimedia")) {
+    const [text, url] = credit.split("|");
+    return (
+      <div className="credit" style={{ fontSize: 11, opacity: 0.6 }}>
+        {url ? <a href={url} target="_blank" rel="noreferrer">{text}</a> : text}
+      </div>
+    );
+  }
+  return <div className="credit" style={{ fontSize: 11, opacity: 0.6 }}>ภาพประกอบจาก AI</div>;
 }
