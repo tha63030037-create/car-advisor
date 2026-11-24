@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Real-time Car Color Configurator (360° Studio)</title>
+  <script src="/3d/three.min.js"></script>
+  <script src="/3d/OrbitControls.js"></script>
+  <script src="/3d/DRACOLoader.js"></script>
+  <script src="/3d/GLTFLoader.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body {
+      background-color: #0b0d13;
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+    }
+    #canvas-container:active {
+      cursor: grabbing;
+    }
+    /* Floating Header */
+    .top-bar {
+      position: absolute;
+      top: 20px;
+      left: 24px;
+      right: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .brand-card {
+      pointer-events: auto;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 14px 20px;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .car-title {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      margin-bottom: 2px;
+    }
+    .car-desc {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .status-card {
+      pointer-events: auto;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 12px 18px;
+      border-radius: 14px;
+      text-align: right;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    }
+    .status-title {
+      font-size: 11px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .status-color {
+      font-size: 15px;
+      font-weight: 700;
+      color: #38bdf8;
+      margin-top: 2px;
+    }
+    /* Control Panel Bottom */
+    .bottom-panel {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(92%, 640px);
+      background: rgba(15, 23, 42, 0.82);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      padding: 16px 20px;
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
+      z-index: 10;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .panel-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #e2e8f0;
+    }
+    .panel-hint {
+      font-size: 11px;
+      color: #64748b;
+    }
+    /* Color Swatches Grid */
+    .color-grid {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .color-grid::-webkit-scrollbar {
+      display: none;
+    }
+    .color-btn {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      background: rgba(30, 41, 59, 0.6);
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      padding: 8px 10px;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .color-btn:hover {
+      background: rgba(51, 65, 85, 0.8);
+      transform: translateY(-3px);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    .color-btn.active {
+      background: rgba(51, 65, 85, 0.95);
+      border-color: #38bdf8;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.35);
+      transform: translateY(-2px);
+    }
+    .swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid rgba(0, 0, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.4), 0 4px 8px rgba(0, 0, 0, 0.4);
+    }
+    .swatch::after {
+      content: '';
+      position: absolute;
+      top: -30%;
+      left: -30%;
+      width: 160%;
+      height: 160%;
+      background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 60%);
+      pointer-events: none;
+    }
+    .swatch-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: #cbd5e1;
+      white-space: nowrap;
+    }
+    /* Toolbar Action Buttons */
+    .toolbar-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .tool-group {
+      display: flex;
+      gap: 8px;
+    }
+    .tool-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .tool-btn:hover {
+      background: rgba(51, 65, 85, 1);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    .tool-btn.active {
+      background: #0284c7;
+      border-color: #38bdf8;
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(2, 132, 199, 0.5);
+    }
+    /* Center Loading Spinner */
+    #loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: #0b0d13;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      transition: opacity 0.6s ease;
+    }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid rgba(56, 189, 248, 0.2);
+      border-top-color: #38bdf8;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading-text {
+      margin-top: 16px;
+      font-size: 13px;
+      letter-spacing: 0.05em;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .drag-hint {
+      position: absolute;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      color: #94a3b8;
+      pointer-events: none;
+      animation: fadeOutHint 4s forwards 2s;
+    }
+    @keyframes fadeOutHint {
+      to { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading State -->
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loading-msg">กำลังโหลด 3D Studio & ชิ้นส่วนรถยนต์...</div>
+  </div>
+
+  <!-- 3D Canvas Container -->
+  <div id="canvas-container"></div>
+
+  <!-- Gesture Hint -->
+  <div class="drag-hint">🖱️ ลากเมาส์ / ปัดหน้าจอเพื่อหมุนรถรอบคัน 360° | เลื่อนลูกกลิ้งเพื่อซูม</div>
+
+  <!-- Top Floating HUD -->
+  <div class="top-bar">
+    <div class="brand-card">
+      <div class="badge">
+        <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#38bdf8;"></span>
+        True 3D WebGL Configurator
+      </div>
+      <h1 class="car-title">Sports Car 3D Studio</h1>
+      <p class="car-desc">โครงสร้างตัวถังแยกชิ้นส่วน PBR Material • เปลี่ยนเฉพาะสีตัวถัง 100%</p>
+    </div>
+
+    <div class="status-card">
+      <div class="status-title">สีตัวถังปัจจุบัน</div>
+      <div class="status-color" id="active-color-name">Rosso Corsa (Classic Red)</div>
+    </div>
+  </div>
+
+  <!-- Bottom Interactive Color Control Panel -->
+  <div class="bottom-panel">
+    <div class="panel-header">
+      <div class="panel-title">เลือกสีตัวถัง (Car Body Paint Only)</div>
+      <div class="panel-hint">ล้อแม็ก ยาง กระจก โคมไฟ คงสภาพเดิม 100%</div>
+    </div>
+
+    <!-- Color Swatches -->
+    <div class="color-grid" id="color-palette"></div>
+
+    <!-- Toolbar: Finish, Lights, Auto-Rotate -->
+    <div class="toolbar-row">
+      <div class="tool-group">
+        <button class="tool-btn active" id="btn-finish-gloss" onclick="setPaintFinish('gloss')">
+          ✨ Metallic Gloss
+        </button>
+        <button class="tool-btn" id="btn-finish-matte" onclick="setPaintFinish('matte')">
+          🛡️ Satin Matte
+        </button>
+        <button class="tool-btn" id="btn-finish-pearl" onclick="setPaintFinish('pearl')">
+          💎 Pearl Mica
+        </button>
+      </div>
+
+      <div class="tool-group">
+        <button class="tool-btn" id="btn-headlights" onclick="toggleHeadlights()">
+          💡 เปิดไฟหน้า LED
+        </button>
+        <button class="tool-btn active" id="btn-autorotate" onclick="toggleAutoRotate()">
+          🔄 หมุนรอบคันอัตโนมัติ
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- 1. Official OEM Colors Definition ---
+    const COLORS = [
+      { name: "Rosso Corsa (Classic Red)", hex: 0xd41420, swatch: "#d41420" },
+      { name: "Soul Red Crystal (Mazda)", hex: 0x9e0e1a, swatch: "#9e0e1a" },
+      { name: "WR Blue Pearl (Subaru)", hex: 0x0948a8, swatch: "#0948a8" },
+      { name: "Attitude Black Mica (Toyota)", hex: 0x141517, swatch: "#141517" },
+      { name: "Platinum White Pearl", hex: 0xf3f5f8, swatch: "#f3f5f8" },
+      { name: "Liquid Silver Metallic", hex: 0x8b94a0, swatch: "#8b94a0" },
+      { name: "Giallo Modena (Racing Yellow)", hex: 0xf5b700, swatch: "#f5b700" },
+      { name: "British Racing Green", hex: 0x0b3d26, swatch: "#0b3d26" },
+      { name: "Sonic Gray Pearl (Honda)", hex: 0x5b6873, swatch: "#5b6873" },
+      { name: "Volcano Orange Metallic", hex: 0xe65100, swatch: "#e65100" }
+    ];
+
+    let currentColor = COLORS[0];
+    let currentFinish = 'gloss';
+    let autoRotate = true;
+    let headlightsOn = false;
+
+    // --- 2. Three.js Scene Setup ---
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0c0e14);
+    scene.fog = new THREE.Fog(0x0c0e14, 15, 30);
+
+    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(4.2, 1.8, 4.6);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    container.appendChild(renderer.domElement);
+
+    // --- 3. Orbit Controls ---
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2 - 0.04; // Don't go below floor
+    controls.minDistance = 2.8;
+    controls.maxDistance = 8.5;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.8;
+    controls.target.set(0, 0.5, 0);
+
+    // Stop auto-rotate on user touch/drag
+    controls.addEventListener('start', () => {
+      if (autoRotate) {
+        controls.autoRotate = false;
+        document.getElementById('btn-autorotate').classList.remove('active');
+      }
+    });
+
+    // --- 4. Studio Lighting & Environment ---
+    // Ambient Light
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+    scene.add(ambientLight);
+
+    // Overhead Studio Softbox Light (Directional with shadow)
+    const topLight = new THREE.DirectionalLight(0xffffff, 2.5);
+    topLight.position.set(0, 8, 0);
+    topLight.castShadow = true;
+    topLight.shadow.mapSize.width = 2048;
+    topLight.shadow.mapSize.height = 2048;
+    topLight.shadow.camera.near = 1;
+    topLight.shadow.camera.far = 12;
+    topLight.shadow.camera.left = -4;
+    topLight.shadow.camera.right = 4;
+    topLight.shadow.camera.top = 4;
+    topLight.shadow.camera.bottom = -4;
+    topLight.shadow.bias = -0.001;
+    scene.add(topLight);
+
+    // Front Dynamic Key Light
+    const keyLight = new THREE.DirectionalLight(0xe2e8f0, 1.5);
+    keyLight.position.set(5, 4, 5);
+    scene.add(keyLight);
+
+    // Rear Rim / Specular Light
+    const rimLight = new THREE.DirectionalLight(0x38bdf8, 1.2);
+    rimLight.position.set(-5, 3, -5);
+    scene.add(rimLight);
+
+    // Soft Studio Cyclorama Overhead Panel (Visual Mesh)
+    const softboxGeo = new THREE.PlaneGeometry(6, 4);
+    const softboxMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+    const softboxMesh = new THREE.Mesh(softboxGeo, softboxMat);
+    softboxMesh.position.set(0, 5.5, 0);
+    softboxMesh.rotation.x = Math.PI / 2;
+    scene.add(softboxMesh);
+
+    // --- 5. Glossy Dark Studio Cyclorama Floor with Shadow ---
+    const floorGeo = new THREE.PlaneGeometry(50, 50);
+    const floorMat = new THREE.MeshStandardMaterial({
+      color: 0x090b10,
+      roughness: 0.25,
+      metalness: 0.65
+    });
+    const floor = new THREE.Mesh(floorGeo, floorMat);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = 0;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    // Subtle Grid on Studio Floor
+    const grid = new THREE.GridHelper(30, 30, 0x1e293b, 0x0f172a);
+    grid.position.y = 0.005;
+    scene.add(grid);
+
+    // --- 6. Car Materials Management (Isolate Body vs Parts) ---
+    // Specifically target the Body paint with MeshPhysicalMaterial for ultra-realistic clearcoat
+    const bodyMaterial = new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color(currentColor.hex),
+      metalness: 0.85,
+      roughness: 0.14,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.03,
+      reflectivity: 1.0
+    });
+
+    const rimMaterial = new THREE.MeshStandardMaterial({
+      color: 0xd1d5db,
+      metalness: 0.95,
+      roughness: 0.15
+    });
+
+    const tireMaterial = new THREE.MeshStandardMaterial({
+      color: 0x18181b,
+      roughness: 0.85,
+      metalness: 0.1
+    });
+
+    const glassMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0x0f172a,
+      metalness: 0.1,
+      roughness: 0.05,
+      transmission: 0.85,
+      transparent: true,
+      opacity: 0.9
+    });
+
+    const headlightMaterial = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      roughness: 0.1,
+      metalness: 0.9,
+      emissive: new THREE.Color(0x000000),
+      emissiveIntensity: 0
+    });
+
+    let carModel = null;
+
+    // --- 7. Load GLTF 3D Car Model with Draco Decoder ---
+    const dracoLoader = new THREE.DRACOLoader();
+    dracoLoader.setDecoderPath('/3d/draco/');
+
+    const loader = new THREE.GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+    
+    loader.load(
+      '/3d/car.glb',
+      function (gltf) {
+        carModel = gltf.scene;
+        
+        // Traverse all mesh parts and assign distinct materials!
+        carModel.traverse(function (child) {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+
+            const name = child.name.toLowerCase();
+
+            // 1. CAR BODY: ONLY this part changes color!
+            if (name === 'body' || name.includes('body')) {
+              child.material = bodyMaterial;
+            }
+            // 2. RIMS & WHEELS: Keep metallic chrome/silver
+            else if (name.includes('rim') || name.includes('wheel') || name.includes('nuts')) {
+              child.material = rimMaterial;
+            }
+            // 3. TIRES: Keep matte dark rubber
+            else if (name.includes('tire')) {
+              child.material = tireMaterial;
+            }
+            // 4. GLASS: Keep crystal transparent
+            else if (name.includes('glass')) {
+              child.material = glassMaterial;
+            }
+            // 5. LIGHTS: Keep headlights
+            else if (name.includes('lights') && !name.includes('red')) {
+              child.material = headlightMaterial;
+            }
+          }
+        });
+
+        // Center and scale car to fit stage
+        carModel.position.set(0, 0, 0);
+        scene.add(carModel);
+
+        // Hide Loading Screen
+        const loadingOverlay = document.getElementById('loading-overlay');
+        loadingOverlay.style.opacity = '0';
+        setTimeout(() => loadingOverlay.style.display = 'none', 600);
+      },
+      function (xhr) {
+        if (xhr.lengthComputable) {
+          const percent = Math.round((xhr.loaded / xhr.total) * 100);
+          document.getElementById('loading-msg').textContent = `กำลังโหลด 3D Model: ${percent}%`;
+        }
+      },
+      function (error) {
+        console.error('Error loading 3D model:', error);
+        const errText = error && error.message ? error.message : (error && error.target && error.target.status ? 'HTTP ' + error.target.status : String(error));
+        document.getElementById('loading-msg').textContent = 'โหลดโมเดลไม่สำเร็จ: ' + errText;
+      }
+    );
+
+    // --- 8. UI Logic: Color Swatches & Controls ---
+    const palette = document.getElementById('color-palette');
+    
+    COLORS.forEach((col, idx) => {
+      const btn = document.createElement('button');
+      btn.className = `color-btn ${idx === 0 ? 'active' : ''}`;
+      btn.innerHTML = `
+        <div class="swatch" style="background-color: ${col.swatch};"></div>
+        <div class="swatch-label">${col.name.split(' ')[0]}</div>
+      `;
+      btn.onclick = () => selectColor(col, btn);
+      palette.appendChild(btn);
+    });
+
+    function selectColor(col, btnElement) {
+      currentColor = col;
+      document.getElementById('active-color-name').textContent = col.name;
+
+      // Smoothly animate body paint color in 3D
+      bodyMaterial.color.set(col.hex);
+
+      document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+      btnElement.classList.add('active');
+    }
+
+    function setPaintFinish(finish) {
+      currentFinish = finish;
+      document.getElementById('btn-finish-gloss').classList.remove('active');
+      document.getElementById('btn-finish-matte').classList.remove('active');
+      document.getElementById('btn-finish-pearl').classList.remove('active');
+
+      if (finish === 'gloss') {
+        document.getElementById('btn-finish-gloss').classList.add('active');
+        bodyMaterial.roughness = 0.14;
+        bodyMaterial.metalness = 0.85;
+        bodyMaterial.clearcoat = 1.0;
+        bodyMaterial.clearcoatRoughness = 0.03;
+      } else if (finish === 'matte') {
+        document.getElementById('btn-finish-matte').classList.add('active');
+        bodyMaterial.roughness = 0.65;
+        bodyMaterial.metalness = 0.15;
+        bodyMaterial.clearcoat = 0.05;
+        bodyMaterial.clearcoatRoughness = 0.5;
+      } else if (finish === 'pearl') {
+        document.getElementById('btn-finish-pearl').classList.add('active');
+        bodyMaterial.roughness = 0.22;
+        bodyMaterial.metalness = 0.95;
+        bodyMaterial.clearcoat = 1.0;
+        bodyMaterial.clearcoatRoughness = 0.08;
+      }
+    }
+
+    function toggleHeadlights() {
+      headlightsOn = !headlightsOn;
+      const btn = document.getElementById('btn-headlights');
+      if (headlightsOn) {
+        btn.classList.add('active');
+        btn.textContent = '💡 ปิดไฟหน้า LED';
+        headlightMaterial.emissive = new THREE.Color(0x93c5fd);
+        headlightMaterial.emissiveIntensity = 3.5;
+      } else {
+        btn.classList.remove('active');
+        btn.textContent = '💡 เปิดไฟหน้า LED';
+        headlightMaterial.emissive = new THREE.Color(0x000000);
+        headlightMaterial.emissiveIntensity = 0;
+      }
+    }
+
+    function toggleAutoRotate() {
+      autoRotate = !autoRotate;
+      controls.autoRotate = autoRotate;
+      const btn = document.getElementById('btn-autorotate');
+      if (autoRotate) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    }
+
+    // --- 9. Window Resize Handling ---
+    window.addEventListener('resize', onWindowResize, false);
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // --- 10. Animation Render Loop ---
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // --- 11. External Integration & postMessage API ---
+    // If embedded via iframe with ?embed=true, hide internal floating cards
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('embed') === 'true') {
+      const topBar = document.querySelector('.top-bar');
+      const bottomPanel = document.querySelector('.bottom-panel');
+      if (topBar) topBar.style.display = 'none';
+      if (bottomPanel) bottomPanel.style.display = 'none';
+    }
+
+    // Set initial color from URL param if present
+    const initColor = urlParams.get('color');
+    if (initColor) {
+      setTimeout(() => {
+        if (bodyMaterial) bodyMaterial.color.set(initColor.startsWith('#') ? initColor : '#' + initColor);
+      }, 500);
+    }
+
+    // Listen to parent postMessage commands
+    window.addEventListener('message', function (event) {
+      if (!event.data) return;
+      const { type, color, finish, headlights, autoRotate: rotateVal } = event.data;
+
+      if (type === 'SET_COLOR' && color) {
+        if (bodyMaterial) {
+          bodyMaterial.color.set(color.startsWith('#') ? color : '#' + color);
+        }
+      }
+      if (type === 'SET_FINISH' && finish) {
+        setPaintFinish(finish);
+      }
+      if (type === 'TOGGLE_HEADLIGHTS') {
+        toggleHeadlights();
+      }
+      if (type === 'TOGGLE_AUTO_ROTATE') {
+        toggleAutoRotate();
+      }
+    });
+  </script>
+</body>
+</html>

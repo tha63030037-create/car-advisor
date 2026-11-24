@@ -1,0 +1,24 @@
+# Node.js dependencies & builds
+node_modules/
+frontend/node_modules/
+.next/
+frontend/.next/
+out/
+frontend/out/
+
+# Python Virtual Environment & Cache
+.venv/
+backend/.venv/
+__pycache__/
+backend/app/__pycache__/
+*.pyc
+
+# Environment & Logs
+.env
+.env.local
+*.log
+.vercel
+
+# Local databases & test caches
+*.db
+.pytest_cache/

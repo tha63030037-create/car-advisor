@@ -4,14 +4,24 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from typing import List
 from app.database import CARS
-from app.models import QuizState, RecommendationResult, Car, Review
+from app.models import QuizState, RecommendationResult, Car
 from app.services import generate_recommendations
+from app import matching_config as match_cfg
+from app.matching import Criteria, recommend as recommend_v2
+from app.explain import explain as explain_top3
+from app.chat import pick_provider
+from app.chat import ChatRequest, ChatResponse, chat_turn
+from app.feedback_db import init_db
+from app.feedback_router import router as feedback_router
 
 app = FastAPI(
     title="Car Advisor Recommendation API",
     description="Backend API serving car recommendation logic and TCO analysis.",
     version="1.0.0"
 )
+
+# Initialize feedback database tables
+init_db()
 
 # Configure CORS so our Next.js frontend can call the endpoints
 app.add_middleware(
@@ -21,6 +31,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Register feedback router
+app.include_router(feedback_router, prefix="/api")
+
 
 @app.get("/", response_class=HTMLResponse)
 def root():
@@ -99,7 +113,9 @@ def root():
 
 @app.get("/api/health")
 def health_check():
-    return {"status": "ok", "message": "Car Advisor API is up and running."}
+    provider, _ = pick_provider()
+    # shows WHICH AI provider is configured (never the key) so a deploy can be checked from a phone
+    return {"status": "ok", "message": "Car Advisor API is up and running.", "llm": provider or "none (rules mode)"}
 
 @app.get("/api/cars", response_model=List[Car])
 def get_all_cars():
@@ -140,23 +156,50 @@ def get_recommendations(state: QuizState):
     """
     return generate_recommendations(state)
 
-@app.get("/api/reviews/{car_name}", response_model=List[Review])
-def get_live_reviews(car_name: str):
-    """
-    Fetches real-time web reviews from Pantip/HeadlightMag/One2Car via Google API or search engine.
-    """
-    from app.review_service import fetch_realtime_reviews
-    raw_reviews = fetch_realtime_reviews(car_name)
-    return [
-        Review(
-            author=r.get("author", "ผู้ใช้จริง"),
-            rating=r.get("rating", 5),
-            text=r.get("text", ""),
-            source=r.get("source", "เว็บรีวิวชั้นนำ"),
-            title=r.get("title"),
-            link=r.get("link"),
-            is_live=r.get("is_live", False)
-        )
-        for r in raw_reviews
-    ]
 
+# ---------------------------------------------------------------- v2 engine
+@app.post("/api/v2/recommend")
+def get_recommendations_v2(criteria: Criteria):
+    """
+    v2 matching engine (IS spec section 4): filters first (brand / seats / fuel /
+    budget ceiling), then a personal weighted score from the 5-card ranking.
+    Deterministic: same criteria -> same ranking. The old /api/recommend stays
+    available as the comparison baseline.
+    """
+    return recommend_v2(criteria)
+
+
+@app.get("/api/v2/options")
+def get_v2_options():
+    """Labels and defaults the frontend needs to build the card-sort and criteria screens."""
+    return {
+        "criteria": match_cfg.CRITERIA,
+        "criteria_th": match_cfg.CRITERIA_TH,
+        "zone_points": match_cfg.ZONE_POINTS,
+        "lifestyles": match_cfg.LIFESTYLES,
+        "lifestyle_th": match_cfg.LIFESTYLE_TH,
+        "stretch_options": match_cfg.STRETCH_OPTIONS,
+        "default_stretch": match_cfg.DEFAULT_STRETCH,
+        "default_km_per_year": match_cfg.DEFAULT_KM_PER_YEAR,
+    }
+
+
+@app.post("/api/chat", response_model=ChatResponse)
+def chat(req: ChatRequest):
+    """
+    AI sales-advisor chat (spec 5): turns what the user types into criteria and asks
+    the next question. Never picks cars itself — the frontend sends the returned
+    criteria to /api/v2/recommend. Uses the LLM when ANTHROPIC_API_KEY is set,
+    otherwise a Thai keyword extractor, so the demo works without AI.
+    """
+    return chat_turn(req)
+
+
+@app.post("/api/explain")
+def explain_endpoint(criteria: Criteria):
+    """
+    Salesperson-style reasons for the top 3 (spec 5.4). The ranking is recomputed from
+    the criteria, the LLM only sees those 3 cars' data, and its text is checked to name
+    exactly those cars; otherwise a template from the same numbers is returned.
+    """
+    return explain_top3(criteria)

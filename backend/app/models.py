@@ -6,9 +6,11 @@ class QuizState(BaseModel):
     income: int
     pains: List[str]
     gains: List[str]
+    lifestyle: Optional[List[str]] = []
     bodytype: str
     fuel: str
     brands: List[str]
+    priority: Optional[str] = "none"
 
 class CarPhoto(BaseModel):
     file: str
@@ -53,7 +55,7 @@ class Review(BaseModel):
     author: str
     rating: int
     text: str
-    source: Optional[str] = "คลับผู้ใช้จริงในไทย (HeadlightMag / Pantip / Facebook Club)"
+    source: Optional[str] = None
     title: Optional[str] = None
     link: Optional[str] = None
     is_live: Optional[bool] = False
@@ -61,7 +63,7 @@ class Review(BaseModel):
 class Complaint(BaseModel):
     issue: str
     frequency: str
-    source: Optional[str] = "คลับผู้ใช้จริงในไทย (HeadlightMag / Pantip / Facebook Club)"
+    source: Optional[str] = None
 
 class RecommendationResult(BaseModel):
     car: Car
