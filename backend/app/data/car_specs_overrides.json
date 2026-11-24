@@ -65,8 +65,9 @@
     "price_thb_entry": 569000,
     "ground_clearance_mm": 160,
     "maintenance_5y_thb": 32551,
-    "source": "Price MY2026 (1.2 Sport 569,000, eff. 1 Jan 2026): car250.com/toyota-yaris-ativ-1-2l.html · Ground clearance 160 mm: headlightmag.com/?p=328029 · Maintenance: sum of the 10 dealer-menu interval totals to 100,000 km/5 yr on car250.com/?p=422922",
-    "collected_on": "2026-11-24"
+    "source": "Price MY2026 (1.2 Sport 569,000, eff. 1 Jan 2026): car250.com/toyota-yaris-ativ-1-2l.html · Ground clearance 160 mm: headlightmag.com/?p=328029 · Maintenance: sum of the 10 dealer-menu interval totals to 100,000 km/5 yr on car250.com/?p=422922 · ASEAN NCAP 5★ (TOYOTA VIOS (2023) — Yaris Ativ is the Thai name): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)",
+    "collected_on": "2026-11-24",
+    "asean_ncap_stars": 5
   },
   "11": {
     "price_thb_entry": 1379000,
@@ -107,8 +108,9 @@
   },
   "70": {
     "price_thb_entry": 795000,
-    "source": "Price: new STARGAZER Trend 6 regular 795,000 (intro 719,000, limited), Smart 6 875,000: thaipost.net/automotive-news/998904 · 6 seats",
-    "collected_on": "2026-11-24"
+    "source": "Price: new STARGAZER Trend 6 regular 795,000 (intro 719,000, limited), Smart 6 875,000: thaipost.net/automotive-news/998904 · 6 seats · ASEAN NCAP 4★ (HYUNDAI STARGAZER): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)",
+    "collected_on": "2026-11-24",
+    "asean_ncap_stars": 4
   },
   "71": {
     "price_thb_entry": 1399000,
@@ -174,8 +176,9 @@
   },
   "8": {
     "price_thb_entry": 795000,
-    "source": "Price: official 795,000 base (autolifethailand.tv/tag/โตโยต้า-เวลอซ, Nov 2023 list; car250.com 2026 says petrol Veloz now ~790–870k and being cleared ahead of a hybrid)",
-    "collected_on": "2026-11-24"
+    "source": "Price: official 795,000 base (autolifethailand.tv/tag/โตโยต้า-เวลอซ, Nov 2023 list; car250.com 2026 says petrol Veloz now ~790–870k and being cleared ahead of a hybrid) · ASEAN NCAP 5★ (TOYOTA VELOZ): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)",
+    "collected_on": "2026-11-24",
+    "asean_ncap_stars": 5
   },
   "77": {
     "discontinued": true,
@@ -199,8 +202,9 @@
   },
   "3": {
     "price_thb_entry": 809000,
-    "source": "Price 809,000: car250.com/?p=446253 (Toyota all-model list, updated 29 Aug 2026)",
-    "collected_on": "2026-11-25"
+    "source": "Price 809,000: car250.com/?p=446253 (Toyota all-model list, updated 29 Aug 2026) · ASEAN NCAP 5★ (TOYOTA YARIS CROSS): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)",
+    "collected_on": "2026-11-25",
+    "asean_ncap_stars": 5
   },
   "4": {
     "price_thb_entry": 909000,
@@ -269,11 +273,12 @@
   },
   "25": {
     "price_thb_entry": 949000,
-    "source": "Price 949,000 — Thai Civic is now e:HEV; consumption is an estimate: 9carthai.com/honda-price/ (updated 1 Oct 2026; regular price, launch promo noted separately)",
+    "source": "Price 949,000 — Thai Civic is now e:HEV; consumption is an estimate: 9carthai.com/honda-price/ (updated 1 Oct 2026; regular price, launch promo noted separately) · ASEAN NCAP 5★ (HONDA CIVIC (2021), same generation): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)",
     "collected_on": "2026-11-25",
     "estimated": [
       "economy"
-    ]
+    ],
+    "asean_ncap_stars": 5
   },
   "27": {
     "price_thb_entry": 3990000,
@@ -289,13 +294,15 @@
   },
   "31": {
     "price_thb_entry": 1409000,
-    "source": "Price 1,409,000: 9carthai.com/honda-price/ (updated 1 Oct 2026; regular price, launch promo noted separately)",
-    "collected_on": "2026-11-25"
+    "source": "Price 1,409,000: 9carthai.com/honda-price/ (updated 1 Oct 2026; regular price, launch promo noted separately) · ASEAN NCAP 5★ (HONDA CR-V (2023)): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)",
+    "collected_on": "2026-11-25",
+    "asean_ncap_stars": 5
   },
   "34": {
     "price_thb_entry": 1479000,
-    "source": "Price 1,479,000: 9carthai.com/honda-price/ (updated 1 Oct 2026; regular price, launch promo noted separately)",
-    "collected_on": "2026-11-25"
+    "source": "Price 1,479,000: 9carthai.com/honda-price/ (updated 1 Oct 2026; regular price, launch promo noted separately) · ASEAN NCAP 5★ (HONDA ACCORD (2024)): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)",
+    "collected_on": "2026-11-25",
+    "asean_ncap_stars": 5
   },
   "36": {
     "price_thb_entry": 529000,
@@ -339,8 +346,9 @@
   },
   "46": {
     "price_thb_entry": 573000,
-    "source": "Price 573,000: 9carthai.com/nissan-price/ (2 Jun 2026)",
-    "collected_on": "2026-11-25"
+    "source": "Price 573,000: 9carthai.com/nissan-price/ (2 Jun 2026) · ASEAN NCAP 4★ (NISSAN ALMERA (2025)): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)",
+    "collected_on": "2026-11-25",
+    "asean_ncap_stars": 4
   },
   "48": {
     "price_thb_entry": 839000,
@@ -374,18 +382,21 @@
   },
   "55": {
     "price_thb_entry": 1197000,
-    "source": "Price 1,197,000: 9carthai.com/isuzu-price/ (5 Nov 2026)",
-    "collected_on": "2026-11-25"
+    "source": "Price 1,197,000: 9carthai.com/isuzu-price/ (5 Nov 2026) · ASEAN NCAP 5★ (ISUZU MU-X): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)",
+    "collected_on": "2026-11-25",
+    "asean_ncap_stars": 5
   },
   "56": {
     "price_thb_entry": 727000,
-    "source": "Price 727,000 — Double Cab 2.4 PRO: 9carthai.com/mitsubishi-price (19 Oct 2026)",
-    "collected_on": "2026-11-25"
+    "source": "Price 727,000 — Double Cab 2.4 PRO: 9carthai.com/mitsubishi-price (19 Oct 2026) · ASEAN NCAP 5★ (MITSUBISHI TRITON (2023)): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)",
+    "collected_on": "2026-11-25",
+    "asean_ncap_stars": 5
   },
   "57": {
     "price_thb_entry": 1299000,
-    "source": "Price 1,299,000: 9carthai.com/mitsubishi-price (19 Oct 2026)",
-    "collected_on": "2026-11-25"
+    "source": "Price 1,299,000: 9carthai.com/mitsubishi-price (19 Oct 2026) · ASEAN NCAP 5★ (MITSUBISHI TRITON (2023)): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)",
+    "collected_on": "2026-11-25",
+    "asean_ncap_stars": 5
   },
   "59": {
     "price_thb_entry": 939000,
@@ -409,8 +420,9 @@
   },
   "69": {
     "price_thb_entry": 929000,
-    "source": "Price 929,000: 9carthai.com/hyundai-price/ (16 Sep 2026)",
-    "collected_on": "2026-11-25"
+    "source": "Price 929,000: 9carthai.com/hyundai-price/ (16 Sep 2026) · ASEAN NCAP 5★ (HYUNDAI CRETA): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)",
+    "collected_on": "2026-11-25",
+    "asean_ncap_stars": 5
   },
   "110": {
     "price_thb_entry": 1399000,
@@ -454,8 +466,9 @@
   },
   "84": {
     "price_thb_entry": 989900,
-    "source": "Price 989,900: car250.com/?p=292626 (BYD price table, updated 19 May 2026)",
-    "collected_on": "2026-11-25"
+    "source": "Price 989,900: car250.com/?p=292626 (BYD price table, updated 19 May 2026) · ASEAN NCAP 5★ (BYD SEAL): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)",
+    "collected_on": "2026-11-25",
+    "asean_ncap_stars": 5
   },
   "85": {
     "price_thb_entry": 859900,
@@ -550,8 +563,9 @@
   },
   "132": {
     "price_thb_entry": 899000,
-    "source": "New model added 25 Nov 2026. Price 899,000 — 24.4 km/l and 7-yr/150,000 km warranty: car250.com/price/new-mitsubishi: 9carthai.com/mitsubishi-price (19 Oct 2026). Not yet verified: horsepower, airbags",
-    "collected_on": "2026-11-25"
+    "source": "New model added 25 Nov 2026. Price 899,000 — 24.4 km/l and 7-yr/150,000 km warranty: car250.com/price/new-mitsubishi: 9carthai.com/mitsubishi-price (19 Oct 2026). Not yet verified: horsepower, airbags · ASEAN NCAP 5★ (MITSUBISHI XFORCE (tested petrol; HEV shares the body)): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)",
+    "collected_on": "2026-11-25",
+    "asean_ncap_stars": 5
   },
   "133": {
     "price_thb_entry": 1640000,
@@ -563,11 +577,12 @@
   },
   "134": {
     "price_thb_entry": 689000,
-    "source": "New model added 25 Nov 2026. Price 689,000: 9carthai.com/suzuki-price/ (7 Jul 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "source": "New model added 25 Nov 2026. Price 689,000: 9carthai.com/suzuki-price/ (7 Jul 2026). Not yet verified: horsepower, airbags, consumption, warranty · ASEAN NCAP 5★ (SUZUKI FRONX): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)",
     "collected_on": "2026-11-25",
     "estimated": [
       "economy"
-    ]
+    ],
+    "asean_ncap_stars": 5
   },
   "135": {
     "price_thb_entry": 799000,
@@ -642,11 +657,12 @@
   },
   "144": {
     "price_thb_entry": 649900,
-    "source": "New model added 25 Nov 2026. Price 649,900: car250.com/?p=70714 (MG price list, 10 Apr 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "source": "New model added 25 Nov 2026. Price 649,900: car250.com/?p=70714 (MG price list, 10 Apr 2026). Not yet verified: horsepower, airbags, consumption, warranty · ASEAN NCAP 5★ (MG MGS5 EV): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)",
     "collected_on": "2026-11-25",
     "estimated": [
       "economy"
-    ]
+    ],
+    "asean_ncap_stars": 5
   },
   "145": {
     "price_thb_entry": 1449000,
@@ -723,11 +739,12 @@
   },
   "154": {
     "price_thb_entry": 759900,
-    "source": "New model added 25 Nov 2026. Price 759,900: car250.com/chery-q-ev-2026-11.html (Chery Q QLICK 469,900 regular); thansettakij.com/motor/654699 (V23 759,900). Not yet verified: horsepower, airbags, consumption, warranty",
+    "source": "New model added 25 Nov 2026. Price 759,900: car250.com/chery-q-ev-2026-11.html (Chery Q QLICK 469,900 regular); thansettakij.com/motor/654699 (V23 759,900). Not yet verified: horsepower, airbags, consumption, warranty · ASEAN NCAP 5★ (CHERY iCAUR V23): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)",
     "collected_on": "2026-11-25",
     "estimated": [
       "economy"
-    ]
+    ],
+    "asean_ncap_stars": 5
   },
   "155": {
     "price_thb_entry": 629000,
@@ -744,5 +761,17 @@
     "estimated": [
       "economy"
     ]
+  },
+  "26": {
+    "asean_ncap_stars": 5,
+    "source": "ASEAN NCAP 5★ (HONDA CIVIC (2021), same generation): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)"
+  },
+  "30": {
+    "asean_ncap_stars": 5,
+    "source": "ASEAN NCAP 5★ (HONDA CR-V (2023)): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)"
+  },
+  "33": {
+    "asean_ncap_stars": 5,
+    "source": "ASEAN NCAP 5★ (HONDA WR-V): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)"
   }
 }

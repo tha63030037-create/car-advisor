@@ -50,10 +50,12 @@ class Criteria(BaseModel):
     fuel_only: Optional[List[str]] = None
     fuel_exclude: List[str] = []
     body_preferred: List[str] = []
+    # opt-in: drop cars whose ASEAN NCAP result is below this; untested cars stay in
+    min_ncap_stars: Optional[int] = Field(None, ge=1, le=5)
     lifestyles: List[str] = []
     km_per_year: int = Field(cfg.DEFAULT_KM_PER_YEAR, gt=0, le=200000)
     priorities: Priorities = Priorities()
-    top_n: int = Field(cfg.DEFAULT_TOP_N, ge=1, le=125)
+    top_n: int = Field(cfg.DEFAULT_TOP_N, ge=1, le=200)
 
     @field_validator("lifestyles")
     @classmethod
@@ -191,6 +193,9 @@ def _filter_checks(c):
         fx = set(c.fuel_exclude)
         checks.append(("fuel_exclude", "ไม่เอาเชื้อเพลิง: " + ", ".join(c.fuel_exclude),
                        lambda car: not (_fuels(car) & fx)))
+    if c.min_ncap_stars:
+        checks.append(("min_ncap_stars", "ไม่เอารถผลทดสอบชน ASEAN NCAP ต่ำกว่า %d ดาว (รถที่ยังไม่มีผลทดสอบยังอยู่)" % c.min_ncap_stars,
+                       lambda car: car.get("asean_ncap_stars") is None or car["asean_ncap_stars"] >= c.min_ncap_stars))
     checks.append(("budget_ceiling", "ราคาไม่เกินงบ + ยืดได้ %d%%" % round(c.budget_stretch * 100),
                    lambda car: car["price"] <= ceiling))
     return checks

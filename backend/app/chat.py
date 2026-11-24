@@ -106,11 +106,12 @@ SYSTEM_PROMPT = """คุณคือที่ปรึกษาการเล�
 
 โครง criteria (ส่งกลับทุกช่อง ค่าที่ไม่รู้ให้เป็น null):
 {"budget": int|null, "budget_stretch": 0|0.1|0.15|0.2|null, "brand_only": [str], "brand_exclude": [str],
- "seats_min": int|null, "fuel_exclude": [str], "body_preferred": [str], "lifestyles": [str], "km_per_year": int|null,
+ "seats_min": int|null, "fuel_exclude": [str], "min_ncap_stars": 3|null, "body_preferred": [str], "lifestyles": [str], "km_per_year": int|null,
  "priorities": {"budget":1-3,"lifestyle":1-3,"running_cost":1-3,"safety":1-3,"design":1-3}|null}
 lifestyles ใช้ได้เฉพาะ: school_run, camping, merit_family, pets, city, long_trips, work_cargo
 body_preferred ใช้ได้เฉพาะ: sedan, hatchback, suv, ppv, mpv, pickup, coupe
 fuel_exclude ใช้ได้เฉพาะ: petrol, diesel, hybrid, ev
+min_ncap_stars ใส่ 3 เฉพาะเมื่อลูกค้าบอกเองว่าไม่เอารถที่ผลทดสอบชนต่ำ/ต้องการรถที่ผ่านการทดสอบชน ไม่งั้นเป็น null
 priorities: 3 = สำคัญที่สุด 2 = สำคัญ 1 = ไม่ค่อยสำคัญ
 
 ตอบเป็น JSON อย่างเดียว ไม่มีข้อความอื่น: {"reply": "ข้อความถึงลูกค้า", "criteria": {...}, "quick_replies": ["ปุ่มตอบด่วนสั้น ๆ 2-4 ปุ่ม"]}"""
@@ -119,11 +120,13 @@ priorities: 3 = สำคัญที่สุด 2 = สำคัญ 1 = ไม
 # ------------------------------------------------------------ rules engine
 BRANDS = ["Toyota", "Honda", "Mazda", "Nissan", "Isuzu", "Mitsubishi", "Suzuki", "Subaru", "Hyundai",
           "Kia", "MG", "BYD", "GWM", "Neta", "GAC", "Deepal", "Changan", "Zeekr", "XPENG", "Tesla",
-          "Ford", "Volvo", "BMW", "Peugeot", "AVATR", "Hyptec", "Riddara"]
+          "Ford", "Volvo", "BMW", "Peugeot", "AVATR", "Hyptec", "Riddara",
+          "Geely", "Chery", "Omoda", "Jaecoo", "Denza"]
 BRAND_TH = {"โตโยต้า": "Toyota", "ฮอนด้า": "Honda", "มาสด้า": "Mazda", "นิสสัน": "Nissan", "อีซูซุ": "Isuzu",
             "มิตซู": "Mitsubishi", "ซูซูกิ": "Suzuki", "ซูบารุ": "Subaru", "ฮุนได": "Hyundai", "เกีย": "Kia",
-            "เอ็มจี": "MG", "บีวายดี": "BYD", "ฟอร์ด": "Ford", "วอลโว่": "Volvo", "เทสล่า": "Tesla"}
-CHINESE = ["MG", "BYD", "GWM", "Neta", "GAC", "Deepal", "Changan", "Zeekr", "XPENG", "AVATR", "Hyptec", "Riddara"]
+            "เอ็มจี": "MG", "บีวายดี": "BYD", "จีลี่": "Geely", "เชอรี่": "Chery", "โอโมดา": "Omoda", "ฟอร์ด": "Ford", "วอลโว่": "Volvo", "เทสล่า": "Tesla"}
+CHINESE = ["MG", "BYD", "GWM", "Neta", "GAC", "Deepal", "Changan", "Zeekr", "XPENG", "AVATR", "Hyptec", "Riddara",
+           "Geely", "Chery", "Omoda", "Jaecoo", "Denza"]
 LIFESTYLE_WORDS = {
     "school_run": ["ลูก", "โรงเรียน", "ส่งเด็ก"],
     "camping": ["แคมป์", "แค้มป์", "เข้าป่า", "ลุย", "ภูเขา", "ทางลูกรัง"],
@@ -209,6 +212,8 @@ def rules_extract(text, crit):
     if re.search(r"ไม่เอา(รถ)?ดีเซล", t):
         fx.add("diesel")
     c["fuel_exclude"] = sorted(fx)
+    if re.search(r"(ทดสอบชน|ncap|ดาวความปลอดภัย|ผลชน)", t):
+        c["min_ncap_stars"] = 3
 
     def brands_in(s):
         found = [b for b in BRANDS if re.search(r"\b" + b.lower() + r"\b", s.lower())]
@@ -276,6 +281,8 @@ def summarize(c):
     if c.get("fuel_exclude"):
         fuel_th = {"ev": "ไฟฟ้า", "diesel": "ดีเซล", "petrol": "เบนซิน", "hybrid": "ไฮบริด"}
         parts.append("ไม่เอารถ" + ", ".join(fuel_th.get(f, f) for f in c["fuel_exclude"]))
+    if c.get("min_ncap_stars"):
+        parts.append("ไม่เอารถผลทดสอบชนต่ำกว่า %d ดาว" % c["min_ncap_stars"])
     if c.get("priorities"):
         top = [cfg.CRITERIA_TH[k] for k, v in c["priorities"].items() if v == 3]
         if top:
@@ -324,6 +331,9 @@ def _clean_criteria(raw):
         v = raw.get(k) or []
         if isinstance(v, list):
             out[k] = [x for x in v if isinstance(x, str) and x in BRANDS]
+    ns = raw.get("min_ncap_stars")
+    if isinstance(ns, int) and 1 <= ns <= 5:
+        out["min_ncap_stars"] = ns
     sm = raw.get("seats_min")
     if isinstance(sm, int) and 1 <= sm <= 15:
         out["seats_min"] = sm

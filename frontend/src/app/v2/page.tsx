@@ -110,6 +110,7 @@ export default function MatchV2() {
   const [brandOnly, setBrandOnly] = useState<string[]>([]);
   const [seatsMin, setSeatsMin] = useState<number | null>(null);
   const [noEv, setNoEv] = useState(false);
+  const [ncapMin, setNcapMin] = useState(false);
   const [brandExclude, setBrandExclude] = useState<string[]>([]);
 
   // chat (spec 5): the bot fills these same controls, so both modes drive one engine
@@ -148,12 +149,13 @@ export default function MatchV2() {
     seats_min: seatsMin,
     fuel_only: null,
     fuel_exclude: noEv ? ["ev"] : [],
+    min_ncap_stars: ncapMin ? 3 : null,
     body_preferred: bodies,
     lifestyles,
     km_per_year: 15000,
     priorities: zones,
     top_n: 10,
-  }), [budgetK, stretch, brandOnly, brandExclude, seatsMin, noEv, bodies, lifestyles, zones]);
+  }), [budgetK, stretch, brandOnly, brandExclude, seatsMin, noEv, bodies, lifestyles, zones, ncapMin]);
 
   // ---------------------------------------------------------------- chat
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -166,6 +168,7 @@ export default function MatchV2() {
     if (Array.isArray(c.brand_exclude)) setBrandExclude(c.brand_exclude);
     if (c.seats_min !== undefined) setSeatsMin(c.seats_min ?? null);
     if (Array.isArray(c.fuel_exclude)) setNoEv(c.fuel_exclude.includes("ev"));
+    if (c.min_ncap_stars !== undefined) setNcapMin(!!c.min_ncap_stars);
     if (c.priorities) setZones(c.priorities);
   };
 
@@ -414,6 +417,7 @@ export default function MatchV2() {
               <button key={String(s)} className={`chip ${seatsMin === s ? "on" : ""}`} onClick={() => setSeatsMin(s)}>{s ? `${s} ที่นั่ง` : "ไม่จำกัด"}</button>
             ))}
             <button className={`chip ${noEv ? "on" : ""}`} onClick={() => setNoEv(!noEv)}>🚫⚡ ไม่เอารถไฟฟ้า</button>
+            <button className={`chip ${ncapMin ? "on" : ""}`} onClick={() => setNcapMin(!ncapMin)} title="รถที่ยังไม่มีผลทดสอบจะยังแสดงอยู่">🛡️ ไม่เอารถผลทดสอบชนต่ำกว่า 3 ดาว</button>
           </div>
 
           <h2>5. ทรงที่ชอบ <small>(ใช้กับการ์ดดีไซน์)</small></h2>

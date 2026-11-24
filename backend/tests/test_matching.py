@@ -164,3 +164,15 @@ def test_discontinued_cars_are_not_recommended():
     from app.database import DISCONTINUED
     from app.matching import CARS_V2
     assert not {c["id"] for c in CARS_V2} & set(DISCONTINUED)
+
+
+def test_ncap_filter_drops_low_rated_but_keeps_untested():
+    base = dict(budget=600000, budget_stretch=0.2, top_n=200)
+    off = recommend(Criteria(**base))
+    on = recommend(Criteria(min_ncap_stars=3, **base))
+    ids_off = {r["id"] for r in off["results"]}
+    ids_on = {r["id"] for r in on["results"]}
+    assert 94 in ids_off and 94 not in ids_on            # Neta V, 0 stars
+    untested = {r["id"] for r in off["results"] if r["asean_ncap_stars"] is None}
+    assert untested and untested <= ids_on               # untested cars are not dropped
+    assert any(f["filter"] == "min_ncap_stars" for f in on["filter_impact"])
