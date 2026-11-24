@@ -43,7 +43,8 @@ BRAND_GROUP = {
     "Toyota": "japan", "Honda": "japan", "Mazda": "japan", "Nissan": "japan",
     "Isuzu": "japan", "Mitsubishi": "japan", "Suzuki": "japan", "Subaru": "japan",
     "Hyundai": "korea", "Kia": "korea",
-    "Volvo": "euro", "BMW": "euro", "Peugeot": "euro",
+    "Volvo": "euro", "BMW": "euro", "Peugeot": "euro", "Mercedes-Benz": "euro", "MINI": "euro",
+    "Audi": "euro", "Porsche": "euro", "Lexus": "japan",
     "Tesla": "usa", "Ford": "usa",
 }
 

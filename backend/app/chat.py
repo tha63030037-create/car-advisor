@@ -121,10 +121,10 @@ priorities: 3 = สำคัญที่สุด 2 = สำคัญ 1 = ไม
 BRANDS = ["Toyota", "Honda", "Mazda", "Nissan", "Isuzu", "Mitsubishi", "Suzuki", "Subaru", "Hyundai",
           "Kia", "MG", "BYD", "GWM", "Neta", "GAC", "Deepal", "Changan", "Zeekr", "XPENG", "Tesla",
           "Ford", "Volvo", "BMW", "Peugeot", "AVATR", "Hyptec", "Riddara",
-          "Geely", "Chery", "Omoda", "Jaecoo", "Denza"]
+          "Geely", "Chery", "Omoda", "Jaecoo", "Denza", "Mercedes-Benz", "MINI", "Lexus", "Audi", "Porsche"]
 BRAND_TH = {"โตโยต้า": "Toyota", "ฮอนด้า": "Honda", "มาสด้า": "Mazda", "นิสสัน": "Nissan", "อีซูซุ": "Isuzu",
             "มิตซู": "Mitsubishi", "ซูซูกิ": "Suzuki", "ซูบารุ": "Subaru", "ฮุนได": "Hyundai", "เกีย": "Kia",
-            "เอ็มจี": "MG", "บีวายดี": "BYD", "จีลี่": "Geely", "เชอรี่": "Chery", "โอโมดา": "Omoda", "ฟอร์ด": "Ford", "วอลโว่": "Volvo", "เทสล่า": "Tesla"}
+            "เอ็มจี": "MG", "บีวายดี": "BYD", "จีลี่": "Geely", "เบนซ์": "Mercedes-Benz", "benz": "Mercedes-Benz", "Benz": "Mercedes-Benz", "บีเอ็ม": "BMW", "มินิ": "MINI", "เล็กซัส": "Lexus", "อาวดี้": "Audi", "ปอร์เช่": "Porsche", "เชอรี่": "Chery", "โอโมดา": "Omoda", "ฟอร์ด": "Ford", "วอลโว่": "Volvo", "เทสล่า": "Tesla"}
 CHINESE = ["MG", "BYD", "GWM", "Neta", "GAC", "Deepal", "Changan", "Zeekr", "XPENG", "AVATR", "Hyptec", "Riddara",
            "Geely", "Chery", "Omoda", "Jaecoo", "Denza"]
 LIFESTYLE_WORDS = {

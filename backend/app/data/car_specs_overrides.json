@@ -773,5 +773,223 @@
   "33": {
     "asean_ncap_stars": 5,
     "source": "ASEAN NCAP 5★ (HONDA WR-V): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)"
+  },
+  "104": {
+    "price_thb_entry": 2199000,
+    "collected_on": "2026-11-25",
+    "source": "Price 2,199,000 — 220 Gran Coupe M Sport Pro (218 no longer listed): 9carthai.com/bmw-price/ (BMW Thailand list, updated 27 Mar 2026)"
+  },
+  "157": {
+    "price_thb_entry": 2290000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 2,290,000 — electric CLA: 9carthai.com/mercedes-benz-price/ (Mercedes-Benz Thailand list, 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "158": {
+    "price_thb_entry": 2690000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 2,690,000: 9carthai.com/mercedes-benz-price/ (Mercedes-Benz Thailand list, 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "159": {
+    "price_thb_entry": 3490000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 3,490,000: 9carthai.com/mercedes-benz-price/ (Mercedes-Benz Thailand list, 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "160": {
+    "price_thb_entry": 2580000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 2,580,000: 9carthai.com/mercedes-benz-price/ (Mercedes-Benz Thailand list, 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "161": {
+    "price_thb_entry": 3490000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 3,490,000: 9carthai.com/mercedes-benz-price/ (Mercedes-Benz Thailand list, 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "162": {
+    "price_thb_entry": 4950000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 4,950,000: 9carthai.com/mercedes-benz-price/ (Mercedes-Benz Thailand list, 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "163": {
+    "price_thb_entry": 2799000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 2,799,000 — 320d M Sport: 9carthai.com/bmw-price/ (BMW Thailand list, updated 27 Mar 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "164": {
+    "price_thb_entry": 3299000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 3,299,000 — plug-in hybrid, 530e Inspiring: 9carthai.com/bmw-price/ (BMW Thailand list, updated 27 Mar 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "165": {
+    "price_thb_entry": 2399000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 2,399,000 — xDrive20i M Sport: 9carthai.com/bmw-price/ (BMW Thailand list, updated 27 Mar 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "166": {
+    "price_thb_entry": 2499000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 2,499,000 — eDrive20L M Sport (long wheelbase): 9carthai.com/bmw-price/ (BMW Thailand list, updated 27 Mar 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "167": {
+    "price_thb_entry": 3799000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 3,799,000 — xDrive20d M Sport Pro: 9carthai.com/bmw-price/ (BMW Thailand list, updated 27 Mar 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "168": {
+    "price_thb_entry": 2999000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 2,999,000 — iX3 M Sport (Inspiring): 9carthai.com/bmw-price/ (BMW Thailand list, updated 27 Mar 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "169": {
+    "price_thb_entry": 5159000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 5,159,000 — xDrive30d M Sport: 9carthai.com/bmw-price/ (BMW Thailand list, updated 27 Mar 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "170": {
+    "price_thb_entry": 4599000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 4,599,000 — eDrive40 M Sport (Inspiring): 9carthai.com/bmw-price/ (BMW Thailand list, updated 27 Mar 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "171": {
+    "price_thb_entry": 5999000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 5,999,000 — xDrive45 M Sport: 9carthai.com/bmw-price/ (BMW Thailand list, updated 27 Mar 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "172": {
+    "price_thb_entry": 1555000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 1,555,000 — J01 Classic; 54.2 kWh, 218 hp: autolifethailand.tv (MINI Cooper SE official 1,555,000–1,799,000 and Aceman SE 1,755,000–1,999,000, 26 Nov 2025). Not yet verified: airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "173": {
+    "price_thb_entry": 1755000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 1,755,000 — Classic; 218 hp, 54.2 kWh; warranty 4 yr unlimited km: autolifethailand.tv (MINI Cooper SE official 1,555,000–1,799,000 and Aceman SE 1,755,000–1,999,000, 26 Nov 2025). Not yet verified: airbags, consumption",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "174": {
+    "price_thb_entry": 2430000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 2,430,000: 9carthai.com/lexus-price/ (Lexus Thailand list). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "175": {
+    "price_thb_entry": 2780000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 2,780,000: 9carthai.com/lexus-price/ (Lexus Thailand list). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "176": {
+    "price_thb_entry": 3310000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 3,310,000: 9carthai.com/lexus-price/ (Lexus Thailand list). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "177": {
+    "price_thb_entry": 4520000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 4,520,000: 9carthai.com/lexus-price/ (Lexus Thailand list). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "178": {
+    "price_thb_entry": 2990000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 2,990,000: 9carthai.com/lexus-price/ (Lexus Thailand list). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "179": {
+    "price_thb_entry": 2799000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 2,799,000: 9carthai.com/lexus-price/ (Lexus Thailand list). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "180": {
+    "price_thb_entry": 3290000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 3,290,000 — new-generation ES, electric: 9carthai.com/lexus-price/ (Lexus Thailand list). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "181": {
+    "price_thb_entry": 6290000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 6,290,000 — Executive 7-seater: 9carthai.com/lexus-price/ (Lexus Thailand list). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "182": {
+    "price_thb_entry": 2499000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 2,499,000 — all-new 3rd gen, 1.5 TFSI mild hybrid: sanook.com/auto/98344 (All-new Audi Q3 official from 2,499,000; 150 hp 1.5 mild hybrid, 18.2 km/l). Not yet verified: airbags, warranty"
+  },
+  "183": {
+    "price_thb_entry": 5290000,
+    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 5,290,000 — RWD: autolifethailand.tv/tag/macan-ev-turbo (Macan EV official from 5,290,000, 5 Nov 2025). Porsche has announced 7,890,000 from 1 Jan 2027 when the excise on imported EVs rises from 10% to 35% (autolifethailand.tv/?p=183901). Not yet verified: horsepower, airbags, consumption, warranty",
+    "estimated": [
+      "economy"
+    ]
   }
 }
