@@ -15,7 +15,7 @@
     }
   },
   "83": {
-    "price_thb_entry": 899900,
+    "price_thb_entry": 799900,
     "ground_clearance_mm": 150,
     "isofix": true,
     "adas": {
@@ -25,8 +25,8 @@
       "parking_sensors": true,
       "camera_360": true
     },
-    "source": "Price: autospinn.com/2025/01/byd-atto-3-thailand-official-price-and-spec-141148 (Dynamic 899,900) · Safety/ADAS: reverautomotive.com/en/model/newatto3/tech-spec (BYD Thailand distributor) · Ground clearance: zigwheels.co.th/new-cars/byd/atto-3/specifications",
-    "collected_on": "2026-11-23"
+    "source": "Price updated 24 Nov: Atto 3 Premium 799,900 before the Motor Show 2026 cut to 669,900 (autospinn.com/2026/03/car-ev-byd-motor-show-2026-price-148118); replaces the Jan 2025 figure 899,900 · Safety/ADAS: reverautomotive.com/en/model/newatto3/tech-spec · Ground clearance: zigwheels.co.th/new-cars/byd/atto-3/specifications",
+    "collected_on": "2026-11-24"
   },
   "96": {
     "price_thb_entry": 769900,
@@ -60,5 +60,118 @@
     "isofix": true,
     "source": "Price/ground clearance: headlightmag.com/?p=289415 (Standard Range D 709,900; 117 mm) · ISOFIX: whichcar.com.au 2024 MG4 review (global spec)",
     "collected_on": "2026-11-23"
+  },
+  "1": {
+    "price_thb_entry": 569000,
+    "ground_clearance_mm": 160,
+    "maintenance_5y_thb": 32551,
+    "source": "Price MY2026 (1.2 Sport 569,000, eff. 1 Jan 2026): car250.com/toyota-yaris-ativ-1-2l.html · Ground clearance 160 mm: headlightmag.com/?p=328029 · Maintenance: sum of the 10 dealer-menu interval totals to 100,000 km/5 yr on car250.com/?p=422922",
+    "collected_on": "2026-11-24"
+  },
+  "11": {
+    "price_thb_entry": 1379000,
+    "source": "Price MY2025 1,379,000–1,489,000: autolifethailand.tv/tag/innova-zenix-hybrid (4 Sep 2025, latest official list found)",
+    "collected_on": "2026-11-24"
+  },
+  "24": {
+    "price_thb_entry": 649000,
+    "adas": {
+      "aeb": true,
+      "lane_assist": true,
+      "adaptive_cruise": true
+    },
+    "source": "Price: City Big Minorchange 2026 sedan e:HEV V regular 649,000 (launch price 619,000 ended 30 Sep 2026): 9carthai.com/?p=492078, headlightmag.com/official-price-honda-city-big-minorchange-2026 · Honda SENSING on all variants: honda.co.th/en/city",
+    "collected_on": "2026-11-24"
+  },
+  "35": {
+    "price_thb_entry": 779000,
+    "adas": {
+      "aeb": true,
+      "lane_assist": true,
+      "adaptive_cruise": true
+    },
+    "source": "Price: City Hatchback e:HEV RS regular 779,000 (launch 749,000 until 30 Sep 2026): 9carthai.com/?p=492078 · Honda SENSING on all variants: honda.co.th/en/city",
+    "collected_on": "2026-11-24"
+  },
+  "28": {
+    "price_thb_entry": 959000,
+    "ground_clearance_mm": 196,
+    "source": "Price: HR-V e:HEV official 959,000–1,189,000 from 1 May 2026: autolifethailand.tv/tag/hr-v-ehev · Ground clearance: zigwheels.co.th/en/new-cars/honda/hr-v-ehev",
+    "collected_on": "2026-11-24"
+  },
+  "51": {
+    "price_thb_entry": 909900,
+    "source": "Price: M6 Dynamic 6-seat official 909,900 (Extended 6/7-seat 1,009,900) from Jan 2026: autolifethailand.tv/official-price-byd-m6-jan-2026 ; promos seen down to 769,900 (car250.com/?p=362203). Entry trim is 6 seats; 7 seats only on Extended",
+    "collected_on": "2026-11-24"
+  },
+  "70": {
+    "price_thb_entry": 795000,
+    "source": "Price: new STARGAZER Trend 6 regular 795,000 (intro 719,000, limited), Smart 6 875,000: thaipost.net/automotive-news/998904 · 6 seats",
+    "collected_on": "2026-11-24"
+  },
+  "71": {
+    "price_thb_entry": 1399000,
+    "adas": {
+      "aeb": true,
+      "lane_assist": true,
+      "adaptive_cruise": true
+    },
+    "source": "Price: EV5 Air list 1,399,000 (special 1,080,000 in Nov 2026): car250.com/kia-ev5-light-2025-3.html, kia.com/th/en/util/promotion/thekiaev5-2026.html · ADAS: headlightmag.com/?p=314928",
+    "collected_on": "2026-11-24"
+  },
+  "90": {
+    "discontinued": true,
+    "source": "GWM discontinued ORA Good Cat in Thailand (Feb 2026): thethaiger.com/guides/automotive/gwm-discontinues-good-cat-prepares-ora-5-suv-launch-for-thai-market, 9carthai.com/?p=326411",
+    "collected_on": "2026-11-24"
+  },
+  "93": {
+    "price_thb_entry": 899000,
+    "source": "Price: The New ZEEKR X 2026 from 899,000: autospinn.com/2026/06/zeekr-x-2026-official-price-and-specification-thailand-149770",
+    "collected_on": "2026-11-24"
+  },
+  "94": {
+    "price_thb_entry": 549000,
+    "ground_clearance_mm": 130,
+    "asean_ncap_stars": 0,
+    "source": "Price/ground clearance: zigwheels.co.th/en/new-cars/neta/v · ASEAN NCAP 0 stars (Dec 2024): autolifethailand.tv (tag เนต้า วี) · Brand risk: parent company Hozon bankruptcy",
+    "collected_on": "2026-11-24"
+  },
+  "112": {
+    "price_thb_entry": 2350000,
+    "ground_clearance_mm": 220,
+    "cargo_l": 291,
+    "adas": {
+      "aeb": true,
+      "lane_assist": true,
+      "adaptive_cruise": true
+    },
+    "source": "Price 2.0i-S EyeSight AWD (CBU Japan) 2,350,000, 8 airbags, ground clearance 220 mm, ADAS: headlightmag.com/?p=335298 (23 Mar 2026) · Cargo 291 L: carlist.my 2026 Crosstrek launch article",
+    "collected_on": "2026-11-24"
+  },
+  "118": {
+    "price_thb_entry": 1189000,
+    "source": "Price: XPENG G6 Standard Range RWD 1,189,000 (Nov 2025): autospinn.com/2025/11/xpeng-g6-standard-range-2025-2026-146146",
+    "collected_on": "2026-11-24"
+  },
+  "22": {
+    "price_thb_entry": 599000,
+    "adas": {
+      "aeb": true,
+      "lane_assist": true,
+      "adaptive_cruise": true
+    },
+    "source": "Price: City 2026 sedan TURBO S regular 599,000 (launch 569,000 until 30 Sep 2026): 9carthai.com/?p=492078 · Honda SENSING on all variants: honda.co.th/en/city",
+    "collected_on": "2026-11-24"
+  },
+  "32": {
+    "price_thb_entry": 915000,
+    "ground_clearance_mm": 209,
+    "source": "Price 915,000–973,000, 7 seats, ground clearance 209 mm: zigwheels.co.th/new-cars/honda/br-v · Honda SENSING all variants: autolifethailand.tv/tag/brv",
+    "collected_on": "2026-11-24"
+  },
+  "8": {
+    "price_thb_entry": 795000,
+    "source": "Price: official 795,000 base (autolifethailand.tv/tag/โตโยต้า-เวลอซ, Nov 2023 list; car250.com 2026 says petrol Veloz now ~790–870k and being cleared ahead of a hybrid)",
+    "collected_on": "2026-11-24"
   }
 }
