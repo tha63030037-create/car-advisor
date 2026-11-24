@@ -15,7 +15,7 @@
     }
   },
   "83": {
-    "price_thb_entry": 799900,
+    "price_thb_entry": 669900,
     "ground_clearance_mm": 150,
     "isofix": true,
     "adas": {
@@ -25,8 +25,8 @@
       "parking_sensors": true,
       "camera_360": true
     },
-    "source": "Price updated 24 Nov: Atto 3 Premium 799,900 before the Motor Show 2026 cut to 669,900 (autospinn.com/2026/03/car-ev-byd-motor-show-2026-price-148118); replaces the Jan 2025 figure 899,900 · Safety/ADAS: reverautomotive.com/en/model/newatto3/tech-spec · Ground clearance: zigwheels.co.th/new-cars/byd/atto-3/specifications",
-    "collected_on": "2026-11-24"
+    "source": "Price 669,900 — after BYD's 2026 price cut (was 799,900): car250.com/?p=292626 (BYD price table, updated 19 May 2026) · Earlier: Price updated 24 Nov: Atto 3 Premium 799,900 before the Motor Show 2026 cut to 669,900 (autospinn.com/2026/03/car-ev-byd-motor-show-2026-price-148118); replaces the Jan 2025 figure 899,900 · Safety/ADAS: reverautomotive.com/en/model/newatto3/tech-spec · Ground clearance: zigwheels.co.th/new-cars/byd/atto-3/specifications",
+    "collected_on": "2026-11-25"
   },
   "96": {
     "price_thb_entry": 769900,
@@ -55,11 +55,11 @@
     "collected_on": "2026-11-23"
   },
   "78": {
-    "price_thb_entry": 709900,
+    "price_thb_entry": 599900,
     "ground_clearance_mm": 117,
     "isofix": true,
-    "source": "Price/ground clearance: headlightmag.com/?p=289415 (Standard Range D 709,900; 117 mm) · ISOFIX: whichcar.com.au 2024 MG4 review (global spec)",
-    "collected_on": "2026-11-23"
+    "source": "Price 599,900 — MG4 Electric MY2026 D Standard: car250.com/?p=70714 (MG price list, 10 Apr 2026) · Earlier: Price/ground clearance: headlightmag.com/?p=289415 (Standard Range D 709,900; 117 mm) · ISOFIX: whichcar.com.au 2024 MG4 review (global spec)",
+    "collected_on": "2026-11-25"
   },
   "1": {
     "price_thb_entry": 569000,
@@ -101,9 +101,9 @@
     "asean_ncap_stars": 5
   },
   "51": {
-    "price_thb_entry": 909900,
-    "source": "Price: M6 Dynamic 6-seat official 909,900 (Extended 6/7-seat 1,009,900) from Jan 2026: autolifethailand.tv/official-price-byd-m6-jan-2026 ; promos seen down to 769,900 (car250.com/?p=362203). Entry trim is 6 seats; 7 seats only on Extended",
-    "collected_on": "2026-11-24"
+    "price_thb_entry": 769900,
+    "source": "Price 769,900 — after BYD's 2026 price cut (Jan list was 909,900); M6 Dynamic is 6 seats: car250.com/?p=292626 (BYD price table, updated 19 May 2026) · Earlier: Price: M6 Dynamic 6-seat official 909,900 (Extended 6/7-seat 1,009,900) from Jan 2026: autolifethailand.tv/official-price-byd-m6-jan-2026 ; promos seen down to 769,900 (car250.com/?p=362203). Entry trim is 6 seats; 7 seats only on Extended",
+    "collected_on": "2026-11-25"
   },
   "70": {
     "price_thb_entry": 795000,
@@ -191,5 +191,558 @@
     "price_thb_entry": 579900,
     "source": "Price: ALL NEW MG3 HYBRID+ D 579,900 / X 619,000: telecomlover.com/?p=93181; official 579,900–619,900: autolifethailand.tv/tag/ราคา-mg-3",
     "collected_on": "2026-11-24"
+  },
+  "2": {
+    "price_thb_entry": 584000,
+    "source": "Price 584,000: car250.com/?p=446253 (Toyota all-model list, updated 29 Aug 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "3": {
+    "price_thb_entry": 809000,
+    "source": "Price 809,000: car250.com/?p=446253 (Toyota all-model list, updated 29 Aug 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "4": {
+    "price_thb_entry": 909000,
+    "source": "Price 909,000 — MY2026 drops the 1.6; 1.8G is the entry trim: car250.com/?p=446253 (Toyota all-model list, updated 29 Aug 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "6": {
+    "price_thb_entry": 989000,
+    "source": "Price 989,000 — Corolla Cross is sold as HEV only in 2026: car250.com/?p=446253 (Toyota all-model list, updated 29 Aug 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "7": {
+    "price_thb_entry": 1475000,
+    "source": "Price 1,475,000: car250.com/?p=446253 (Toyota all-model list, updated 29 Aug 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "12": {
+    "price_thb_entry": 1239000,
+    "source": "Price 1,239,000 — entry of the Fortuner line (Leader): car250.com/?p=446253 (Toyota all-model list, updated 29 Aug 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "14": {
+    "price_thb_entry": 584000,
+    "source": "Price 584,000 — Revo kept in base/fleet trims; Hilux TRAVO is the successor: car250.com/?p=446253 (Toyota all-model list, updated 29 Aug 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "17": {
+    "price_thb_entry": 519000,
+    "source": "Price 519,000: car250.com/?p=446253 (Toyota all-model list, updated 29 Aug 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "18": {
+    "price_thb_entry": 2999000,
+    "source": "Price 2,999,000: car250.com/?p=446253 (Toyota all-model list, updated 29 Aug 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "19": {
+    "price_thb_entry": 3499000,
+    "source": "Price 3,499,000: car250.com/?p=446253 (Toyota all-model list, updated 29 Aug 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "21": {
+    "price_thb_entry": 4269000,
+    "source": "Price 4,269,000: car250.com/?p=446253 (Toyota all-model list, updated 29 Aug 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "106": {
+    "price_thb_entry": 4199000,
+    "source": "Price 4,199,000: car250.com/?p=446253 (Toyota all-model list, updated 29 Aug 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "9": {
+    "price_thb_entry": 1149000,
+    "source": "Price 1,149,000: 9carthai.com/tesla-price/ (30 Mar 2026; detailed sections: Model 3 Standard RWD 1,149,000, Model Y RWD 1,719,000 — the page's summary list shows older figures)",
+    "collected_on": "2026-11-25"
+  },
+  "20": {
+    "price_thb_entry": 1719000,
+    "source": "Price 1,719,000: 9carthai.com/tesla-price/ (30 Mar 2026; detailed sections: Model 3 Standard RWD 1,149,000, Model Y RWD 1,719,000 — the page's summary list shows older figures)",
+    "collected_on": "2026-11-25"
+  },
+  "23": {
+    "price_thb_entry": 599000,
+    "source": "Price 599,000 — City Hatchback S regular 599,000 (launch 579,000): 9carthai.com/honda-price/ (updated 1 Oct 2026; regular price, launch promo noted separately)",
+    "collected_on": "2026-11-25"
+  },
+  "25": {
+    "price_thb_entry": 949000,
+    "source": "Price 949,000 — Thai Civic is now e:HEV; consumption is an estimate: 9carthai.com/honda-price/ (updated 1 Oct 2026; regular price, launch promo noted separately)",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "27": {
+    "price_thb_entry": 3990000,
+    "source": "Price 3,990,000: 9carthai.com/honda-price/ (updated 1 Oct 2026; regular price, launch promo noted separately)",
+    "collected_on": "2026-11-25"
+  },
+  "29": {
+    "price_thb_entry": 959000,
+    "source": "Price 959,000 — autolifethailand.tv/tag/hr-v-ehev: 959,000–1,189,000 from 1 May 2026 (9carthai shows 899,000 for E; the dated official list wins): 9carthai.com/honda-price/ (updated 1 Oct 2026; regular price, launch promo noted separately) · (moved from duplicate id 28) Price: HR-V e:HEV official 959,000–1,189,000 from 1 May 2026: autolifethailand.tv/tag/hr-v-ehev · Ground clearance: zigwheels.co.th/en/new-cars/honda/hr-v-ehev · ASEAN NCAP 5 stars, 81.38 pts (Sep 2022): aseancap.org/v4/wp-json/wp/v2/posts/5692",
+    "collected_on": "2026-11-25",
+    "ground_clearance_mm": 196,
+    "asean_ncap_stars": 5
+  },
+  "31": {
+    "price_thb_entry": 1409000,
+    "source": "Price 1,409,000: 9carthai.com/honda-price/ (updated 1 Oct 2026; regular price, launch promo noted separately)",
+    "collected_on": "2026-11-25"
+  },
+  "34": {
+    "price_thb_entry": 1479000,
+    "source": "Price 1,479,000: 9carthai.com/honda-price/ (updated 1 Oct 2026; regular price, launch promo noted separately)",
+    "collected_on": "2026-11-25"
+  },
+  "36": {
+    "price_thb_entry": 529000,
+    "source": "Price 529,000: 9carthai.com/mazda-price/ (7 Oct 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "37": {
+    "price_thb_entry": 529000,
+    "source": "Price 529,000: 9carthai.com/mazda-price/ (7 Oct 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "38": {
+    "price_thb_entry": 979000,
+    "source": "Price 979,000 — regular 979,000 (promo 859,000): 9carthai.com/mazda-price/ (7 Oct 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "40": {
+    "price_thb_entry": 899000,
+    "source": "Price 899,000 — CX-30 Essential 2.0 Prime: 9carthai.com/mazda-price/ (7 Oct 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "41": {
+    "price_thb_entry": 1219000,
+    "source": "Price 1,219,000: 9carthai.com/mazda-price/ (7 Oct 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "42": {
+    "price_thb_entry": 1499000,
+    "source": "Price 1,499,000: 9carthai.com/mazda-price/ (7 Oct 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "44": {
+    "price_thb_entry": 992000,
+    "source": "Price 992,000 — Double Cab Hi-Racer 2.2 XT 6AT (entry Freestyle Cab 762,000): 9carthai.com/mazda-price/ (7 Oct 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "45": {
+    "price_thb_entry": 2820000,
+    "source": "Price 2,820,000 — MX-5 2.0 RF: 9carthai.com/mazda-price/ (7 Oct 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "46": {
+    "price_thb_entry": 573000,
+    "source": "Price 573,000: 9carthai.com/nissan-price/ (2 Jun 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "48": {
+    "price_thb_entry": 839000,
+    "source": "Price 839,000 — new-generation Kicks e-POWER (Motor Show 2026): checkraka.com/car/nissan (Kicks e-POWER 2026: V 839,000)",
+    "collected_on": "2026-11-25"
+  },
+  "49": {
+    "price_thb_entry": 792000,
+    "source": "Price 792,000 — Double Cab Calibre SL 6MT: 9carthai.com/nissan-price/ (2 Jun 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "50": {
+    "price_thb_entry": 1199000,
+    "source": "Price 1,199,000: 9carthai.com/nissan-price/ (2 Jun 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "52": {
+    "price_thb_entry": 1690000,
+    "source": "Price 1,690,000: 9carthai.com/nissan-price/ (2 Jun 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "53": {
+    "price_thb_entry": 561000,
+    "source": "Price 561,000: 9carthai.com/isuzu-price/ (5 Nov 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "54": {
+    "price_thb_entry": 940000,
+    "source": "Price 940,000: 9carthai.com/isuzu-price/ (5 Nov 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "55": {
+    "price_thb_entry": 1197000,
+    "source": "Price 1,197,000: 9carthai.com/isuzu-price/ (5 Nov 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "56": {
+    "price_thb_entry": 727000,
+    "source": "Price 727,000 — Double Cab 2.4 PRO: 9carthai.com/mitsubishi-price (19 Oct 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "57": {
+    "price_thb_entry": 1299000,
+    "source": "Price 1,299,000: 9carthai.com/mitsubishi-price (19 Oct 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "59": {
+    "price_thb_entry": 939000,
+    "source": "Price 939,000 — Xpander is sold as HEV only: 9carthai.com/mitsubishi-price (19 Oct 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "60": {
+    "price_thb_entry": 969000,
+    "source": "Price 969,000 — Xpander Cross is sold as HEV only: 9carthai.com/mitsubishi-price (19 Oct 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "61": {
+    "price_thb_entry": 564000,
+    "source": "Price 564,000: 9carthai.com/mitsubishi-price (19 Oct 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "63": {
+    "price_thb_entry": 567000,
+    "source": "Price 567,000: 9carthai.com/suzuki-price/ (7 Jul 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "69": {
+    "price_thb_entry": 929000,
+    "source": "Price 929,000: 9carthai.com/hyundai-price/ (16 Sep 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "110": {
+    "price_thb_entry": 1399000,
+    "source": "Price 1,399,000: 9carthai.com/hyundai-price/ (16 Sep 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "122": {
+    "price_thb_entry": 1999000,
+    "source": "Price 1,999,000: 9carthai.com/hyundai-price/ (16 Sep 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "102": {
+    "price_thb_entry": 3390000,
+    "source": "Price 3,390,000 — XC60 Ultra T8 PHEV: 9carthai.com/volvo-price/ (updated 4 Jun 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "92": {
+    "price_thb_entry": 1099000,
+    "source": "Price 1,099,000 — page also shows 1,119,000 in a later list: 9carthai.com/deepal-price/ (24 Feb 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "97": {
+    "price_thb_entry": 799900,
+    "source": "Price 799,900: 9carthai.com/aion-price/ (31 Mar 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "119": {
+    "price_thb_entry": 1249000,
+    "source": "Price 1,249,000: 9carthai.com/aion-price/ (31 Mar 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "108": {
+    "price_thb_entry": 2399000,
+    "source": "Price 2,399,000 — 009 7-seat single motor: 9carthai.com/zeekr-price/ (4 May 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "82": {
+    "price_thb_entry": 509900,
+    "source": "Price 509,900: car250.com/?p=292626 (BYD price table, updated 19 May 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "84": {
+    "price_thb_entry": 989900,
+    "source": "Price 989,900: car250.com/?p=292626 (BYD price table, updated 19 May 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "85": {
+    "price_thb_entry": 859900,
+    "source": "Price 859,900: car250.com/?p=292626 (BYD price table, updated 19 May 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "114": {
+    "price_thb_entry": 1199900,
+    "source": "Price 1,199,900: car250.com/?p=292626 (BYD price table, updated 19 May 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "116": {
+    "price_thb_entry": 1399900,
+    "source": "Price 1,399,900: car250.com/?p=70714 (MG price list, 10 Apr 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "117": {
+    "price_thb_entry": 1799000,
+    "source": "Price 1,799,000: car250.com/?p=70714 (MG price list, 10 Apr 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "91": {
+    "price_thb_entry": 1549000,
+    "source": "Price 1,549,000: 9carthai.com/?p=456278 (GWM Tank prices, 24 Feb 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "86": {
+    "price_thb_entry": 2299000,
+    "source": "Price 2,299,000: autolifethailand.tv (AVATR 11 MY2026 official 2,299,000–2,499,000, 18 Jul 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "98": {
+    "price_thb_entry": 1379000,
+    "source": "Price 1,379,000: 9carthai.com/ford-price/ (20 May 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "99": {
+    "price_thb_entry": 939000,
+    "source": "Price 939,000 — Double Cab XLS 2.0L Turbo HR: 9carthai.com/ford-price/ (20 May 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "100": {
+    "price_thb_entry": 1804000,
+    "source": "Price 1,804,000 — entry Raptor is the 2.0L bi-turbo diesel: 9carthai.com/ford-price/ (20 May 2026)",
+    "collected_on": "2026-11-25"
+  },
+  "126": {
+    "price_thb_entry": 1529000,
+    "source": "New model added 25 Nov 2026. Price 1,529,000: car250.com/?p=446253 (Toyota all-model list, updated 29 Aug 2026). · Specs: FWD 224 PS, 1,529,000 per Toyota Thailand site: paultan.org/2026/03/25/2026-toyota-bz4x-facelift-in-bangkok Not yet verified: airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "127": {
+    "price_thb_entry": 1269000,
+    "source": "New model added 25 Nov 2026. Price 1,269,000 — made in Thailand, 2.7 petrol 4WD: car250.com/?p=446253 (Toyota all-model list, updated 29 Aug 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "128": {
+    "price_thb_entry": 767000,
+    "source": "New model added 25 Nov 2026. Price 767,000 — successor to Hilux Revo: car250.com/?p=446253 (Toyota all-model list, updated 29 Aug 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "129": {
+    "price_thb_entry": 1199000,
+    "source": "New model added 25 Nov 2026. Price 1,199,000: 9carthai.com/honda-price/ (updated 1 Oct 2026; regular price, launch promo noted separately). Not yet verified: horsepower, airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "130": {
+    "price_thb_entry": 1169000,
+    "source": "New model added 25 Nov 2026. Price 1,169,000 — CBU China, 654 km NEDC: 9carthai.com/mazda-price/ (7 Oct 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "131": {
+    "price_thb_entry": 1259000,
+    "source": "New model added 25 Nov 2026. Price 1,259,000: 9carthai.com/mazda-price/ (7 Oct 2026). · Specs: RWD 258 PS, 77.9 kWh, 555 km NEDC; 168 Wh/km WLTP: car250.com/new-mazda-cx-6e-suv-2026-th.html, electrive.com/2026/10/19; cargo 468 L: 9carthai.com/?p=504141 Not yet verified: airbags, warranty",
+    "collected_on": "2026-11-25",
+    "cargo_l": 468
+  },
+  "132": {
+    "price_thb_entry": 899000,
+    "source": "New model added 25 Nov 2026. Price 899,000 — 24.4 km/l and 7-yr/150,000 km warranty: car250.com/price/new-mitsubishi: 9carthai.com/mitsubishi-price (19 Oct 2026). Not yet verified: horsepower, airbags",
+    "collected_on": "2026-11-25"
+  },
+  "133": {
+    "price_thb_entry": 1640000,
+    "source": "New model added 25 Nov 2026. Price 1,640,000: 9carthai.com/mitsubishi-price (19 Oct 2026). · Specs: 302 hp combined, 22.7 kWh battery: topgear.com.ph (PIMS 2026). Consumption set conservatively to 16 km/l (charge-depleted, no Thai figure found) so plug-in savings are not overstated Not yet verified: airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "134": {
+    "price_thb_entry": 689000,
+    "source": "New model added 25 Nov 2026. Price 689,000: 9carthai.com/suzuki-price/ (7 Jul 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "135": {
+    "price_thb_entry": 799000,
+    "source": "New model added 25 Nov 2026. Price 799,000 — S05 LITE BEV: 9carthai.com/deepal-price/ (24 Feb 2026). · Specs: 6 airbags (front, side, curtain), ground clearance 169 mm, cargo 492 L: autodeal.com.ph Deepal S05 comparison Not yet verified: horsepower, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ],
+    "ground_clearance_mm": 169,
+    "cargo_l": 492
+  },
+  "136": {
+    "price_thb_entry": 469900,
+    "source": "New model added 25 Nov 2026. Price 469,900: 9carthai.com/aion-price/ (31 Mar 2026). · Specs: 100 kW, 11.4 kWh/100 km CLTC: data.carnewschina.com/database/aion/aion-ut (x0.75 real-world factor); cargo 440 L, battery/drive warranty 8 yr/200,000 km: headlightmag.com/?p=297487 Not yet verified: airbags",
+    "collected_on": "2026-11-25",
+    "cargo_l": 440
+  },
+  "137": {
+    "price_thb_entry": 1399000,
+    "source": "New model added 25 Nov 2026. Price 1,399,000: 9carthai.com/zeekr-price/ (4 May 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "138": {
+    "price_thb_entry": 429900,
+    "source": "New model added 25 Nov 2026. Price 429,900: car250.com/?p=292626 (BYD price table, updated 19 May 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "139": {
+    "price_thb_entry": 629900,
+    "source": "New model added 25 Nov 2026. Price 629,900: car250.com/?p=292626 (BYD price table, updated 19 May 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "140": {
+    "price_thb_entry": 599900,
+    "source": "New model added 25 Nov 2026. Price 599,900 — plug-in hybrid: car250.com/?p=292626 (BYD price table, updated 19 May 2026). Not yet verified: horsepower, airbags, warranty",
+    "collected_on": "2026-11-25"
+  },
+  "141": {
+    "price_thb_entry": 759900,
+    "source": "New model added 25 Nov 2026. Price 759,900 — plug-in hybrid: car250.com/?p=292626 (BYD price table, updated 19 May 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "142": {
+    "price_thb_entry": 799900,
+    "source": "New model added 25 Nov 2026. Price 799,900: car250.com price/ราคา-byd (Seal 6 Standard 799,900, 6 Jul 2026). · Specs: Standard 46.08 kWh / 410 km NEDC (x0.75), regular 799,900: car250.com/new-byd-seal-6-th-2026-10.html; ACC, AEB, lane keep: reverautomotive.com/en/model/seal6/tech-spec Not yet verified: horsepower, airbags, warranty",
+    "collected_on": "2026-11-25",
+    "adas": {
+      "aeb": true,
+      "lane_assist": true,
+      "adaptive_cruise": true
+    }
+  },
+  "143": {
+    "price_thb_entry": 1949900,
+    "source": "New model added 25 Nov 2026. Price 1,949,900: car250.com/?p=292626 (BYD price table, updated 19 May 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "144": {
+    "price_thb_entry": 649900,
+    "source": "New model added 25 Nov 2026. Price 649,900: car250.com/?p=70714 (MG price list, 10 Apr 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "145": {
+    "price_thb_entry": 1449000,
+    "source": "New model added 25 Nov 2026. Price 1,449,000 — 860 km NEDC, 100 kWh: car250.com/?p=70714 (MG price list, 10 Apr 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "146": {
+    "price_thb_entry": 549900,
+    "source": "New model added 25 Nov 2026. Price 549,900: car250.com (MG URBAN 549,900–729,900, 4 Aug 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "147": {
+    "price_thb_entry": 1049000,
+    "source": "New model added 25 Nov 2026. Price 1,049,000: 9carthai.com/?p=456278 (GWM Tank prices, 24 Feb 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "148": {
+    "price_thb_entry": 649000,
+    "source": "New model added 25 Nov 2026. Price 649,000: car250.com (GWM ORA 5 EV 649,000–719,000, 11 May 2026); pptvhd36.com/automotive/news/271555 (ORA 5 HEV Pro 709,000). Not yet verified: horsepower, airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "149": {
+    "price_thb_entry": 709000,
+    "source": "New model added 25 Nov 2026. Price 709,000: car250.com (GWM ORA 5 EV 649,000–719,000, 11 May 2026); pptvhd36.com/automotive/news/271555 (ORA 5 HEV Pro 709,000). Not yet verified: horsepower, airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "150": {
+    "price_thb_entry": 2399000,
+    "source": "New model added 25 Nov 2026. Price 2,399,000: en.thairath.co.th/news/auto/2921643 (New XPENG X9 Premium 2,399,000, Mar 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "151": {
+    "price_thb_entry": 429990,
+    "source": "New model added 25 Nov 2026. Price 429,990: autolifethailand.tv/tag/geely-ex2 (EX2 official 429,990–459,990); autolifethailand.tv/tag/geely-ex5 (EX5 official 759,000–929,000 from 5 May 2026). · Specs: 85 kW motor, 39.4 kWh / 355 km (≈310 km real-world): en.thairath.co.th/news/auto/2916423, thedriven.io; ground clearance 161 mm, cargo 375 L, warranty 6 yr/150,000 km: headlightmag.com/?p=323594. Consumption = NEDC range/battery x 0.75 (same real-world factor as the other EVs). Not yet verified: airbags",
+    "collected_on": "2026-11-25",
+    "ground_clearance_mm": 161,
+    "cargo_l": 375
+  },
+  "152": {
+    "price_thb_entry": 759000,
+    "source": "New model added 25 Nov 2026. Price 759,000 — ground clearance 173 mm, cargo 461 L: headlightmag.com/?p=336644: autolifethailand.tv/tag/geely-ex2 (EX2 official 429,990–459,990); autolifethailand.tv/tag/geely-ex5 (EX5 official 759,000–929,000 from 5 May 2026). Not yet verified: horsepower, airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ],
+    "ground_clearance_mm": 173,
+    "cargo_l": 461
+  },
+  "153": {
+    "price_thb_entry": 469900,
+    "source": "New model added 25 Nov 2026. Price 469,900 — 6 airbags, 360 camera: 9carthai.com/?p=480322: car250.com/chery-q-ev-2026-11.html (Chery Q QLICK 469,900 regular); thansettakij.com/motor/654699 (V23 759,900). Not yet verified: consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "154": {
+    "price_thb_entry": 759900,
+    "source": "New model added 25 Nov 2026. Price 759,900: car250.com/chery-q-ev-2026-11.html (Chery Q QLICK 469,900 regular); thansettakij.com/motor/654699 (V23 759,900). Not yet verified: horsepower, airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "155": {
+    "price_thb_entry": 629000,
+    "source": "New model added 25 Nov 2026. Price 629,000 — launch price; 211 hp, 422 km: pptvhd36.com/automotive/news/271609 (OMODA C5 EV MAX+ launch price 629,000, Motor Show 2026); 9carthai.com EV price list (JAECOO 5 EV 549,000). Not yet verified: airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
+  },
+  "156": {
+    "price_thb_entry": 549000,
+    "source": "New model added 25 Nov 2026. Price 549,000 — assembled in Thailand: pptvhd36.com/automotive/news/271609 (OMODA C5 EV MAX+ launch price 629,000, Motor Show 2026); 9carthai.com EV price list (JAECOO 5 EV 549,000). Not yet verified: horsepower, airbags, consumption, warranty",
+    "collected_on": "2026-11-25",
+    "estimated": [
+      "economy"
+    ]
   }
 }

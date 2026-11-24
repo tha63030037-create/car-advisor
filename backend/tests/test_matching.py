@@ -85,7 +85,7 @@ def test_too_few_results_reports_biggest_filter():
 
 # ---- ranking behaviour the demo relies on
 def test_moving_budget_card_changes_ranking():
-    base = dict(budget=800000, budget_stretch=0.2, lifestyles=["city"], top_n=5)
+    base = dict(budget=800000, budget_stretch=0.2, lifestyles=["city"], top_n=10)
     a = recommend(Criteria(priorities=Priorities(budget=3, lifestyle=2, running_cost=2, safety=2, design=1), **base))
     b = recommend(Criteria(priorities=Priorities(budget=1, lifestyle=2, running_cost=2, safety=3, design=3), **base))
     assert [r["id"] for r in a["results"]] != [r["id"] for r in b["results"]]
