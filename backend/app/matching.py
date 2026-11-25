@@ -390,6 +390,12 @@ def recommend(c, cars=None):
     costs = {car["id"]: annual_cost(car, c.km_per_year) for car in passed}
     lo, hi = cost_scale(c.km_per_year)
 
+    # a wanted body type that no car within the filters has (e.g. a coupe on a 1.5M budget) would give
+    # every car 0 and only drown out the brand taste: leave it out and say so in preference_notes
+    body_pref = c.body_preferred
+    if body_pref and len({score_design(car, body_pref) for car in passed}) <= 1:
+        body_pref = []
+
     rows = []
     for car in passed:
         s_budget = score_budget(car["price"], c.budget, c.budget_stretch)
@@ -404,7 +410,7 @@ def recommend(c, cars=None):
             "lifestyle": s_life,
             "running_cost": s_cost,
             "safety": score_safety(car),
-            "design": score_design(car, c.body_preferred, c.brand_preferred),
+            "design": score_design(car, body_pref, c.brand_preferred),
         }
         # A criterion with unknown data is skipped for this car: re-normalise the remaining weights.
         usable = {k: w for k, w in weights.items() if scores[k] is not None}
@@ -442,7 +448,7 @@ def recommend(c, cars=None):
         })
 
     # criteria the user gave no input for (no lifestyle / no body type) are left out for every car
-    inactive = [k for k in cfg.CRITERIA if (k == "lifestyle" and not c.lifestyles) or (k == "design" and not c.body_preferred and not c.brand_preferred)]
+    inactive = [k for k in cfg.CRITERIA if (k == "lifestyle" and not c.lifestyles) or (k == "design" and not body_pref and not c.brand_preferred)]
     active_w = {k: w for k, w in weights.items() if k not in inactive}
     aw = sum(active_w.values()) or 1.0
 
