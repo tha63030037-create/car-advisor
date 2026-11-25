@@ -55,15 +55,20 @@ FEATURE_TH = {
     "highway_economy": "ประหยัดนอกเมือง",
     "cargo_work": "ท้ายรถหรือกระบะขนของได้",
     "low_maintenance": "ค่าบำรุงรักษาต่ำ",
+    "lane_assist": "ระบบช่วยรักษาเลน",
 }
+# Feature -> weight inside each lifestyle (revised 26 Nov 2026). The defining feature counts more
+# (a pickup bed for work, ground clearance for camping). Fuel economy and maintenance cost were taken
+# out of the lifestyles because the running-cost card already scores them: counting them twice made
+# every EV win every lifestyle.
 LIFESTYLE_FEATURES = {
-    "school_run": ["isofix", "compact", "city_economy", "aeb"],
-    "camping": ["ground_clearance", "cargo_large", "roof_rails", "four_wd"],
-    "merit_family": ["seven_seats", "easy_entry", "rear_ac"],
-    "pets": ["fold_flat", "cargo_large", "rear_ac"],
-    "city": ["compact", "city_economy", "parking_aid"],
-    "long_trips": ["adaptive_cruise", "highway_economy", "cargo_large"],
-    "work_cargo": ["cargo_work", "fold_flat", "low_maintenance"],
+    "school_run": {"isofix": 1, "compact": 1, "aeb": 1},
+    "camping": {"ground_clearance": 2, "cargo_large": 1, "roof_rails": 1, "four_wd": 1},
+    "merit_family": {"seven_seats": 2, "easy_entry": 1, "rear_ac": 1},
+    "pets": {"cargo_large": 1, "fold_flat": 1, "rear_ac": 1},
+    "city": {"compact": 2, "parking_aid": 1},
+    "long_trips": {"adaptive_cruise": 1, "lane_assist": 1, "cargo_large": 1},
+    "work_cargo": {"cargo_work": 3, "fold_flat": 1},
 }
 
 # 4.5 Running cost assumptions
@@ -87,6 +92,22 @@ BODY_SIMILAR = {
     "mpv": ["suv", "ppv"],
     "pickup": ["ppv"],
 }
+
+# 4.4 (revised 26 Nov 2026) continuous feature scales: value at which a feature scores 0 and 1.
+# Replaces yes/no thresholds, which put most cars on 0, .33, .67 or 1 and produced ties.
+COMPACT_LENGTH_MM = (4750, 4300)     # >= 4.75 m scores 0, <= 4.30 m scores 1 (easy to park in Bangkok)
+CITY_COST_PER_KM = (2.6, 1.2)        # energy baht/km: >= 2.6 scores 0, <= 1.2 scores 1
+HIGHWAY_COST_PER_KM = (2.6, 1.2)
+CARGO_LARGE_L = (250, 500)
+CARGO_WORK_L_RANGE = (300, 900)   # a boot never matches a pickup bed (bed = 1)
+GROUND_MM = (150, 210)
+MAINT_5Y_THB = (60000, 25000)
+# Safety: a car with no ASEAN NCAP result is treated as a middle result (3 of 5 stars) — never as 0,
+# and never better than a car that was tested and scored 4-5 stars.
+NCAP_UNKNOWN_STARS = 3
+# Running cost is scored on a fixed scale taken from the whole catalogue (5th-95th percentile of
+# yearly cost), so a car's score no longer changes when other cars are filtered in or out.
+COST_SCALE_PERCENTILES = (5, 95)
 
 MIN_RESULTS = 3
 DEFAULT_TOP_N = 10

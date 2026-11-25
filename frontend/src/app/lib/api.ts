@@ -41,6 +41,9 @@ export interface Result {
 
 export interface RecommendResponse {
   weights_pct: Record<Key, number>;
+  /** criteria the user gave no input for (no lifestyle / no body type); left out of every score */
+  inactive_criteria?: Key[];
+  effective_weights_pct?: Record<Key, number>;
   total_cars: number;
   passed_filters: number;
   results: Result[];

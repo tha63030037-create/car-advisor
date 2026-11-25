@@ -86,10 +86,18 @@ export default function Advisor() {
   const lastRanks = useRef<Record<number, number>>({});
 
   // live weights preview (same formula as the backend: points / total)
+  // a card the visitor gave no input for (no lifestyle / no body type) is left out, same as the backend
+  const inactive = useMemo(() => {
+    const out: Key[] = [];
+    if (lifestyles.length === 0) out.push("lifestyle");
+    if (bodies.length === 0) out.push("design");
+    return out;
+  }, [lifestyles, bodies]);
   const weights = useMemo(() => {
-    const total = CARDS.reduce((s, c) => s + zones[c.key], 0);
-    return Object.fromEntries(CARDS.map((c) => [c.key, Math.round((100 * zones[c.key]) / total)])) as Record<Key, number>;
-  }, [zones]);
+    const total = CARDS.reduce((s, c) => s + (inactive.includes(c.key) ? 0 : zones[c.key]), 0) || 1;
+    return Object.fromEntries(CARDS.map((c) => [c.key, inactive.includes(c.key) ? 0 : Math.round((100 * zones[c.key]) / total)])) as Record<Key, number>;
+  }, [zones, inactive]);
+  const wLabel = (k: Key) => (inactive.includes(k) ? "ไม่นับ" : `${weights[k]}%`);
 
   const criteria = useMemo(() => ({
     budget: budgetK * 1000,
@@ -281,7 +289,7 @@ export default function Advisor() {
                     <div key={c.key} style={{ width: `${weights[c.key]}%`, background: CRIT_COLOR[c.key] }} title={`${c.label} ${weights[c.key]}%`} />
                   ))}
                 </div>
-                <div className="legend">{CARDS.map((c) => <span key={c.key}><i style={{ background: CRIT_COLOR[c.key] }} />{c.label} {weights[c.key]}%</span>)}</div>
+                <div className="legend">{CARDS.map((c) => <span key={c.key}><i style={{ background: CRIT_COLOR[c.key] }} />{c.label} {wLabel(c.key)}</span>)}</div>
               </div>}
             </div>
           )}
@@ -316,7 +324,7 @@ export default function Advisor() {
                     >
                       <span className="ic">{c.icon}</span>
                       <span className="cl">{c.label}</span>
-                      <span className="cw" style={{ color: CRIT_COLOR[c.key] }}>{weights[c.key]}%</span>
+                      <span className="cw" style={{ color: inactive.includes(c.key) ? "var(--muted)" : CRIT_COLOR[c.key] }} title={inactive.includes(c.key) ? (c.key === "design" ? "ยังไม่ได้เลือกทรงรถในข้อ 5 จึงไม่นับเกณฑ์นี้" : "ยังไม่ได้เลือกไลฟ์สไตล์ จึงไม่นับเกณฑ์นี้") : undefined}>{wLabel(c.key)}</span>
                     </button>
                   ))}
                   {CARDS.every((c) => zones[c.key] !== z) && <span className="empty">วางการ์ดที่นี่</span>}
@@ -469,8 +477,8 @@ export default function Advisor() {
                           {CARDS.map((c) => (
                             <tr key={c.key}>
                               <td>{c.icon} {c.label}</td>
-                              <td>{r.criteria[c.key] === null ? "ไม่มีข้อมูล" : `${Math.round((r.criteria[c.key] as number) * 100)}/100`}</td>
-                              <td>น้ำหนัก {weights[c.key]}%</td>
+                              <td>{inactive.includes(c.key) ? "ไม่ได้เลือก" : r.criteria[c.key] === null ? "ไม่มีข้อมูล" : `${Math.round((r.criteria[c.key] as number) * 100)}/100`}</td>
+                              <td>น้ำหนัก {wLabel(c.key)}</td>
                               <td><b>+{r.contribution[c.key] ?? 0}</b></td>
                             </tr>
                           ))}

@@ -25,7 +25,7 @@ export default function CarPage({ params }: { params: { id: string } }) {
   const id = Number(params.id);
   const [car, setCar] = useState<CarDetail | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [fit, setFit] = useState<{ r: Result; total: number; weights: RecommendResponse["weights_pct"] } | null>(null);
+  const [fit, setFit] = useState<{ r: Result; total: number; weights: RecommendResponse["weights_pct"]; inactive: string[] } | null>(null);
   const [fitState, setFitState] = useState<"none" | "loading" | "filtered" | "ok">("none");
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function CarPage({ params }: { params: { id: string } }) {
     postJSON<RecommendResponse>("/api/v2/recommend", { ...c, top_n: 200 })
       .then((resp) => {
         const r = resp.results.find((x) => x.id === id);
-        if (r) { setFit({ r, total: resp.passed_filters, weights: resp.weights_pct }); setFitState("ok"); }
+        if (r) { setFit({ r, total: resp.passed_filters, weights: resp.effective_weights_pct || resp.weights_pct, inactive: resp.inactive_criteria || [] }); setFitState("ok"); }
         else setFitState("filtered");
       })
       .catch(() => setFitState("none"));
@@ -124,7 +124,7 @@ export default function CarPage({ params }: { params: { id: string } }) {
                       <tr key={c.key}>
                         <td><i style={{ background: CRIT_COLOR[c.key] }} />{c.label}</td>
                         <td>
-                          {v === null ? <span className="muted">ไม่มีข้อมูล</span> : (
+                          {fit.inactive.includes(c.key) ? <span className="muted">ไม่ได้เลือก จึงไม่นับ</span> : v === null ? <span className="muted">ไม่มีข้อมูล</span> : (
                             <span className="bar"><span style={{ width: `${Math.round(v * 100)}%`, background: CRIT_COLOR[c.key] }} /></span>
                           )}
                         </td>

@@ -21,6 +21,7 @@ from app import matching_config as cfg
 from app.database import CARS
 
 DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "car_specs.json")
+DIM_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "car_dimensions.json")
 
 
 # ------------------------------------------------------------------ models
@@ -76,46 +77,61 @@ def _load_cars():
         if s is None:
             raise RuntimeError("car_specs.json is missing car id %s — run scripts/build_car_specs.py" % car["id"])
         merged.append(dict(car, **{k: v for k, v in s.items() if k != "id"}))
+    with open(DIM_PATH, encoding="utf-8") as f:
+        lengths = json.load(f)["length_mm"]
+    for car in merged:
+        car["length_mm"] = lengths.get(str(car["id"]))
+        if car["length_mm"] is not None:
+            car["estimated"] = list(car.get("estimated", [])) + ["length_mm"]
     return merged
 
 
-def _features(car):
-    """Boolean lifestyle features for one car; None means unknown (skipped, never 0)."""
-    def opt(x):
-        return None if x is None else bool(x)
+def _scale(x, zero, one):
+    """Linear 0-1 between the value that scores 0 and the value that scores 1 (either direction)."""
+    if x is None:
+        return None
+    t = (x - zero) / float(one - zero)
+    return round(max(0.0, min(1.0, t)), 4)
 
+
+def energy_cost_per_km(car):
     econ, fuel = car.get("economy"), car["fuelType"]
-    if econ is None:
-        city_econ = hwy_econ = None
-    elif fuel == "ev":
-        city_econ = hwy_econ = True
-    else:
-        city_econ = fuel == "hybrid" or econ >= cfg.CITY_ECON_KML
-        hwy_econ = econ >= cfg.LONG_TRIP_ECON_KML
+    if not econ:
+        return None
+    if fuel == "ev":
+        return cfg.EV_PRICE_THB_PER_KWH / econ
+    return cfg.FUEL_PRICE_THB[fuel] / econ
+
+
+def _features(car):
+    """Lifestyle features scored 0-1 for one car; None means unknown (skipped, never 0).
+    Measurable ones (length, running cost, boot, ground clearance) are continuous; equipment is yes/no."""
+    def opt(x):
+        return None if x is None else (1.0 if x else 0.0)
+
+    per_km = energy_cost_per_km(car)
     cargo, bed = car.get("cargo_l"), car.get("has_cargo_bed")
-    cargo_large = True if bed else (None if cargo is None else cargo >= cfg.CARGO_OK_L)
-    cargo_work = True if bed else (None if cargo is None else cargo >= cfg.CARGO_WORK_L)
     adas = car.get("adas") or {}
-    gc = car.get("ground_clearance_mm")
-    m5 = car.get("maintenance_5y_thb")
+    four = car.get("drivetrain")
     return {
         "isofix": opt(car.get("isofix")),
-        "compact": opt(car.get("compact")),
-        "city_economy": city_econ,
+        "compact": _scale(car.get("length_mm"), *cfg.COMPACT_LENGTH_MM),
+        "city_economy": _scale(per_km, *cfg.CITY_COST_PER_KM),
         "aeb": opt(adas.get("aeb")),
-        "ground_clearance": None if gc is None else gc >= cfg.GROUND_OFFROAD_MM,
-        "cargo_large": cargo_large,
+        "ground_clearance": _scale(car.get("ground_clearance_mm"), *cfg.GROUND_MM),
+        "cargo_large": 1.0 if bed else _scale(cargo, *cfg.CARGO_LARGE_L),
         "roof_rails": opt(car.get("roof_rails")),
-        "four_wd": None if car.get("drivetrain") is None else car["drivetrain"] in ("4WD", "AWD"),
-        "seven_seats": car["seats"] >= 7,
+        "four_wd": None if four is None else (1.0 if four in ("4WD", "AWD") else 0.0),
+        "seven_seats": 1.0 if car["seats"] >= 7 else 0.0,
         "easy_entry": opt(car.get("easy_entry")),
         "rear_ac": opt(car.get("rear_ac_vents")),
-        "fold_flat": opt(car.get("rear_seat_fold_flat")),
+        "fold_flat": None if bed else opt(car.get("rear_seat_fold_flat")),  # n/a with a pickup bed
         "parking_aid": opt(adas.get("parking_sensors")),
         "adaptive_cruise": opt(adas.get("adaptive_cruise")),
-        "highway_economy": hwy_econ,
-        "cargo_work": cargo_work,
-        "low_maintenance": None if m5 is None else m5 <= cfg.LOW_MAINT_5Y_THB,
+        "highway_economy": _scale(per_km, *cfg.HIGHWAY_COST_PER_KM),
+        "cargo_work": 1.0 if bed else _scale(cargo, *cfg.CARGO_WORK_L_RANGE),
+        "low_maintenance": _scale(car.get("maintenance_5y_thb"), *cfg.MAINT_5Y_THB),
+        "lane_assist": opt(adas.get("lane_assist")),
     }
 
 
@@ -123,9 +139,11 @@ def lifestyle_fit(car):
     """0-1 fit per lifestyle = share of known features the car has (spec 4.4)."""
     feats = _features(car)
     fit = {}
-    for ls, keys in cfg.LIFESTYLE_FEATURES.items():
-        known = [feats[k] for k in keys if feats[k] is not None]
-        fit[ls] = round(sum(known) / float(len(known)), 4) if known else None
+    for ls, wts in cfg.LIFESTYLE_FEATURES.items():
+        known = {k: w for k, w in wts.items() if feats[k] is not None}
+        tw = sum(known.values())
+        # weighted mean of the 0-1 feature scores the car has data for
+        fit[ls] = round(sum(feats[k] * w for k, w in known.items()) / float(tw), 4) if tw else None
     return fit, feats
 
 
@@ -133,6 +151,22 @@ CARS_V2 = _load_cars()
 # Pre-computed once at import (spec 3: stored, not recomputed per request)
 for _c in CARS_V2:
     _c["lifestyle_fit"], _c["_features"] = lifestyle_fit(_c)
+
+
+def _percentile(vals, q):
+    vals = sorted(vals)
+    if not vals:
+        return 0.0
+    k = (len(vals) - 1) * q / 100.0
+    lo, hi = int(k), min(int(k) + 1, len(vals) - 1)
+    return vals[lo] + (vals[hi] - vals[lo]) * (k - lo)
+
+
+def cost_scale(km_per_year):
+    """Fixed yearly-cost scale over the whole catalogue (not just the cars that passed filters)."""
+    totals = [v["total"] for v in (annual_cost(c, km_per_year) for c in CARS_V2) if v is not None]
+    p_lo, p_hi = cfg.COST_SCALE_PERCENTILES
+    return _percentile(totals, p_lo), _percentile(totals, p_hi)
 
 
 # ----------------------------------------------------------------- helpers
@@ -227,7 +261,7 @@ def score_budget(price, budget, m):
 
 def score_lifestyle(car, lifestyles):
     if not lifestyles:
-        return 1.0, []
+        return None, []  # not chosen: the criterion is left out, not handed out as free points
     vals, detail = [], []
     for ls in lifestyles:
         f = car["lifestyle_fit"].get(ls)
@@ -237,8 +271,8 @@ def score_lifestyle(car, lifestyles):
             "lifestyle": ls,
             "label": cfg.LIFESTYLE_TH[ls],
             "fit": f,
-            "has": [cfg.FEATURE_TH[k] for k in keys if feats[k] is True],
-            "missing": [cfg.FEATURE_TH[k] for k in keys if feats[k] is False],
+            "has": [cfg.FEATURE_TH[k] for k in keys if feats[k] is not None and feats[k] >= 0.5],
+            "missing": [cfg.FEATURE_TH[k] for k in keys if feats[k] is not None and feats[k] < 0.5],
             "unknown": [cfg.FEATURE_TH[k] for k in keys if feats[k] is None],
         })
         if f is not None:
@@ -255,7 +289,7 @@ def score_safety(car):
     equipment = sum(parts) / len(parts)
     stars = car.get("asean_ncap_stars")
     if stars is None:
-        return equipment
+        stars = cfg.NCAP_UNKNOWN_STARS
     return cfg.NCAP_SHARE * (stars / 5.0) + (1 - cfg.NCAP_SHARE) * equipment
 
 
@@ -268,7 +302,7 @@ def safety_warning(car):
 
 def score_design(car, preferred):
     if not preferred:
-        return 1.0
+        return None  # no body preference: left out of the score
     body = car["bodyType"]
     if body in preferred:
         return 1.0
@@ -285,8 +319,7 @@ def recommend(c, cars=None):
     passed, removed_by = apply_filters(cars, c)
 
     costs = {car["id"]: annual_cost(car, c.km_per_year) for car in passed}
-    known_totals = [v["total"] for v in costs.values() if v is not None]
-    lo, hi = (min(known_totals), max(known_totals)) if known_totals else (0, 0)
+    lo, hi = cost_scale(c.km_per_year)
 
     rows = []
     for car in passed:
@@ -295,10 +328,8 @@ def recommend(c, cars=None):
         cost = costs[car["id"]]
         if cost is None:
             s_cost = None
-        elif hi == lo:
-            s_cost = 1.0
         else:
-            s_cost = 1 - (cost["total"] - lo) / float(hi - lo)
+            s_cost = _scale(cost["total"], hi, lo)
         scores = {
             "budget": s_budget,
             "lifestyle": s_life,
@@ -341,6 +372,11 @@ def recommend(c, cars=None):
             "estimated_fields": car.get("estimated", []),
         })
 
+    # criteria the user gave no input for (no lifestyle / no body type) are left out for every car
+    inactive = [k for k in cfg.CRITERIA if (k == "lifestyle" and not c.lifestyles) or (k == "design" and not c.body_preferred)]
+    active_w = {k: w for k, w in weights.items() if k not in inactive}
+    aw = sum(active_w.values()) or 1.0
+
     rows.sort(key=lambda r: (-r["score"], r["price"]))
     for i, r in enumerate(rows, 1):
         r["rank"] = i
@@ -350,6 +386,8 @@ def recommend(c, cars=None):
         "engine": "v2",
         "weights": {k: round(v, 4) for k, v in weights.items()},
         "weights_pct": {k: round(100 * v) for k, v in weights.items()},
+        "inactive_criteria": inactive,
+        "effective_weights_pct": {k: (round(100 * active_w[k] / aw) if k in active_w else 0) for k in cfg.CRITERIA},
         "total_cars": len(cars),
         "passed_filters": len(rows),
         "results": rows[: c.top_n],
@@ -366,7 +404,7 @@ FEATURE_TH = {
     "roof_rails": "ราวหลังคา", "four_wd": "ขับเคลื่อน 4 ล้อ", "seven_seats": "7 ที่นั่ง", "easy_entry": "ขึ้นลงง่าย",
     "rear_ac": "แอร์ตอนหลัง", "fold_flat": "เบาะหลังพับราบ", "parking_aid": "เซ็นเซอร์ช่วยจอด",
     "adaptive_cruise": "ครูซคอนโทรลแบบปรับระยะ", "highway_economy": "ประหยัดทางไกล", "cargo_work": "บรรทุกของได้มาก",
-    "low_maintenance": "ค่าบำรุงรักษาต่ำ",
+    "low_maintenance": "ค่าบำรุงรักษาต่ำ", "lane_assist": "ระบบช่วยรักษาเลน",
 }
 
 
@@ -381,11 +419,11 @@ def car_public(car, full=True):
     base.update({k: car.get(k) for k in ("consumption", "economy", "economy_unit", "drivetrain", "doors",
                                           "ground_clearance_mm", "cargo_l", "has_cargo_bed", "adas",
                                           "maintenance_5y_thb", "source", "collected_on", "estimated",
-                                          "transmission", "serviceNetwork")})
+                                          "transmission", "serviceNetwork", "length_mm")})
     base["annual_cost"] = annual_cost(car, cfg.DEFAULT_KM_PER_YEAR)
     base["km_per_year"] = cfg.DEFAULT_KM_PER_YEAR
-    base["features_has"] = [FEATURE_TH[k] for k, v in feats.items() if v is True and k in FEATURE_TH]
-    base["features_missing"] = [FEATURE_TH[k] for k, v in feats.items() if v is False and k in FEATURE_TH]
+    base["features_has"] = [FEATURE_TH[k] for k, v in feats.items() if v is not None and v >= 0.5 and k in FEATURE_TH]
+    base["features_missing"] = [FEATURE_TH[k] for k, v in feats.items() if v is not None and v < 0.5 and k in FEATURE_TH]
     base["lifestyle_fit"] = {cfg.LIFESTYLE_TH.get(k, k): v for k, v in car["lifestyle_fit"].items()}
     base["safety_warning"] = safety_warning(car)
     return base
