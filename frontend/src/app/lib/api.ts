@@ -35,6 +35,7 @@ export interface Result {
   over_budget: { amount: number; pct: number; label: string } | null;
   safety_warning?: string | null;
   annual_cost: { energy: number | null; maintenance: number | null; total: number } | null;
+  monthly?: { installment: number; pct_of_income: number; level: "comfortable" | "tight" | "over"; label: string; running_per_month: number | null; total_per_month: number; total_pct_of_income: number } | null;
   lifestyle_detail: LifestyleDetail[];
   estimated_fields: string[];
 }
@@ -50,6 +51,7 @@ export interface RecommendResponse {
   too_few_results: boolean;
   filter_impact: { filter: string; label: string; removed: number }[];
   near_misses?: { id: number; name: string; price: number; bodyType: string; reason: string }[];
+  affordability?: { income: number; comfortable_price: number; max_price: number; budget_installment: number; budget_pct_of_income: number; assumptions: string } | null;
   preference_notes?: { kind: "brand" | "body"; key: string; car_id: number; text: string }[];
 }
 

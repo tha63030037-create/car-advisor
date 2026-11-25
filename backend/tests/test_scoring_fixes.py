@@ -85,3 +85,23 @@ def test_liked_brand_is_read_even_if_the_model_drops_it():
     from app.chat import ChatRequest, guard_brand_only
     req = ChatRequest(messages=[{"role": "user", "content": "ชอบ subaru ที่สุด อยากได้คูเป้"}], criteria={}, asked=[])
     assert guard_brand_only(req, {"brand_only": []})["brand_preferred"] == ["Subaru"]
+
+
+def test_income_is_parsed_apart_from_the_budget():
+    from app.chat import rules_extract
+    c = rules_extract("เงินเดือน 3 หมื่น ขับในเมือง งบ 8 แสน", {})
+    assert c["monthly_income"] == 30000 and c["budget"] == 800000 and c["lifestyles"] == ["city"]
+
+
+def test_income_caps_what_is_shown_and_flags_tight_installments():
+    r = run(budget=1500000, monthly_income=30000)
+    cap = r["affordability"]["max_price"]
+    assert all(x["price"] <= cap + 1000 for x in r["results"])
+    assert {x["monthly"]["level"] for x in r["results"]} <= {"comfortable", "tight"}
+    assert r["affordability"]["comfortable_price"] < r["affordability"]["max_price"]
+
+
+def test_chat_is_not_done_without_income():
+    from app.chat import next_topic
+    assert next_topic({"budget": 900000, "budget_stretch": 0.1, "lifestyles": ["city"], "priorities": {"budget": 3}},
+                      ["usage", "lifestyle", "budget", "stretch", "brand", "priorities"]) == "income"

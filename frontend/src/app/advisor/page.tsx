@@ -47,6 +47,20 @@ export default function Advisor() {
   const [stretch, setStretch] = useState(0.15);
   const [lifestyles, setLifestyles] = useState<string[]>([]);
   const [budgetSet, setBudgetSet] = useState(false);
+  const [budgetText, setBudgetText] = useState("");
+  const [income, setIncome] = useState<number | null>(null);
+  const [incomeText, setIncomeText] = useState("");
+  const digits = (t: string) => Number(t.replace(/[^\d]/g, "")) || 0;
+  const setBudgetFrom = (t: string) => {
+    const n = digits(t);
+    setBudgetText(n ? baht(n) : "");
+    if (n >= 50000) { setBudgetK(n / 1000); setBudgetSet(true); } else setBudgetSet(false);
+  };
+  const setIncomeFrom = (t: string) => {
+    const n = digits(t);
+    setIncomeText(n ? baht(n) : "");
+    setIncome(n >= 3000 ? n : null);
+  };
   // which answers came from the visitor (not defaults) — the chat must still ask about the rest
   const [stretchSet, setStretchSet] = useState(false);
   const [zonesSet, setZonesSet] = useState(false);
@@ -101,7 +115,8 @@ export default function Advisor() {
   const wLabel = (k: Key) => (inactive.includes(k) ? "ไม่นับ" : `${weights[k]}%`);
 
   const criteria = useMemo(() => ({
-    budget: budgetK * 1000,
+    budget: Math.round(budgetK * 1000),
+    monthly_income: income,
     budget_stretch: stretch,
     brand_only: brandOnly,
     brand_preferred: brandPref,
@@ -115,12 +130,13 @@ export default function Advisor() {
     km_per_year: 15000,
     priorities: zones,
     top_n: 10,
-  }), [budgetK, stretch, brandOnly, brandPref, brandExclude, seatsMin, noEv, bodies, lifestyles, zones, ncapMin]);
+  }), [budgetK, income, stretch, brandOnly, brandPref, brandExclude, seatsMin, noEv, bodies, lifestyles, zones, ncapMin]);
 
   // ---------------------------------------------------------------- chat
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const applyChatCriteria = (c: any) => {
-    if (c.budget) { setBudgetK(Math.round(c.budget / 1000)); setBudgetSet(true); }
+    if (c.budget) { setBudgetK(c.budget / 1000); setBudgetSet(true); setBudgetText(baht(c.budget)); }
+    if (c.monthly_income) { setIncome(c.monthly_income); setIncomeText(baht(c.monthly_income)); }
     if (typeof c.budget_stretch === "number") { setStretch(c.budget_stretch); setStretchSet(true); }
     if (Array.isArray(c.lifestyles)) setLifestyles(c.lifestyles);
     if (Array.isArray(c.body_preferred)) setBodies(c.body_preferred);
@@ -143,7 +159,7 @@ export default function Advisor() {
       // send what the controls show now, so manual edits and chat stay in sync
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       // defaults the visitor never chose are sent as null, so the advisor still asks about them
-      const sent = { ...criteria, budget: budgetSet ? criteria.budget : null, budget_stretch: stretchSet ? stretch : null, priorities: zonesSet ? zones : null };
+      const sent = { ...criteria, monthly_income: income, budget: budgetSet ? criteria.budget : null, budget_stretch: stretchSet ? stretch : null, priorities: zonesSet ? zones : null };
       const r: any = await postJSON("/api/chat", { messages: msgs, criteria: sent, asked });
       setChatMsgs([...msgs, { role: "assistant", content: r.reply }]);
       setAsked(r.asked);
@@ -219,11 +235,20 @@ export default function Advisor() {
   }, [criteria, revealed]);
 
   const manualMissing = [
-    !budgetSet && "ตั้งงบประมาณ",
+    !income && "กรอกรายได้ต่อเดือน",
+    !budgetSet && "กรอกงบซื้อรถ",
     lifestyles.length === 0 && "เลือกไลฟ์สไตล์อย่างน้อย 1 ข้อ",
   ].filter(Boolean) as string[];
+  // same estimate as the backend: 25% down, 5 years, 3% flat — shown live under the budget box
+  const inst = (price: number) => (price * 0.75 * 1.15) / 60;
+  const afford = income && budgetSet ? {
+    inst: Math.round(inst(budgetK * 1000)),
+    pct: Math.round((1000 * inst(budgetK * 1000)) / income) / 10,
+    comfortable: Math.round((income * 0.3 * 60) / (0.75 * 1.15) / 1000) * 1000,
+    level: inst(budgetK * 1000) / income <= 0.3 ? "ok" : inst(budgetK * 1000) / income <= 0.5 ? "tight" : "over",
+  } : null;
   const reveal = () => { setRevealed(true); setTimeout(() => scrollTo(resultsTop.current), 350); };
-  const TOPIC_TH: Record<string, string> = { usage: "การใช้งาน", lifestyle: "ไลฟ์สไตล์", budget: "งบประมาณ", stretch: "งบยืดได้แค่ไหน", brand: "แบรนด์", priorities: "เรื่องที่สำคัญ" };
+  const TOPIC_TH: Record<string, string> = { usage: "การใช้งาน", lifestyle: "ไลฟ์สไตล์", income: "รายได้ต่อเดือน", budget: "งบประมาณ", stretch: "งบยืดได้แค่ไหน", brand: "แบรนด์", priorities: "เรื่องที่สำคัญ" };
   const answered = chatDone ? asked : asked.slice(0, -1);
 
   const toggle = (arr: string[], v: string, set: (x: string[]) => void) =>
@@ -298,7 +323,77 @@ export default function Advisor() {
           )}
 
           {mode === "manual" && (<>
-          <h2>1. จัดการ์ดความสำคัญ</h2>
+          <h2>1. รายได้และงบ</h2>
+          <label className="sub" htmlFor="income">รายได้ต่อเดือน (รวมคนที่ช่วยผ่อน) <b className="req">จำเป็น</b></label>
+          <div className="money">
+            <input id="income" inputMode="numeric" autoComplete="off" placeholder="เช่น 35,000" value={incomeText} onChange={(e) => setIncomeFrom(e.target.value)} />
+            <span>บาท/เดือน</span>
+          </div>
+          <div className="chips small">
+            {[20000, 30000, 50000, 80000, 150000].map((v) => (
+              <button key={v} className={`chip ${income === v ? "on" : ""}`} onClick={() => setIncomeFrom(String(v))}>{baht(v)}</button>
+            ))}
+          </div>
+          <label className="sub" htmlFor="budget">งบซื้อรถ <b className="req">จำเป็น</b></label>
+          <div className="money">
+            <input id="budget" inputMode="numeric" autoComplete="off" placeholder="เช่น 900,000" value={budgetText} onChange={(e) => setBudgetFrom(e.target.value)} />
+            <span>บาท</span>
+          </div>
+          <div className="chips small">
+            {[500000, 800000, 1000000, 1500000, 2000000, 3000000, 5000000].map((v) => (
+              <button key={v} className={`chip ${budgetSet && budgetK * 1000 === v ? "on" : ""}`} onClick={() => setBudgetFrom(String(v))}>{v >= 1000000 ? `${v / 1000000} ล้าน` : `${v / 100000} แสน`}</button>
+            ))}
+          </div>
+          {afford && (
+            <p className={`afford ${afford.level}`}>
+              งบนี้ผ่อนราว {baht(afford.inst)} บาท/เดือน = {afford.pct}% ของรายได้ · แนะนำค่างวดไม่เกิน 30% คือรถราคาไม่เกินราว {baht(afford.comfortable)} บาท
+            </p>
+          )}
+          <label className="sub">ยอมเกินงบได้แค่ไหน</label>
+          <div className="chips">
+            {STRETCH.map((s) => (
+              <button key={s.v} className={`chip ${stretch === s.v ? "on" : ""}`} onClick={() => { setStretch(s.v); setStretchSet(true); }}>{s.label}</button>
+            ))}
+          </div>
+
+          <h2>2. ไลฟ์สไตล์ <small>(เลือกได้หลายข้อ)</small></h2>
+          <div className="chips">
+            {LIFESTYLES.map((l) => (
+              <button key={l.key} className={`chip ${lifestyles.includes(l.key) ? "on" : ""}`} onClick={() => toggle(lifestyles, l.key, setLifestyles)}>
+                {l.icon} {l.label}
+              </button>
+            ))}
+          </div>
+
+          <h2>3. เงื่อนไขบังคับ <small>(ตัดทิ้ง ไม่ใช่แค่หักคะแนน)</small></h2>
+          <label className="sub">เอาเฉพาะแบรนด์</label>
+          <div className="chips small">
+            {BRANDS.map((b) => (
+              <button key={b} className={`chip ${brandOnly.includes(b) ? "on" : ""}`} onClick={() => toggle(brandOnly, b, setBrandOnly)}>{b}</button>
+            ))}
+          </div>
+          <label className="sub">ต้องนั่งได้อย่างน้อย</label>
+          <div className="chips">
+            {[null, 5, 7].map((s) => (
+              <button key={String(s)} className={`chip ${seatsMin === s ? "on" : ""}`} onClick={() => setSeatsMin(s)}>{s ? `${s} ที่นั่ง` : "ไม่จำกัด"}</button>
+            ))}
+            <button className={`chip ${noEv ? "on" : ""}`} onClick={() => setNoEv(!noEv)}>🚫⚡ ไม่เอารถไฟฟ้า</button>
+            <button className={`chip ${ncapMin ? "on" : ""}`} onClick={() => setNcapMin(!ncapMin)} title="รถที่ยังไม่มีผลทดสอบจะยังแสดงอยู่">🛡️ ไม่เอารถผลทดสอบชนต่ำกว่า 3 ดาว</button>
+          </div>
+
+          <h2>4. ทรงและแบรนด์ที่ชอบ <small>(ใช้กับการ์ดดีไซน์ ไม่ตัดรถคันอื่น)</small></h2>
+          <div className="chips">
+            {BODIES.map((b) => (
+              <button key={b.key} className={`chip ${bodies.includes(b.key) ? "on" : ""}`} onClick={() => toggle(bodies, b.key, setBodies)}>{b.label}</button>
+            ))}
+          </div>
+          <label className="sub">แบรนด์ที่ชอบ (ได้คะแนนดีไซน์เพิ่ม แต่ยังเห็นแบรนด์อื่น)</label>
+          <div className="chips small">
+            {BRANDS.map((b) => (
+              <button key={b} className={`chip ${brandPref.includes(b) ? "on" : ""}`} onClick={() => toggle(brandPref, b, setBrandPref)}>{b}</button>
+            ))}
+          </div>
+          <h2>5. จัดการ์ดความสำคัญ <small>(ทำท้ายสุด ใช้ลำดับตั้งต้นก็ได้)</small></h2>
           <div className="zones">
             {ZONES.map(({ z, label }) => (
               <div
@@ -341,64 +436,16 @@ export default function Advisor() {
             ))}
           </div>
 
-          <h2>2. งบประมาณ</h2>
-          <div className="budget">
-            <input type="range" min={300} max={3500} step={10} value={budgetK} onChange={(e) => { setBudgetK(+e.target.value); setBudgetSet(true); }} />
-            <div className="bval">{budgetSet ? `${baht(budgetK * 1000)} บาท` : <span className="unset">เลื่อนเพื่อตั้งงบ</span>}</div>
-          </div>
-          <div className="chips">
-            {STRETCH.map((s) => (
-              <button key={s.v} className={`chip ${stretch === s.v ? "on" : ""}`} onClick={() => { setStretch(s.v); setStretchSet(true); }}>{s.label}</button>
-            ))}
-          </div>
-
-          <h2>3. ไลฟ์สไตล์ <small>(เลือกได้หลายข้อ)</small></h2>
-          <div className="chips">
-            {LIFESTYLES.map((l) => (
-              <button key={l.key} className={`chip ${lifestyles.includes(l.key) ? "on" : ""}`} onClick={() => toggle(lifestyles, l.key, setLifestyles)}>
-                {l.icon} {l.label}
-              </button>
-            ))}
-          </div>
-
-          <h2>4. เงื่อนไขบังคับ <small>(ตัดทิ้ง ไม่ใช่แค่หักคะแนน)</small></h2>
-          <label className="sub">เอาเฉพาะแบรนด์</label>
-          <div className="chips small">
-            {BRANDS.map((b) => (
-              <button key={b} className={`chip ${brandOnly.includes(b) ? "on" : ""}`} onClick={() => toggle(brandOnly, b, setBrandOnly)}>{b}</button>
-            ))}
-          </div>
-          <label className="sub">ต้องนั่งได้อย่างน้อย</label>
-          <div className="chips">
-            {[null, 5, 7].map((s) => (
-              <button key={String(s)} className={`chip ${seatsMin === s ? "on" : ""}`} onClick={() => setSeatsMin(s)}>{s ? `${s} ที่นั่ง` : "ไม่จำกัด"}</button>
-            ))}
-            <button className={`chip ${noEv ? "on" : ""}`} onClick={() => setNoEv(!noEv)}>🚫⚡ ไม่เอารถไฟฟ้า</button>
-            <button className={`chip ${ncapMin ? "on" : ""}`} onClick={() => setNcapMin(!ncapMin)} title="รถที่ยังไม่มีผลทดสอบจะยังแสดงอยู่">🛡️ ไม่เอารถผลทดสอบชนต่ำกว่า 3 ดาว</button>
-          </div>
-
-          <h2>5. ทรงและแบรนด์ที่ชอบ <small>(ใช้กับการ์ดดีไซน์ ไม่ตัดรถคันอื่น)</small></h2>
-          <div className="chips">
-            {BODIES.map((b) => (
-              <button key={b.key} className={`chip ${bodies.includes(b.key) ? "on" : ""}`} onClick={() => toggle(bodies, b.key, setBodies)}>{b.label}</button>
-            ))}
-          </div>
-          <label className="sub">แบรนด์ที่ชอบ (ได้คะแนนดีไซน์เพิ่ม แต่ยังเห็นแบรนด์อื่น)</label>
-          <div className="chips small">
-            {BRANDS.map((b) => (
-              <button key={b} className={`chip ${brandPref.includes(b) ? "on" : ""}`} onClick={() => toggle(brandPref, b, setBrandPref)}>{b}</button>
-            ))}
-          </div>
-          {!revealed && (
-            <div className="submit">
-              <button className="go" disabled={manualMissing.length > 0} onClick={reveal}>ดูรถที่เหมาะกับคุณ</button>
-              <p className="hint">{manualMissing.length > 0 ? `ยังขาด: ${manualMissing.join(" และ ")}` : "พร้อมแล้ว ข้อ 4–5 ไม่ตอบก็ได้"}</p>
-            </div>
-          )}
           {brandExclude.length > 0 && (
             <div className="excl">
               ไม่เอาแบรนด์: {brandExclude.join(", ")}
               <button className="chip" onClick={() => setBrandExclude([])}>ล้าง</button>
+            </div>
+          )}
+          {!revealed && (
+            <div className="submit">
+              <button className="go" disabled={manualMissing.length > 0} onClick={reveal}>ดูรถที่เหมาะกับคุณ</button>
+              <p className="hint">{manualMissing.length > 0 ? `ยังขาด: ${manualMissing.join(" และ ")}` : "พร้อมแล้ว ข้อ 3–5 ไม่ตอบก็ได้"}</p>
             </div>
           )}
           </>)}
@@ -411,7 +458,7 @@ export default function Advisor() {
               <h2>รถที่เหมาะกับคุณจะขึ้นตรงนี้</h2>
               {mode === "chat" ? (
                 <>
-                  <p className="muted">ที่ปรึกษาจะถามประมาณ 6 เรื่อง ตอบครบแล้วระบบจะจัดอันดับจากรถ 175 รุ่นให้ทันที</p>
+                  <p className="muted">ที่ปรึกษาจะถามประมาณ 7 เรื่อง ตอบครบแล้วระบบจะจัดอันดับจากรถ 175 รุ่นให้ทันที</p>
                   <ul className="todo">
                     {Object.entries(TOPIC_TH).map(([k, v]) => (
                       <li key={k} className={answered.includes(k) ? "ok" : asked[asked.length - 1] === k ? "now" : ""}>
@@ -422,9 +469,10 @@ export default function Advisor() {
                 </>
               ) : (
                 <>
-                  <p className="muted">ตั้งงบและเลือกไลฟ์สไตล์ทางซ้าย แล้วกด &quot;ดูรถที่เหมาะกับคุณ&quot;</p>
+                  <p className="muted">กรอกรายได้ งบ และเลือกไลฟ์สไตล์ทางซ้าย แล้วกด &quot;ดูรถที่เหมาะกับคุณ&quot;</p>
                   <ul className="todo">
                     <li className="ok"><span aria-hidden>✓</span>ลำดับการ์ด (ใช้ตั้งต้นได้)</li>
+                    <li className={income ? "ok" : ""}><span aria-hidden>{income ? "✓" : ""}</span>รายได้ต่อเดือน</li>
                     <li className={budgetSet ? "ok" : ""}><span aria-hidden>{budgetSet ? "✓" : ""}</span>งบประมาณ</li>
                     <li className={lifestyles.length ? "ok" : ""}><span aria-hidden>{lifestyles.length ? "✓" : ""}</span>ไลฟ์สไตล์</li>
                   </ul>
@@ -448,6 +496,9 @@ export default function Advisor() {
               )}
             </div>
           )}
+          {data?.affordability && (
+            <p className="aff-note">รายได้ {baht(data.affordability.income)} บาท/เดือน: ผ่อนสบายถ้ารถไม่เกินราว {baht(data.affordability.comfortable_price)} บาท · ไม่แสดงรถที่ค่างวดเกินครึ่งหนึ่งของรายได้ (เกิน {baht(data.affordability.max_price)} บาท) · {data.affordability.assumptions}</p>
+          )}
           {data?.preference_notes && data.preference_notes.length > 0 && (
             <div className="prefs">
               {data.preference_notes.map((n) => <p key={n.kind + n.key}><Link href={`/car/${n.car_id}`}>{n.kind === "brand" ? "แบรนด์ที่คุณชอบ" : "ทรงที่คุณอยากได้"}</Link> · {n.text}</p>)}
@@ -469,6 +520,9 @@ export default function Advisor() {
                 <div className="info">
                   <Link href={`/car/${r.id}`} className="name">{r.name}</Link>
                   <div className="meta">{baht(r.price)} บาท · {FUEL_TH[r.fuelType] || r.fuelType} · {r.seats} ที่นั่ง</div>
+                  {r.monthly && (
+                    <div className={`mo ${r.monthly.level}`}>ผ่อนราว {baht(r.monthly.installment)} บาท/เดือน ({r.monthly.pct_of_income}% ของรายได้) · {r.monthly.label}</div>
+                  )}
                   <PhotoCredit credit={r.photo.credit} />
                   {(r.over_budget || r.safety_warning) && (
                     <div className="flags">
@@ -649,6 +703,20 @@ export default function Advisor() {
         .v2 :global(.nm a), .v2 :global(.prefs a) { color: inherit; font-weight: 600; }
         .prefs { margin-top: 12px; padding: 10px 14px; border-radius: 12px; background: #EEF4FB; color: #1D4F86; font-size: 14px; }
         .prefs p { margin: 2px 0; }
+        .req { color: var(--danger); font-weight: 600; font-size: 12px; margin-left: 4px; }
+        .money { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+        .money input { flex: 1; min-width: 0; min-height: 46px; border-radius: 12px; border: 1px solid var(--line); padding: 0 14px; font: inherit; font-size: 18px; font-weight: 600; color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
+        .money input:focus { outline: 2.5px solid var(--accent); border-color: transparent; }
+        .money span { color: var(--muted); font-size: 14px; white-space: nowrap; }
+        .afford { margin: 10px 0 0; font-size: 13.5px; padding: 8px 12px; border-radius: 10px; }
+        .afford.ok { background: var(--accent-wash); color: var(--accent-ink); }
+        .afford.tight { background: var(--signal-wash); color: #7A5200; }
+        .afford.over { background: var(--danger-wash); color: var(--danger); }
+        .mo { font-size: 13px; margin-top: 2px; font-weight: 600; }
+        .mo.comfortable { color: var(--accent-ink); }
+        .mo.tight { color: #8A5D00; }
+        .mo.over { color: var(--danger); }
+        .aff-note { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
         .unset { color: var(--muted); font-weight: 500; font-size: 14px; }
         .submit { position: sticky; bottom: -18px; margin: 20px -18px -18px; padding: 14px 18px 18px; background: linear-gradient(rgba(255,255,255,0), var(--surface) 30%); }
         .go { width: 100%; min-height: 50px; border: 0; border-radius: 14px; background: var(--accent); color: #fff; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; }

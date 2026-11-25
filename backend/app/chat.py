@@ -72,8 +72,10 @@ class ChatResponse(BaseModel):
 
 
 # Conversation order (spec 5.5). budget is the only hard requirement to show results.
-TOPICS = ["usage", "lifestyle", "budget", "stretch", "brand", "priorities"]
+TOPICS = ["usage", "lifestyle", "income", "budget", "stretch", "brand", "priorities"]
 QUESTIONS = {
+    "income": ("ขอถามเรื่องรายได้หน่อยนะคะ รายได้ต่อเดือนประมาณเท่าไรคะ (รวมของคนที่ช่วยผ่อนด้วยก็ได้) จะได้แนะนำรถที่ผ่อนไหวจริง ๆ ค่ะ",
+               ["รายได้ 2 หมื่น", "รายได้ 3 หมื่น", "รายได้ 5 หมื่น", "รายได้ 1 แสน"]),
     "usage": ("สวัสดีค่ะ เล่าให้ฟังหน่อยว่าจะใช้รถทำอะไรเป็นหลักคะ เช่น ขับไปทำงานในเมือง พาครอบครัวเที่ยว หรือใช้ขนของ",
               ["ขับในเมืองไปทำงาน", "พาครอบครัวเที่ยวต่างจังหวัด", "ใช้ขนของทำงาน"]),
     "lifestyle": ("ปกติใครนั่งประจำบ้างคะ มีเด็ก ผู้ใหญ่ หรือสัตว์เลี้ยงไปด้วยไหม วันหยุดชอบไปไหน",
@@ -92,7 +94,7 @@ SYSTEM_PROMPT = """คุณคือที่ปรึกษาการเล�
 หน้าที่
 - ถามให้รู้การใช้ชีวิตจริงของลูกค้า แล้วสรุปเป็นเงื่อนไขตามโครง JSON ที่กำหนด
 - ถามทีละ 1 ข้อ สั้น เป็นกันเอง ไม่ใช้ศัพท์เทคนิค
-- ข้อมูลที่ต้องได้ก่อนแนะนำ: งบ, จำนวนคนที่นั่งประจำ, การใช้งานหลัก, แบรนด์ที่เจาะจงหรือไม่เอา, ลำดับความสำคัญของ 5 เรื่อง
+- ข้อมูลที่ต้องได้ก่อนแนะนำ: รายได้ต่อเดือน (ต้องถามทุกครั้ง ถ้าลูกค้าไม่อยากบอกให้ขอเป็นช่วงคร่าว ๆ), งบ, จำนวนคนที่นั่งประจำ, การใช้งานหลัก, แบรนด์ที่เจาะจงหรือไม่เอา, ลำดับความสำคัญของ 5 เรื่อง
 - แบรนด์: "ชอบ X" หรือ "ชอบ X ที่สุด" ใส่ใน brand_preferred (ยังดูแบรนด์อื่นด้วย) ; ใส่ brand_only เฉพาะเมื่อลูกค้าพูดชัดว่า "เอาแค่ X", "เฉพาะ X" หรือ "ไม่เอาแบรนด์อื่น" เท่านั้น
 - ถามเรื่องงบให้รู้ว่ายืดได้แค่ไหน: ไม่ยืดเลย (0) ยืดได้นิดหน่อย (0.1) หรือยืดได้ถ้าคุ้ม (0.2)
 
@@ -105,7 +107,7 @@ SYSTEM_PROMPT = """คุณคือที่ปรึกษาการเล�
 - ถ้าลูกค้าคุยเรื่องอื่นที่ไม่เกี่ยวกับการเลือกรถ ให้พากลับมาอย่างสุภาพ
 
 โครง criteria (ส่งกลับทุกช่อง ค่าที่ไม่รู้ให้เป็น null):
-{"budget": int|null, "budget_stretch": 0|0.1|0.15|0.2|null, "brand_only": [str], "brand_exclude": [str], "brand_preferred": [str],
+{"monthly_income": int|null, "budget": int|null, "budget_stretch": 0|0.1|0.15|0.2|null, "brand_only": [str], "brand_exclude": [str], "brand_preferred": [str],
  "seats_min": int|null, "fuel_exclude": [str], "min_ncap_stars": 3|null, "body_preferred": [str], "lifestyles": [str], "km_per_year": int|null,
  "priorities": {"budget":1-3,"lifestyle":1-3,"running_cost":1-3,"safety":1-3,"design":1-3}|null}
 lifestyles ใช้ได้เฉพาะ: school_run, camping, merit_family, pets, city, long_trips, work_cargo
@@ -165,6 +167,17 @@ def parse_budget(t):
 def rules_extract(text, crit):
     t = text.lower()
     c = dict(crit)
+    # "เงินเดือน 3 หมื่น" / "รายได้ 50,000" is income, not the car budget
+    inc = re.search(r"(?:เงินเดือน|รายได้(?:ต่อเดือน)?|ได้เดือนละ)\s*(?:ประมาณ|ราว ?ๆ?|ก็|อยู่ที่|คือ)?\s*"
+                    r"((?:\d[\d,\.]*|" + "|".join(THAI_NUM) + r")\s*(?:ล้าน|แสน|หมื่น|k|K|พัน)?)", text)
+    if inc:
+        v = parse_budget(inc.group(1))
+        if v is None:
+            digits = re.sub(r"[^\d]", "", inc.group(1))
+            v = int(digits) if digits else None
+        if v and 3000 <= v <= 10000000:
+            c["monthly_income"] = v
+        text = text[:inc.start()] + " " + text[inc.end():]
     b = parse_budget(text)
     rel = re.search(r"(เพิ่ม|ลด)งบ", text)
     if rel and b and c.get("budget"):
@@ -257,6 +270,8 @@ def next_topic(c, asked):
             continue
         if t == "lifestyle" and c.get("lifestyles") and c.get("seats_min"):
             continue
+        if t == "income" and c.get("monthly_income"):
+            continue
         if t == "budget" and c.get("budget"):
             continue
         if t == "stretch" and c.get("budget_stretch") is not None:
@@ -269,6 +284,8 @@ def next_topic(c, asked):
 
 def summarize(c):
     parts = []
+    if c.get("monthly_income"):
+        parts.append("รายได้ %s บาท/เดือน" % format(c["monthly_income"], ","))
     if c.get("budget"):
         s = "งบ %s บาท" % format(c["budget"], ",")
         if c.get("budget_stretch") is not None:
@@ -321,6 +338,9 @@ def _clean_criteria(raw):
     out = {}
     if not isinstance(raw, dict):
         raise ValueError("criteria is not an object")
+    mi = raw.get("monthly_income")
+    if isinstance(mi, (int, float)) and 3000 <= mi <= 10000000:
+        out["monthly_income"] = int(mi)
     b = raw.get("budget")
     if isinstance(b, (int, float)) and b > 0:
         out["budget"] = int(b)
@@ -495,5 +515,5 @@ def chat_turn(req):
     return ChatResponse(
         reply=reply, criteria=crit, missing=missing, ready=not missing,
         next_topic=nt, asked=asked, quick_replies=quick, engine=engine,
-        done=bool(crit.get("budget")) and nt is None,
+        done=bool(crit.get("budget")) and bool(crit.get("monthly_income")) and nt is None,
     )

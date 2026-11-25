@@ -56,6 +56,8 @@ class Criteria(BaseModel):
     # opt-in: drop cars whose ASEAN NCAP result is below this; untested cars stay in
     min_ncap_stars: Optional[int] = Field(None, ge=1, le=5)
     lifestyles: List[str] = []
+    # monthly income (household, before tax); required by the UI, optional here so old callers still work
+    monthly_income: Optional[int] = Field(None, gt=0, le=10000000)
     km_per_year: int = Field(cfg.DEFAULT_KM_PER_YEAR, gt=0, le=200000)
     priorities: Priorities = Priorities()
     top_n: int = Field(cfg.DEFAULT_TOP_N, ge=1, le=200)
@@ -197,6 +199,30 @@ def annual_cost(car, km_per_year):
     }
 
 
+def monthly_installment(price):
+    """Estimated monthly installment: 25% down, 5 years, 3% flat interest (assumptions in matching_config)."""
+    financed = price * (1 - cfg.FIN_DOWN)
+    return financed * (1 + cfg.FIN_FLAT_RATE * cfg.FIN_YEARS) / (12 * cfg.FIN_YEARS)
+
+
+def price_for_installment(amount):
+    return amount * 12 * cfg.FIN_YEARS / ((1 - cfg.FIN_DOWN) * (1 + cfg.FIN_FLAT_RATE * cfg.FIN_YEARS))
+
+
+def affordability(price, income, annual_cost_total=None):
+    if not income:
+        return None
+    inst = monthly_installment(price)
+    pct = inst / income
+    level = "comfortable" if pct <= cfg.INCOME_COMFORT else ("tight" if pct <= cfg.INCOME_MAX else "over")
+    label = {"comfortable": "ผ่อนสบาย", "tight": "ผ่อนตึง", "over": "เกินกำลังผ่อน"}[level]
+    running = None if annual_cost_total is None else round(annual_cost_total / 12)
+    return {"installment": round(inst), "pct_of_income": round(100 * pct, 1), "level": level, "label": label,
+            "running_per_month": running,
+            "total_per_month": round(inst + (running or 0)),
+            "total_pct_of_income": round(100 * (inst + (running or 0)) / income, 1)}
+
+
 def _norm_brand(b):
     return b.strip().lower()
 
@@ -234,6 +260,10 @@ def _filter_checks(c):
                        lambda car: car.get("asean_ncap_stars") is None or car["asean_ncap_stars"] >= c.min_ncap_stars))
     checks.append(("budget_ceiling", "ราคาไม่เกินงบ + ยืดได้ %d%%" % round(c.budget_stretch * 100),
                    lambda car: car["price"] <= ceiling))
+    if c.monthly_income:
+        cap = price_for_installment(c.monthly_income * cfg.INCOME_MAX)
+        checks.append(("income_cap", "ค่างวดไม่เกินครึ่งหนึ่งของรายได้ (รถไม่เกิน %s บาท)" % format(int(round(cap, -3)), ","),
+                       lambda car: car["price"] <= cap))
     return checks
 
 
@@ -443,6 +473,7 @@ def recommend(c, cars=None):
             "asean_ncap_stars": car.get("asean_ncap_stars"),
             "safety_warning": safety_warning(car),
             "annual_cost": cost,
+            "monthly": affordability(car["price"], c.monthly_income, cost["total"] if cost else None),
             "lifestyle_detail": life_detail,
             "estimated_fields": car.get("estimated", []),
         })
@@ -471,6 +502,15 @@ def recommend(c, cars=None):
         "filter_impact": removed_by if too_few else removed_by[:3],
         "near_misses": near_misses(cars, c) if too_few else [],
         "preference_notes": preference_notes(cars, rows, c),
+        "affordability": None if not c.monthly_income else {
+            "income": c.monthly_income,
+            "comfortable_price": int(round(price_for_installment(c.monthly_income * cfg.INCOME_COMFORT), -3)),
+            "max_price": int(round(price_for_installment(c.monthly_income * cfg.INCOME_MAX), -3)),
+            "budget_installment": round(monthly_installment(c.budget)),
+            "budget_pct_of_income": round(100 * monthly_installment(c.budget) / c.monthly_income, 1),
+            "assumptions": "ดาวน์ %d%% ผ่อน %d ปี ดอกเบี้ย %.1f%% ต่อปีแบบคงที่ (ค่าประมาณ ไม่ใช่ข้อเสนอสินเชื่อ)" % (
+                round(cfg.FIN_DOWN * 100), cfg.FIN_YEARS, cfg.FIN_FLAT_RATE * 100),
+        },
     }
 
 

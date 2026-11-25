@@ -136,6 +136,9 @@ export default function CarPage({ params }: { params: { id: string } }) {
                 </tbody>
               </table>
               {fit.r.over_budget && <p className="note warn">{fit.r.over_budget.label}</p>}
+              {fit.r.monthly && (
+                <p className="note">ผ่อนราว <b>{baht(fit.r.monthly.installment)}</b> บาท/เดือน ({fit.r.monthly.pct_of_income}% ของรายได้ · {fit.r.monthly.label}) รวมค่าน้ำมันหรือค่าไฟและบำรุงรักษาราว {baht(fit.r.monthly.total_per_month)} บาท/เดือน <span className="muted small">(สมมติดาวน์ 25% ผ่อน 5 ปี ดอกเบี้ย 3% ต่อปี)</span></p>
+              )}
               {fit.r.lifestyle_detail.map((l) => (
                 <p key={l.lifestyle} className="small"><b>{l.label}</b>{l.has.length > 0 && <> มี {l.has.join(", ")}</>}{l.missing.length > 0 && <><span className="muted"> · ไม่มี {l.missing.join(", ")}</span></>}</p>
               ))}
