@@ -559,14 +559,14 @@ export default function MatchV2() {
         .count { font-size: 13px; color: #94a3b8; }
         .alert { margin-top: 12px; padding: 10px 14px; border-radius: 12px; background: rgba(248,113,113,.12); border: 1px solid rgba(248,113,113,.4); font-size: 14px; }
         .alert.warn { background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.4); }
-        .res { display: grid; grid-template-columns: 56px 120px 1fr 80px; gap: 12px; align-items: start; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,.06); animation: fade .35s ease; }
+        .res { display: grid; grid-template-columns: 56px 168px 1fr 80px; gap: 12px; align-items: start; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,.06); animation: fade .35s ease; }
         @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-        @media (max-width: 600px) { .res { grid-template-columns: 44px 1fr 64px; } .res img { display: none; } }
+        @media (max-width: 600px) { .res { grid-template-columns: 44px 1fr 64px; } .res img { order: -1; grid-column: 1 / -1; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 14px; } }
         .res.top .num { color: #c084fc; }
         .rank { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; display: flex; flex-direction: column; gap: 2px; }
         .rank span { font-size: 11px; font-weight: 600; }
         .up { color: #34d399; } .down { color: #f87171; } .new { color: #38bdf8; }
-        .res img { width: 120px; height: 72px; object-fit: contain; border-radius: 8px; background: rgba(255,255,255,.03); }
+        .res img { width: 168px; height: 95px; object-fit: cover; border-radius: 10px; background: #12141a; box-shadow: 0 6px 18px rgba(0,0,0,.35); transition: transform .25s ease; } .res:hover img { transform: scale(1.04); }
         .name { font-weight: 600; font-size: 16px; }
         .meta { font-size: 13px; color: #94a3b8; }
         .over { display: inline-block; margin-top: 4px; font-size: 12px; padding: 2px 8px; border-radius: 6px; background: rgba(245,158,11,.15); color: #fbbf24; border: 1px solid rgba(245,158,11,.4); }
@@ -627,13 +627,17 @@ export default function MatchV2() {
 }
 
 function PhotoCredit({ credit }: { credit?: string | null }) {
+  const style: React.CSSProperties = {
+    fontSize: 11, opacity: 0.55, color: "inherit", textDecoration: "none", display: "block",
+    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%", marginTop: 2,
+  };
   if (credit && credit.includes("Wikimedia")) {
     const [text, url] = credit.split("|");
-    return (
-      <div className="credit" style={{ fontSize: 11, opacity: 0.6 }}>
-        {url ? <a href={url} target="_blank" rel="noreferrer">{text}</a> : text}
-      </div>
-    );
+    const m = text.match(/^ภาพ: (.*?) \/ Wikimedia Commons \(([^)]+)\)/);
+    const short = m ? `📷 ${m[1]} · ${m[2]} · Wikimedia Commons` : text;
+    return url
+      ? <a href={url} target="_blank" rel="noreferrer" title={text} style={style}>{short}</a>
+      : <span title={text} style={style}>{short}</span>;
   }
-  return <div className="credit" style={{ fontSize: 11, opacity: 0.6 }}>ภาพประกอบจาก AI</div>;
+  return <span style={style}>✨ ภาพประกอบจาก AI</span>;
 }

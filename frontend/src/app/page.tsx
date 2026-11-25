@@ -1508,7 +1508,7 @@ export default function CarAdvisor() {
             <div className="hero__glow"></div>
             <p className="hero__eyebrow">✦ เพื่อนสาวที่พร้อมช่วยหารถ</p>
             <h1 className="hero__title">
-              มาหารถที่ใช่<br />ไปด้วยกัน<br /><span className="hero__title-accent">นะ</span>
+              มาหารถที่ใช่<br />ไปด้วยกัน<span className="hero__title-accent">นะ</span>
             </h1>
             <p className="hero__sub">
               ตอบคำถามสั้นๆ ให้เราเข้าใจพี่ก่อน แล้วช่วยกันคัดรถ เทียบต้นทุนจริง ดูว่าผ่อนไหวไหม จนพร้อมเดินเข้าโชว์รูมแบบมั่นใจสุดๆ
@@ -1516,7 +1516,7 @@ export default function CarAdvisor() {
 
             <div className="hero__stats">
               <div className="hero__stat">
-                <span className="hero__stat-num">125</span>
+                <span className="hero__stat-num">{CARS_DATASET.length}</span>
                 <span className="hero__stat-label">รุ่นรถให้เลือกดู</span>
               </div>
               <div className="hero__stat">
