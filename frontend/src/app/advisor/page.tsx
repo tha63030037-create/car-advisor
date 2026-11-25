@@ -45,7 +45,13 @@ export default function Advisor() {
   const [picked, setPicked] = useState<Key | null>(null);
   const [budgetK, setBudgetK] = useState(800);
   const [stretch, setStretch] = useState(0.15);
-  const [lifestyles, setLifestyles] = useState<string[]>(["city"]);
+  const [lifestyles, setLifestyles] = useState<string[]>([]);
+  const [budgetSet, setBudgetSet] = useState(false);
+  // which answers came from the visitor (not defaults) — the chat must still ask about the rest
+  const [stretchSet, setStretchSet] = useState(false);
+  const [zonesSet, setZonesSet] = useState(false);
+  // results stay hidden until the visitor has answered everything (chat done, or manual form submitted)
+  const [revealed, setRevealed] = useState(false);
   const [bodies, setBodies] = useState<string[]>([]);
   const [brandOnly, setBrandOnly] = useState<string[]>([]);
   const [seatsMin, setSeatsMin] = useState<number | null>(null);
@@ -104,8 +110,8 @@ export default function Advisor() {
   // ---------------------------------------------------------------- chat
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const applyChatCriteria = (c: any) => {
-    if (c.budget) setBudgetK(Math.round(c.budget / 1000));
-    if (typeof c.budget_stretch === "number") setStretch(c.budget_stretch);
+    if (c.budget) { setBudgetK(Math.round(c.budget / 1000)); setBudgetSet(true); }
+    if (typeof c.budget_stretch === "number") { setStretch(c.budget_stretch); setStretchSet(true); }
     if (Array.isArray(c.lifestyles)) setLifestyles(c.lifestyles);
     if (Array.isArray(c.body_preferred)) setBodies(c.body_preferred);
     if (Array.isArray(c.brand_only)) setBrandOnly(c.brand_only);
@@ -113,7 +119,7 @@ export default function Advisor() {
     if (c.seats_min !== undefined) setSeatsMin(c.seats_min ?? null);
     if (Array.isArray(c.fuel_exclude)) setNoEv(c.fuel_exclude.includes("ev"));
     if (c.min_ncap_stars !== undefined) setNcapMin(!!c.min_ncap_stars);
-    if (c.priorities) setZones(c.priorities);
+    if (c.priorities) { setZones(c.priorities); setZonesSet(true); }
   };
 
   const sendChat = async (text: string | null) => {
@@ -125,12 +131,14 @@ export default function Advisor() {
     try {
       // send what the controls show now, so manual edits and chat stay in sync
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const r: any = await postJSON("/api/chat", { messages: msgs, criteria: { ...criteria, priorities: zones }, asked });
+      // defaults the visitor never chose are sent as null, so the advisor still asks about them
+      const sent = { ...criteria, budget: budgetSet ? criteria.budget : null, budget_stretch: stretchSet ? stretch : null, priorities: zonesSet ? zones : null };
+      const r: any = await postJSON("/api/chat", { messages: msgs, criteria: sent, asked });
       setChatMsgs([...msgs, { role: "assistant", content: r.reply }]);
       setAsked(r.asked);
       setQuick(r.quick_replies || []);
       setChatEngine(r.engine);
-      if (r.done) setChatDone(true);
+      if (r.done) { setChatDone(true); setRevealed(true); }
       applyChatCriteria(r.criteria);
     } catch {
       setChatMsgs([...msgs, { role: "assistant", content: "ขอโทษค่ะ ตอนนี้ที่ปรึกษาตอบไม่ได้ ลองพิมพ์ใหม่ หรือสลับไปแท็บ \"ตั้งค่าเอง\" ได้เลยค่ะ" }]);
@@ -180,6 +188,7 @@ export default function Advisor() {
 
   // re-rank automatically whenever anything changes — the demo moment in spec 6
   useEffect(() => {
+    if (!revealed) return;
     const t = setTimeout(async () => {
       setLoading(true);
       setErr(null);
@@ -196,14 +205,22 @@ export default function Advisor() {
       }
     }, 250);
     return () => clearTimeout(t);
-  }, [criteria]);
+  }, [criteria, revealed]);
+
+  const manualMissing = [
+    !budgetSet && "ตั้งงบประมาณ",
+    lifestyles.length === 0 && "เลือกไลฟ์สไตล์อย่างน้อย 1 ข้อ",
+  ].filter(Boolean) as string[];
+  const reveal = () => { setRevealed(true); setTimeout(() => scrollTo(resultsTop.current), 350); };
+  const TOPIC_TH: Record<string, string> = { usage: "การใช้งาน", lifestyle: "ไลฟ์สไตล์", budget: "งบประมาณ", stretch: "งบยืดได้แค่ไหน", brand: "แบรนด์", priorities: "เรื่องที่สำคัญ" };
+  const answered = chatDone ? asked : asked.slice(0, -1);
 
   const toggle = (arr: string[], v: string, set: (x: string[]) => void) =>
     set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
 
   const moveTo = (z: Zone) => {
     if (!picked) return;
-    setZones({ ...zones, [picked]: z });
+    setZones({ ...zones, [picked]: z }); setZonesSet(true);
     setPicked(null);
   };
 
@@ -212,8 +229,8 @@ export default function Advisor() {
       <header className="hero">
         <h1>หาคันที่ใช่</h1>
         <p>{mode === "chat"
-          ? "เล่าให้ที่ปรึกษาฟังว่าจะใช้รถยังไง งบเท่าไร ระบบจะกรอกเงื่อนไขและจัดอันดับรถให้ทันที"
-          : "เรียงการ์ด 5 ใบตามความสำคัญ แล้วตั้งงบและเงื่อนไข อันดับรถทางขวาเปลี่ยนตามทุกครั้งที่คุณขยับ"}</p>
+          ? "ตอบคำถามของที่ปรึกษาสักครู่ พอได้ข้อมูลครบ ระบบจะจัดอันดับรถที่เหมาะกับคุณที่สุด"
+          : "เรียงการ์ด 5 ใบตามความสำคัญ ตั้งงบและไลฟ์สไตล์ แล้วกดดูรถที่เหมาะกับคุณ หลังจากนั้นอันดับจะเปลี่ยนตามทุกครั้งที่คุณขยับ"}</p>
       </header>
 
       <div className="layout">
@@ -257,15 +274,15 @@ export default function Advisor() {
                 <input value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="พิมพ์เล่าได้เลย เช่น มีลูก 2 คน งบ 9 แสน" maxLength={500} aria-label="ข้อความถึงที่ปรึกษา" enterKeyHint="send" autoComplete="off" />
                 <button type="submit" disabled={chatBusy || !chatInput.trim()}>ส่ง</button>
               </form>
-              <p className="hint">ที่ปรึกษาจะกรอกเงื่อนไขให้ในแท็บ &quot;ตั้งค่าเอง&quot; และจัดอันดับรถให้ทันที {chatEngine === "rules" && "· โหมดอ่านคำสำคัญ (ยังไม่ได้เชื่อม AI)"}</p>
-              <div className="mini">
+              <p className="hint">{revealed ? "อยากปรับอะไร พิมพ์บอกได้เลย อันดับจะเปลี่ยนตาม" : "ตอบครบแล้วรถที่เหมาะกับคุณจะขึ้นทันที"} {chatEngine === "rules" && "· โหมดอ่านคำสำคัญ (ยังไม่ได้เชื่อม AI)"}</p>
+              {(zonesSet || revealed) && <div className="mini">
                 <div className="wbar" aria-label="น้ำหนักแต่ละเกณฑ์">
                   {CARDS.map((c) => (
                     <div key={c.key} style={{ width: `${weights[c.key]}%`, background: CRIT_COLOR[c.key] }} title={`${c.label} ${weights[c.key]}%`} />
                   ))}
                 </div>
                 <div className="legend">{CARDS.map((c) => <span key={c.key}><i style={{ background: CRIT_COLOR[c.key] }} />{c.label} {weights[c.key]}%</span>)}</div>
-              </div>
+              </div>}
             </div>
           )}
 
@@ -280,7 +297,7 @@ export default function Advisor() {
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => {
                   const k = e.dataTransfer.getData("text") as Key;
-                  if (k) setZones({ ...zones, [k]: z });
+                  if (k) { setZones({ ...zones, [k]: z }); setZonesSet(true); }
                 }}
               >
                 <div className="zone-head">
@@ -315,12 +332,12 @@ export default function Advisor() {
 
           <h2>2. งบประมาณ</h2>
           <div className="budget">
-            <input type="range" min={300} max={3500} step={10} value={budgetK} onChange={(e) => setBudgetK(+e.target.value)} />
-            <div className="bval">{baht(budgetK * 1000)} บาท</div>
+            <input type="range" min={300} max={3500} step={10} value={budgetK} onChange={(e) => { setBudgetK(+e.target.value); setBudgetSet(true); }} />
+            <div className="bval">{budgetSet ? `${baht(budgetK * 1000)} บาท` : <span className="unset">เลื่อนเพื่อตั้งงบ</span>}</div>
           </div>
           <div className="chips">
             {STRETCH.map((s) => (
-              <button key={s.v} className={`chip ${stretch === s.v ? "on" : ""}`} onClick={() => setStretch(s.v)}>{s.label}</button>
+              <button key={s.v} className={`chip ${stretch === s.v ? "on" : ""}`} onClick={() => { setStretch(s.v); setStretchSet(true); }}>{s.label}</button>
             ))}
           </div>
 
@@ -355,6 +372,12 @@ export default function Advisor() {
               <button key={b.key} className={`chip ${bodies.includes(b.key) ? "on" : ""}`} onClick={() => toggle(bodies, b.key, setBodies)}>{b.label}</button>
             ))}
           </div>
+          {!revealed && (
+            <div className="submit">
+              <button className="go" disabled={manualMissing.length > 0} onClick={reveal}>ดูรถที่เหมาะกับคุณ</button>
+              <p className="hint">{manualMissing.length > 0 ? `ยังขาด: ${manualMissing.join(" และ ")}` : "พร้อมแล้ว ข้อ 4–5 ไม่ตอบก็ได้"}</p>
+            </div>
+          )}
           {brandExclude.length > 0 && (
             <div className="excl">
               ไม่เอาแบรนด์: {brandExclude.join(", ")}
@@ -365,7 +388,33 @@ export default function Advisor() {
         </section>
 
         {/* ------------------------------------------------ right: results */}
-        <section className="results" ref={resultsTop}>
+        <section className={`results ${revealed ? "" : "waiting"}`} ref={resultsTop}>
+          {!revealed ? (
+            <div className="wait">
+              <h2>รถที่เหมาะกับคุณจะขึ้นตรงนี้</h2>
+              {mode === "chat" ? (
+                <>
+                  <p className="muted">ที่ปรึกษาจะถามประมาณ 6 เรื่อง ตอบครบแล้วระบบจะจัดอันดับจากรถ 175 รุ่นให้ทันที</p>
+                  <ul className="todo">
+                    {Object.entries(TOPIC_TH).map(([k, v]) => (
+                      <li key={k} className={answered.includes(k) ? "ok" : asked[asked.length - 1] === k ? "now" : ""}>
+                        <span aria-hidden>{answered.includes(k) ? "✓" : ""}</span>{v}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                <>
+                  <p className="muted">ตั้งงบและเลือกไลฟ์สไตล์ทางซ้าย แล้วกด &quot;ดูรถที่เหมาะกับคุณ&quot;</p>
+                  <ul className="todo">
+                    <li className="ok"><span aria-hidden>✓</span>ลำดับการ์ด (ใช้ตั้งต้นได้)</li>
+                    <li className={budgetSet ? "ok" : ""}><span aria-hidden>{budgetSet ? "✓" : ""}</span>งบประมาณ</li>
+                    <li className={lifestyles.length ? "ok" : ""}><span aria-hidden>{lifestyles.length ? "✓" : ""}</span>ไลฟ์สไตล์</li>
+                  </ul>
+                </>
+              )}
+            </div>
+          ) : (<>
           <div className="rhead">
             <h2>ผลการจับคู่</h2>
             {mode === "chat" && <button className="back-chat" onClick={() => scrollTo(chatTop.current)}>↑ กลับไปคุยต่อ</button>}
@@ -448,10 +497,11 @@ export default function Advisor() {
             );
           })}
           <p className="foot">คะแนนคำนวณจากสูตรเดียวกันทุกคัน AI ไม่ได้เลือกรถเอง <Link href="/how-it-works" className="link">ดูวิธีคิดคะแนน</Link></p>
+          </>)}
         </section>
       </div>
 
-      {mode === "chat" && !resultsInView && data && data.results.length > 0 && (
+      {mode === "chat" && revealed && !resultsInView && data && data.results.length > 0 && (
         <button className="jump" onClick={() => scrollTo(resultsTop.current)}>
           ดูผล: อันดับ 1 {data.results[0].name} เข้ากัน {Math.round(data.results[0].score)}%
         </button>
@@ -569,6 +619,22 @@ export default function Advisor() {
           .back-chat { display: inline-block; background: var(--surface); border: 1px solid var(--line); color: var(--ink-2); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 13px; min-height: 36px; }
           .jump { display: block; position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 45; min-height: 50px; border: 0; border-radius: 16px; background: var(--accent); color: #fff; font: inherit; font-size: 15px; font-weight: 600; box-shadow: 0 10px 28px rgba(15,110,90,.35); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 16px; }
         }
+        .unset { color: var(--muted); font-weight: 500; font-size: 14px; }
+        .submit { position: sticky; bottom: -18px; margin: 20px -18px -18px; padding: 14px 18px 18px; background: linear-gradient(rgba(255,255,255,0), var(--surface) 30%); }
+        .go { width: 100%; min-height: 50px; border: 0; border-radius: 14px; background: var(--accent); color: #fff; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; }
+        .go:disabled { background: #B9C6CF; cursor: default; }
+        .submit .hint { margin-top: 6px; text-align: center; }
+        .results.waiting { border-style: dashed; background: #FAFBFC; }
+        .wait { padding: 24px 8px; max-width: 420px; }
+        .wait h2 { font-size: 18px; margin: 0 0 6px; }
+        .todo { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 8px; }
+        .todo li { display: flex; align-items: center; gap: 10px; font-size: 14.5px; color: var(--muted); }
+        .todo li span { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--line); display: grid; place-items: center; font-size: 12px; font-weight: 700; flex: none; }
+        .todo li.ok { color: var(--ink); }
+        .todo li.ok span { background: var(--accent); border-color: var(--accent); color: #fff; }
+        .todo li.now { color: var(--ink); font-weight: 600; }
+        .todo li.now span { border-color: var(--accent); }
+        @media (max-width: 960px) { .results.waiting { display: none; } }
         .excl { margin-top: 12px; font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
       `}</style>
     </div>
