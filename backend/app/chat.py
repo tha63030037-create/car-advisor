@@ -93,7 +93,7 @@ SYSTEM_PROMPT = """คุณคือที่ปรึกษาการเล�
 - ถามให้รู้การใช้ชีวิตจริงของลูกค้า แล้วสรุปเป็นเงื่อนไขตามโครง JSON ที่กำหนด
 - ถามทีละ 1 ข้อ สั้น เป็นกันเอง ไม่ใช้ศัพท์เทคนิค
 - ข้อมูลที่ต้องได้ก่อนแนะนำ: งบ, จำนวนคนที่นั่งประจำ, การใช้งานหลัก, แบรนด์ที่เจาะจงหรือไม่เอา, ลำดับความสำคัญของ 5 เรื่อง
-- ถ้าลูกค้าบอกว่า "เอาเฉพาะ" แบรนด์ใด ใส่ใน brand_only ถ้าแค่ "ชอบ" ให้ถามยืนยันว่ารับแบรนด์อื่นได้ไหม
+- แบรนด์: "ชอบ X" หรือ "ชอบ X ที่สุด" ใส่ใน brand_preferred (ยังดูแบรนด์อื่นด้วย) ; ใส่ brand_only เฉพาะเมื่อลูกค้าพูดชัดว่า "เอาแค่ X", "เฉพาะ X" หรือ "ไม่เอาแบรนด์อื่น" เท่านั้น
 - ถามเรื่องงบให้รู้ว่ายืดได้แค่ไหน: ไม่ยืดเลย (0) ยืดได้นิดหน่อย (0.1) หรือยืดได้ถ้าคุ้ม (0.2)
 
 ข้อห้าม
@@ -105,7 +105,7 @@ SYSTEM_PROMPT = """คุณคือที่ปรึกษาการเล�
 - ถ้าลูกค้าคุยเรื่องอื่นที่ไม่เกี่ยวกับการเลือกรถ ให้พากลับมาอย่างสุภาพ
 
 โครง criteria (ส่งกลับทุกช่อง ค่าที่ไม่รู้ให้เป็น null):
-{"budget": int|null, "budget_stretch": 0|0.1|0.15|0.2|null, "brand_only": [str], "brand_exclude": [str],
+{"budget": int|null, "budget_stretch": 0|0.1|0.15|0.2|null, "brand_only": [str], "brand_exclude": [str], "brand_preferred": [str],
  "seats_min": int|null, "fuel_exclude": [str], "min_ncap_stars": 3|null, "body_preferred": [str], "lifestyles": [str], "km_per_year": int|null,
  "priorities": {"budget":1-3,"lifestyle":1-3,"running_cost":1-3,"safety":1-3,"design":1-3}|null}
 lifestyles ใช้ได้เฉพาะ: school_run, camping, merit_family, pets, city, long_trips, work_cargo
@@ -234,6 +234,10 @@ def rules_extract(text, crit):
     if "ไม่จำกัดยี่ห้อ" in text or "ยี่ห้อไหนก็ได้" in text:
         only = set()
     c["brand_only"] = sorted(only)
+    liked = set(c.get("brand_preferred") or [])
+    for part in re.findall(r"ชอบ([^,\.]*)", text):
+        liked.update(b for b in brands_in(part) if b not in only)
+    c["brand_preferred"] = sorted(liked)
 
     if re.search(r"สำคัญ(ที่)?สุด|เน้น|มาก่อน", text):
         pr = dict(c.get("priorities") or {k: 2 for k in cfg.CRITERIA})
@@ -276,6 +280,8 @@ def summarize(c):
         parts.append("ใช้งาน: " + ", ".join(cfg.LIFESTYLE_TH[x] for x in c["lifestyles"]))
     if c.get("brand_only"):
         parts.append("เอาเฉพาะ " + ", ".join(c["brand_only"]))
+    if c.get("brand_preferred"):
+        parts.append("ชอบ " + ", ".join(c["brand_preferred"]))
     if c.get("brand_exclude"):
         parts.append("ไม่เอา " + ", ".join(c["brand_exclude"][:4]) + ("…" if len(c["brand_exclude"]) > 4 else ""))
     if c.get("fuel_exclude"):
@@ -327,7 +333,7 @@ def _clean_criteria(raw):
         v = raw.get(k) or []
         if isinstance(v, list):
             out[k] = [x for x in v if x in allowed]
-    for k in ("brand_only", "brand_exclude"):
+    for k in ("brand_only", "brand_exclude", "brand_preferred"):
         v = raw.get(k) or []
         if isinstance(v, list):
             out[k] = [x for x in v if isinstance(x, str) and x in BRANDS]
@@ -433,6 +439,22 @@ def llm_turn(req, provider, api_key):
     raise RuntimeError("LLM returned invalid JSON twice: %s" % last_err)
 
 
+EXCLUSIVE_BRAND = re.compile(r"เฉพาะ|เอาแต่|เท่านั้น|แค่(ยี่ห้อ|แบรนด์)?\s*[A-Za-zก-๙]|ต้องเป็น|ไม่เอา(ยี่ห้อ|แบรนด์)อื่น|ไม่ดู(ยี่ห้อ|แบรนด์)อื่น")
+
+
+def guard_brand_only(req, crit):
+    """The model sometimes turns "ชอบ Subaru" into a hard brand filter, which can leave one car.
+    A brand only becomes a filter when the user's own words say so; otherwise it is a preference."""
+    before = set(req.criteria.get("brand_only") or [])
+    new = [b for b in (crit.get("brand_only") or []) if b not in before]
+    last_user = next((m.content for m in reversed(req.messages) if m.role == "user"), "")
+    if new and not EXCLUSIVE_BRAND.search(last_user):
+        crit = dict(crit)
+        crit["brand_only"] = [b for b in crit["brand_only"] if b in before]
+        crit["brand_preferred"] = sorted(set(crit.get("brand_preferred") or []) | set(new))
+    return crit
+
+
 # --------------------------------------------------------------------- API
 def chat_turn(req):
     provider, api_key = pick_provider()
@@ -441,6 +463,7 @@ def chat_turn(req):
     if provider:
         try:
             crit, reply, quick = llm_turn(req, provider, api_key)
+            crit = guard_brand_only(req, crit)
             engine = "llm:" + provider
             nt = next_topic(crit, asked)
             if nt:

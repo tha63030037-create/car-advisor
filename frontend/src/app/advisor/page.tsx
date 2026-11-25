@@ -54,6 +54,7 @@ export default function Advisor() {
   const [revealed, setRevealed] = useState(false);
   const [bodies, setBodies] = useState<string[]>([]);
   const [brandOnly, setBrandOnly] = useState<string[]>([]);
+  const [brandPref, setBrandPref] = useState<string[]>([]);
   const [seatsMin, setSeatsMin] = useState<number | null>(null);
   const [noEv, setNoEv] = useState(false);
   const [ncapMin, setNcapMin] = useState(false);
@@ -90,9 +91,9 @@ export default function Advisor() {
   const inactive = useMemo(() => {
     const out: Key[] = [];
     if (lifestyles.length === 0) out.push("lifestyle");
-    if (bodies.length === 0) out.push("design");
+    if (bodies.length === 0 && brandPref.length === 0) out.push("design");
     return out;
-  }, [lifestyles, bodies]);
+  }, [lifestyles, bodies, brandPref]);
   const weights = useMemo(() => {
     const total = CARDS.reduce((s, c) => s + (inactive.includes(c.key) ? 0 : zones[c.key]), 0) || 1;
     return Object.fromEntries(CARDS.map((c) => [c.key, inactive.includes(c.key) ? 0 : Math.round((100 * zones[c.key]) / total)])) as Record<Key, number>;
@@ -103,6 +104,7 @@ export default function Advisor() {
     budget: budgetK * 1000,
     budget_stretch: stretch,
     brand_only: brandOnly,
+    brand_preferred: brandPref,
     brand_exclude: brandExclude,
     seats_min: seatsMin,
     fuel_only: null,
@@ -113,7 +115,7 @@ export default function Advisor() {
     km_per_year: 15000,
     priorities: zones,
     top_n: 10,
-  }), [budgetK, stretch, brandOnly, brandExclude, seatsMin, noEv, bodies, lifestyles, zones, ncapMin]);
+  }), [budgetK, stretch, brandOnly, brandPref, brandExclude, seatsMin, noEv, bodies, lifestyles, zones, ncapMin]);
 
   // ---------------------------------------------------------------- chat
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -123,6 +125,7 @@ export default function Advisor() {
     if (Array.isArray(c.lifestyles)) setLifestyles(c.lifestyles);
     if (Array.isArray(c.body_preferred)) setBodies(c.body_preferred);
     if (Array.isArray(c.brand_only)) setBrandOnly(c.brand_only);
+    if (Array.isArray(c.brand_preferred)) setBrandPref(c.brand_preferred);
     if (Array.isArray(c.brand_exclude)) setBrandExclude(c.brand_exclude);
     if (c.seats_min !== undefined) setSeatsMin(c.seats_min ?? null);
     if (Array.isArray(c.fuel_exclude)) setNoEv(c.fuel_exclude.includes("ev"));
@@ -374,10 +377,16 @@ export default function Advisor() {
             <button className={`chip ${ncapMin ? "on" : ""}`} onClick={() => setNcapMin(!ncapMin)} title="รถที่ยังไม่มีผลทดสอบจะยังแสดงอยู่">🛡️ ไม่เอารถผลทดสอบชนต่ำกว่า 3 ดาว</button>
           </div>
 
-          <h2>5. ทรงที่ชอบ <small>(ใช้กับการ์ดดีไซน์)</small></h2>
+          <h2>5. ทรงและแบรนด์ที่ชอบ <small>(ใช้กับการ์ดดีไซน์ ไม่ตัดรถคันอื่น)</small></h2>
           <div className="chips">
             {BODIES.map((b) => (
               <button key={b.key} className={`chip ${bodies.includes(b.key) ? "on" : ""}`} onClick={() => toggle(bodies, b.key, setBodies)}>{b.label}</button>
+            ))}
+          </div>
+          <label className="sub">แบรนด์ที่ชอบ (ได้คะแนนดีไซน์เพิ่ม แต่ยังเห็นแบรนด์อื่น)</label>
+          <div className="chips small">
+            {BRANDS.map((b) => (
+              <button key={b} className={`chip ${brandPref.includes(b) ? "on" : ""}`} onClick={() => toggle(brandPref, b, setBrandPref)}>{b}</button>
             ))}
           </div>
           {!revealed && (
@@ -433,7 +442,15 @@ export default function Advisor() {
 
           {data?.too_few_results && (
             <div className="alert warn">
-              เหลือรถไม่ถึง 3 คัน — เงื่อนไขที่ตัดรถออกมากที่สุดคือ <b>{data.filter_impact[0]?.label}</b> ({data.filter_impact[0]?.removed} คัน) ลองผ่อนเงื่อนไขนี้ไหม?
+              เหลือรถ {data.passed_filters} คัน เงื่อนไขที่ตัดรถออกมากที่สุดคือ <b>{data.filter_impact[0]?.label}</b> ({data.filter_impact[0]?.removed} คัน) ลองผ่อนเงื่อนไขนี้ไหม
+              {data.near_misses && data.near_misses.length > 0 && (
+                <ul className="nm">{data.near_misses.map((m) => <li key={m.id}><Link href={`/car/${m.id}`}>{m.name}</Link> {baht(m.price)} บาท · {m.reason}</li>)}</ul>
+              )}
+            </div>
+          )}
+          {data?.preference_notes && data.preference_notes.length > 0 && (
+            <div className="prefs">
+              {data.preference_notes.map((n) => <p key={n.kind + n.key}><Link href={`/car/${n.car_id}`}>{n.kind === "brand" ? "แบรนด์ที่คุณชอบ" : "ทรงที่คุณอยากได้"}</Link> · {n.text}</p>)}
             </div>
           )}
 
@@ -627,6 +644,11 @@ export default function Advisor() {
           .back-chat { display: inline-block; background: var(--surface); border: 1px solid var(--line); color: var(--ink-2); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 13px; min-height: 36px; }
           .jump { display: block; position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 45; min-height: 50px; border: 0; border-radius: 16px; background: var(--accent); color: #fff; font: inherit; font-size: 15px; font-weight: 600; box-shadow: 0 10px 28px rgba(15,110,90,.35); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 16px; }
         }
+        .nm { margin: 8px 0 0; padding-left: 18px; }
+        .nm li { margin: 2px 0; }
+        .v2 :global(.nm a), .v2 :global(.prefs a) { color: inherit; font-weight: 600; }
+        .prefs { margin-top: 12px; padding: 10px 14px; border-radius: 12px; background: #EEF4FB; color: #1D4F86; font-size: 14px; }
+        .prefs p { margin: 2px 0; }
         .unset { color: var(--muted); font-weight: 500; font-size: 14px; }
         .submit { position: sticky; bottom: -18px; margin: 20px -18px -18px; padding: 14px 18px 18px; background: linear-gradient(rgba(255,255,255,0), var(--surface) 30%); }
         .go { width: 100%; min-height: 50px; border: 0; border-radius: 14px; background: var(--accent); color: #fff; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; }

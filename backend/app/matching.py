@@ -47,6 +47,8 @@ class Criteria(BaseModel):
     budget_stretch: float = Field(cfg.DEFAULT_STRETCH, ge=0, le=0.5)
     brand_only: List[str] = []
     brand_exclude: List[str] = []
+    # "ชอบ Subaru" is a taste, not a filter: it counts inside the design card and other brands stay in
+    brand_preferred: List[str] = []
     seats_min: Optional[int] = Field(None, ge=1, le=15)
     fuel_only: Optional[List[str]] = None
     fuel_exclude: List[str] = []
@@ -300,16 +302,83 @@ def safety_warning(car):
     return None
 
 
-def score_design(car, preferred):
-    if not preferred:
-        return None  # no body preference: left out of the score
-    body = car["bodyType"]
-    if body in preferred:
-        return 1.0
-    for p in preferred:
-        if body in cfg.BODY_SIMILAR.get(p, []):
-            return 0.5
-    return 0.0
+def score_design(car, preferred, brands=None):
+    """Body type match and, when given, brand taste. None when the user stated neither (left out)."""
+    parts = []
+    if preferred:
+        body = car["bodyType"]
+        if body in preferred:
+            parts.append(1.0)
+        elif any(body in cfg.BODY_SIMILAR.get(p, []) for p in preferred):
+            parts.append(0.5)
+        else:
+            parts.append(0.0)
+    if brands:
+        parts.append(1.0 if _norm_brand(car["brand"]) in {_norm_brand(b) for b in brands} else 0.0)
+    return sum(parts) / len(parts) if parts else None
+
+
+def near_misses(cars, c, limit=4):
+    """Cars that fail exactly one filter, so the user hears what they are missing instead of
+    getting a list of one. Cars matching a stated brand/body preference come first."""
+    checks = _filter_checks(c)
+    ceiling = round(c.budget * (1 + c.budget_stretch))
+    pref_brands = {_norm_brand(b) for b in (c.brand_preferred or [])}
+    out = []
+    for car in cars:
+        failed = [(name, label) for name, label, fn in checks if not fn(car)]
+        if len(failed) != 1:
+            continue
+        name, label = failed[0]
+        if name == "budget_ceiling":
+            reason = "ราคาเกินเพดานงบ %s บาท อยู่ %s บาท" % (format(int(ceiling), ","), format(int(car["price"] - ceiling), ","))
+        else:
+            reason = "ไม่ผ่านเงื่อนไข: " + label
+        pref = (_norm_brand(car["brand"]) in pref_brands) + (car["bodyType"] in (c.body_preferred or []))
+        out.append((-pref, abs(car["price"] - c.budget), {
+            "id": car["id"], "name": car["name"], "price": car["price"], "bodyType": car["bodyType"],
+            "photo": car["photo"], "failed_filter": name, "reason": reason,
+        }))
+    out.sort(key=lambda x: (x[0], x[1]))
+    if out and out[0][0] < 0:  # something matches a stated preference: show only those
+        out = [x for x in out if x[0] < 0]
+    return [x[2] for x in out[:limit]]
+
+
+BODY_TH = {"sedan": "ซีดาน", "hatchback": "แฮทช์แบ็ก", "suv": "SUV", "ppv": "PPV", "mpv": "MPV / รถตู้",
+           "pickup": "กระบะ", "coupe": "คูเป้"}
+
+
+def preference_notes(cars, rows, c):
+    """Tell the user where the brands and body types they asked for ended up, in plain words —
+    even when they are not in the top 10, or did not pass the filters at all."""
+    notes = []
+    ceiling = round(c.budget * (1 + c.budget_stretch))
+    checks = _filter_checks(c)
+    for b in c.brand_preferred or []:
+        mine = [r for r in rows if _norm_brand(r["brand"]) == _norm_brand(b)]
+        if mine:
+            best = mine[0]
+            low = min(((v, k) for k, v in best["criteria"].items() if v is not None and k != "design"), default=None)
+            why = (" คะแนนที่ดึงลงคือ%s (%d/100)" % (cfg.CRITERIA_TH[low[1]], round(low[0] * 100))) if low and low[0] < 0.6 else ""
+            notes.append({"kind": "brand", "key": b, "car_id": best["id"],
+                          "text": "%s ที่เข้ากับคุณที่สุดคือ %s อยู่อันดับ %d เข้ากัน %d%%%s" % (b, best["name"], best["rank"], round(best["score"]), why)})
+        else:
+            theirs = sorted((x for x in cars if _norm_brand(x["brand"]) == _norm_brand(b)), key=lambda x: x["price"])
+            if theirs:
+                x = theirs[0]
+                failed = [label for _, label, fn in checks if not fn(x)]
+                notes.append({"kind": "brand", "key": b, "car_id": x["id"],
+                              "text": "%s ไม่มีรุ่นที่ผ่านเงื่อนไข รุ่นที่ถูกที่สุดคือ %s %s บาท (%s)" % (b, x["name"], format(x["price"], ","), ", ".join(failed) or "ไม่ผ่านเงื่อนไข")})
+    for body in c.body_preferred or []:
+        if any(r["bodyType"] == body for r in rows):
+            continue
+        theirs = sorted((x for x in cars if x["bodyType"] == body), key=lambda x: x["price"])[:3]
+        if theirs:
+            notes.append({"kind": "body", "key": body, "car_id": theirs[0]["id"],
+                          "text": "ไม่มี%sในงบ (เพดาน %s บาท) รุ่นที่ถูกที่สุดคือ %s" % (BODY_TH.get(body, body), format(ceiling, ","),
+                                  ", ".join("%s %s บาท" % (x["name"], format(x["price"], ",")) for x in theirs))})
+    return notes
 
 
 # ------------------------------------------------------------------ main
@@ -335,7 +404,7 @@ def recommend(c, cars=None):
             "lifestyle": s_life,
             "running_cost": s_cost,
             "safety": score_safety(car),
-            "design": score_design(car, c.body_preferred),
+            "design": score_design(car, c.body_preferred, c.brand_preferred),
         }
         # A criterion with unknown data is skipped for this car: re-normalise the remaining weights.
         usable = {k: w for k, w in weights.items() if scores[k] is not None}
@@ -373,7 +442,7 @@ def recommend(c, cars=None):
         })
 
     # criteria the user gave no input for (no lifestyle / no body type) are left out for every car
-    inactive = [k for k in cfg.CRITERIA if (k == "lifestyle" and not c.lifestyles) or (k == "design" and not c.body_preferred)]
+    inactive = [k for k in cfg.CRITERIA if (k == "lifestyle" and not c.lifestyles) or (k == "design" and not c.body_preferred and not c.brand_preferred)]
     active_w = {k: w for k, w in weights.items() if k not in inactive}
     aw = sum(active_w.values()) or 1.0
 
@@ -394,6 +463,8 @@ def recommend(c, cars=None):
         # 4.1: never relax filters silently — tell the user which one cut the most
         "too_few_results": too_few,
         "filter_impact": removed_by if too_few else removed_by[:3],
+        "near_misses": near_misses(cars, c) if too_few else [],
+        "preference_notes": preference_notes(cars, rows, c),
     }
 
 

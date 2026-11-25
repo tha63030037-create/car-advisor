@@ -58,3 +58,24 @@ def test_scores_are_spread_out_not_all_ninety_plus():
     rows = run()["results"]
     assert sum(r["score"] >= 90 for r in rows) <= 5
     assert len({r["score"] for r in rows[:10]}) >= 8
+
+
+def test_liking_a_brand_is_a_preference_not_a_filter():
+    from app.chat import ChatRequest, guard_brand_only
+    liked = ChatRequest(messages=[{"role": "user", "content": "ชอบ subaru ที่สุด"}], criteria={}, asked=[])
+    out = guard_brand_only(liked, {"brand_only": ["Subaru"]})
+    assert out["brand_only"] == [] and out["brand_preferred"] == ["Subaru"]
+    only = ChatRequest(messages=[{"role": "user", "content": "เอาแค่ subaru ไม่เอาแบรนด์อื่น"}], criteria={}, asked=[])
+    assert guard_brand_only(only, {"brand_only": ["Subaru"]})["brand_only"] == ["Subaru"]
+
+
+def test_user_is_told_where_their_brand_and_body_ended_up():
+    r = run(budget=1500000, body_preferred=["coupe"], brand_preferred=["Subaru"])
+    assert r["passed_filters"] > 3
+    texts = " ".join(n["text"] for n in r["preference_notes"])
+    assert "Subaru Forester" in texts and "Subaru BRZ" in texts  # BRZ is the coupe, but over budget
+
+
+def test_one_car_left_comes_with_near_misses():
+    r = run(budget=1500000, body_preferred=["coupe"], brand_only=["Subaru"])
+    assert r["too_few_results"] and r["near_misses"][0]["name"] == "Subaru BRZ"

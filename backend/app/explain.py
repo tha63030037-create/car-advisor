@@ -33,6 +33,8 @@ EXPLAIN_PROMPT = """คุณคือพนักงานขายรถที
 - ค่าที่อยู่ใน estimated_fields ต้องบอกว่าเป็นค่าประมาณ
 - ห้ามเปลี่ยนลำดับของรถ และห้ามพูดถึงรถรุ่นอื่นนอกจาก 3 คันนี้
 - ห้ามพูดเรื่องไฟแนนซ์
+- เขียนราคาและตัวเลขเป็นตัวเลขอารบิกพร้อมจุลภาค เช่น 1,399,000 บาท ห้ามเขียนเป็นคำอ่าน
+- ถ้ามีรถน้อยกว่า 3 คัน ให้อธิบายเท่าที่มี ไม่ต้องขอโทษ
 - ตอบเป็นข้อความธรรมดา ไม่ใช้ markdown ไม่เกิน 220 คำ"""
 
 ALL_NAMES = sorted({c["name"] for c in CARS}, key=len, reverse=True)
@@ -104,12 +106,30 @@ def text_is_grounded(text: str, top: List[Dict[str, Any]]) -> bool:
     return not any(n in rest for n in ALL_NAMES if n not in allowed and len(n) >= 6)
 
 
+def near_miss_text(res) -> str:
+    """Deterministic note added when fewer than 3 cars pass: what was left out and why."""
+    pref = [n["text"] + " ค่ะ" for n in res.get("preference_notes") or []]
+    if not res.get("too_few_results"):
+        return "\n\n".join(pref)
+    n = res["passed_filters"]
+    lines = ["มีรถผ่านเงื่อนไขของคุณ %d คันค่ะ" % n if n else "ยังไม่มีรถที่ผ่านเงื่อนไขของคุณค่ะ"]
+    if res.get("near_misses"):
+        lines.append("รุ่นที่เกือบเข้าเงื่อนไข: " + " · ".join(
+            "%s %s บาท (%s)" % (m["name"], _baht(m["price"]), m["reason"]) for m in res["near_misses"][:3]))
+    top = (res.get("filter_impact") or [{}])[0]
+    if top.get("label"):
+        lines.append("เงื่อนไขที่ตัดรถออกมากที่สุดคือ %s ถ้าผ่อนข้อนี้จะเห็นตัวเลือกมากขึ้นค่ะ" % top["label"])
+    lines += pref
+    return "\n\n".join(lines)
+
+
 def explain(criteria: Criteria) -> Dict[str, Any]:
     c = criteria.model_copy(update={"top_n": 3})
     res = recommend(c)
     top = res["results"][:3]
+    note = near_miss_text(res)
     if not top:
-        return {"text": "ยังไม่มีรถที่ผ่านเงื่อนไขค่ะ ลองผ่อนเงื่อนไขดูนะคะ", "engine": "template", "ids": []}
+        return {"text": note or "ยังไม่มีรถที่ผ่านเงื่อนไขค่ะ ลองผ่อนเงื่อนไขดูนะคะ", "engine": "template", "ids": []}
     provider, key = pick_provider()
     if provider:
         payload = {"criteria": c.model_dump(exclude={"top_n"}), "cars": [_facts(r) for r in top]}
@@ -120,8 +140,8 @@ def explain(criteria: Criteria) -> Dict[str, Any]:
             # small models sometimes emit a stray glyph from another script inside Thai words
             text = re.sub(r"[^\u0000-\u024F\u0E00-\u0E7F\u2000-\u206F\u20AC\u0E3F]", "", text)[:2500]
             if text and text_is_grounded(text, top):
-                return {"text": text, "engine": "llm:" + provider, "ids": [r["id"] for r in top]}
+                return {"text": text + ("\n\n" + note if note else ""), "engine": "llm:" + provider, "ids": [r["id"] for r in top]}
             print("[explain] LLM text failed the grounding check, using template")
         except Exception as e:
             print("[explain] LLM failed, using template:", repr(e)[:400])
-    return {"text": template_text(top), "engine": "template", "ids": [r["id"] for r in top]}
+    return {"text": template_text(top) + ("\n\n" + note if note else ""), "engine": "template", "ids": [r["id"] for r in top]}

@@ -49,6 +49,8 @@ export interface RecommendResponse {
   results: Result[];
   too_few_results: boolean;
   filter_impact: { filter: string; label: string; removed: number }[];
+  near_misses?: { id: number; name: string; price: number; bodyType: string; reason: string }[];
+  preference_notes?: { kind: "brand" | "body"; key: string; car_id: number; text: string }[];
 }
 
 export interface CarSummary {
