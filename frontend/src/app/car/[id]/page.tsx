@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import { CarPhoto, CompareButton, PhotoCredit, Stars } from "../../components/Site";
+import { CarPhoto, CompareButton, crashLabel, PhotoCredit, Stars } from "../../components/Site";
 import {
   ADAS_TH, baht, BODY_TH, CarDetail, CARDS, CRIT_COLOR, FUEL_TH, getJSON, loadLastCriteria, parseCredit, postJSON,
   RecommendResponse, Result,
@@ -92,7 +92,7 @@ export default function CarPage({ params }: { params: { id: string } }) {
             <div><dt>อัตราสิ้นเปลือง</dt><dd className="num">{econ} <E k="economy" /></dd></div>
             <div><dt>กำลัง</dt><dd className="num">{car.horsepower} แรงม้า</dd></div>
             <div><dt>ค่าใช้จ่ายต่อปี</dt><dd className="num">{car.annual_cost ? `~${baht(car.annual_cost.total)} บาท` : "ไม่มีข้อมูล"}</dd></div>
-            <div><dt>ผลทดสอบชน</dt><dd><Stars n={car.asean_ncap_stars} /></dd></div>
+            <div><dt>ผลทดสอบชน{car.crash_test ? ` (${car.crash_test.program})` : ""}</dt><dd><Stars n={car.crash_stars} program={car.crash_test?.program} /></dd></div>
           </dl>
           <div className="top-acts">
             <CompareButton id={car.id} />
@@ -165,7 +165,9 @@ export default function CarPage({ params }: { params: { id: string } }) {
         {/* ------------------------------------------------------ safety */}
         <section className="panel">
           <h2 className="h2">ความปลอดภัย</h2>
-          <div className="cost-row"><span>ASEAN NCAP</span><span><Stars n={car.asean_ncap_stars} /></span></div>
+          <div className="cost-row"><span>ผลทดสอบชน {car.crash_test && <a href={car.crash_test.url} target="_blank" rel="noreferrer" className="small">{crashLabel(car.crash_test)}</a>}</span><span><Stars n={car.crash_stars} program={car.crash_test?.program} /></span></div>
+          {car.crash_test?.note && <p className="muted small" style={{ margin: "4px 0 0" }}>{car.crash_test.note}</p>}
+          {!car.crash_test && <p className="muted small" style={{ margin: "4px 0 0" }}>ยังไม่พบผลจาก ASEAN NCAP, ANCAP หรือ Euro NCAP คะแนนส่วนนี้จึงคิดเป็นกลาง ๆ เท่า 3 ดาว</p>}
           <div className="cost-row"><span>ถุงลมนิรภัย</span><b className="num">{car.airbags} ใบ</b></div>
           <ul className="checks">
             {adas.map(([k, v]) => (

@@ -121,7 +121,7 @@ export default function Home() {
         <div className="trust panel">
           <div><b className="num">{cars ? cars.length : "–"}</b><span>รุ่นที่ยังขายในไทย จาก {brands || "–"} แบรนด์</span></div>
           <div><b>พ.ย. 2569</b><span>ราคาขายปกติจากรายการราคาทางการ ไม่ใช่ราคาโปรโมชัน</span></div>
-          <div><b>ASEAN NCAP</b><span>ใช้ผลทดสอบชนจริงในคะแนนความปลอดภัย และเลือกตัดรถคะแนนต่ำออกได้</span></div>
+          <div><b>ผลทดสอบชนจริง</b><span>ASEAN NCAP, ANCAP และ Euro NCAP รวม 93 รุ่น ใช้ในคะแนนความปลอดภัย และเลือกตัดรถคะแนนต่ำออกได้</span></div>
           <div><b className="num">{realPhotos || "–"}</b><span>คันใช้ภาพถ่ายจริง พร้อมชื่อผู้ถ่ายและสัญญาอนุญาต</span></div>
         </div>
         <p className="muted small" style={{ marginTop: 12 }}>

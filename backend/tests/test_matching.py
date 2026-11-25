@@ -152,11 +152,13 @@ def test_ncap_result_counts_in_safety_and_warns():
     from app.matching import score_safety, safety_warning
     base = {"airbags": 6, "adas": {"aeb": True, "lane_assist": True}}
     unknown = score_safety(dict(base))
-    zero = score_safety(dict(base, asean_ncap_stars=0))
-    five = score_safety(dict(base, asean_ncap_stars=5))
+    def tested(n):
+        return dict(base, crash_stars=n, crash_test={"program": "ASEAN NCAP", "stars": n})
+    zero = score_safety(tested(0))
+    five = score_safety(tested(5))
     assert zero < unknown < five
-    assert safety_warning(dict(base, asean_ncap_stars=0)) is not None
-    assert safety_warning(dict(base, asean_ncap_stars=5)) is None
+    assert safety_warning(tested(0)) is not None
+    assert safety_warning(tested(5)) is None
     assert safety_warning(dict(base)) is None
 
 

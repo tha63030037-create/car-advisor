@@ -106,7 +106,7 @@ export default function Cars() {
                 <span>{FUEL_TH[c.fuelType]}</span>
                 <span>{c.seats} ที่นั่ง</span>
               </div>
-              {c.asean_ncap_stars !== null && <div className="t-ncap small"><Stars n={c.asean_ncap_stars} /> <span className="muted">ASEAN NCAP</span></div>}
+              {c.crash_test && <div className="t-ncap small"><Stars n={c.crash_stars} program={c.crash_test.program} /> <span className="muted">{c.crash_test.program}</span></div>}
               <div className="t-act"><CompareButton id={c.id} compact /></div>
             </div>
           </Link>

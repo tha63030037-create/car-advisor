@@ -21,6 +21,7 @@ from app import matching_config as cfg
 from app.database import CARS
 
 DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "car_specs.json")
+CRASH_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "crash_tests.json")
 DIM_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "car_dimensions.json")
 
 
@@ -83,6 +84,16 @@ def _load_cars():
         merged.append(dict(car, **{k: v for k, v in s.items() if k != "id"}))
     with open(DIM_PATH, encoding="utf-8") as f:
         lengths = json.load(f)["length_mm"]
+    with open(CRASH_PATH, encoding="utf-8") as f:
+        crash = json.load(f)["results"]
+    for car in merged:
+        # one crash-test result per car: ASEAN NCAP first, then ANCAP / Euro NCAP (see crash_tests.json)
+        if car.get("asean_ncap_stars") is not None:
+            car["crash_test"] = {"program": "ASEAN NCAP", "stars": car["asean_ncap_stars"], "year": None,
+                                 "url": "https://www.aseancap.org/x/results.php", "note": None}
+        else:
+            car["crash_test"] = crash.get(str(car["id"]))
+        car["crash_stars"] = car["crash_test"]["stars"] if car["crash_test"] else None
     for car in merged:
         car["length_mm"] = lengths.get(str(car["id"]))
         if car["length_mm"] is not None:
@@ -256,8 +267,8 @@ def _filter_checks(c):
         checks.append(("fuel_exclude", "ไม่เอาเชื้อเพลิง: " + ", ".join(c.fuel_exclude),
                        lambda car: not (_fuels(car) & fx)))
     if c.min_ncap_stars:
-        checks.append(("min_ncap_stars", "ไม่เอารถผลทดสอบชน ASEAN NCAP ต่ำกว่า %d ดาว (รถที่ยังไม่มีผลทดสอบยังอยู่)" % c.min_ncap_stars,
-                       lambda car: car.get("asean_ncap_stars") is None or car["asean_ncap_stars"] >= c.min_ncap_stars))
+        checks.append(("min_ncap_stars", "ไม่เอารถผลทดสอบชนต่ำกว่า %d ดาว (รถที่ยังไม่มีผลทดสอบยังอยู่)" % c.min_ncap_stars,
+                       lambda car: car.get("crash_stars") is None or car["crash_stars"] >= c.min_ncap_stars))
     checks.append(("budget_ceiling", "ราคาไม่เกินงบ + ยืดได้ %d%%" % round(c.budget_stretch * 100),
                    lambda car: car["price"] <= ceiling))
     if c.monthly_income:
@@ -319,16 +330,16 @@ def score_safety(car):
     if known:
         parts.append(sum(known) / float(len(known)))
     equipment = sum(parts) / len(parts)
-    stars = car.get("asean_ncap_stars")
+    stars = car.get("crash_stars")
     if stars is None:
         stars = cfg.NCAP_UNKNOWN_STARS
     return cfg.NCAP_SHARE * (stars / 5.0) + (1 - cfg.NCAP_SHARE) * equipment
 
 
 def safety_warning(car):
-    stars = car.get("asean_ncap_stars")
+    stars = car.get("crash_stars")
     if stars is not None and stars <= cfg.NCAP_WARN_MAX_STARS:
-        return "ผลทดสอบชน ASEAN NCAP %d ดาว (เต็ม 5)" % stars
+        return "ผลทดสอบชน %s %d ดาว (เต็ม 5)" % (car["crash_test"]["program"], stars)
     return None
 
 
@@ -471,6 +482,8 @@ def recommend(c, cars=None):
             "top_criteria": [{"key": k, "label": cfg.CRITERIA_TH[k]} for k in top2],
             "over_budget": over,
             "asean_ncap_stars": car.get("asean_ncap_stars"),
+            "crash_stars": car.get("crash_stars"),
+            "crash_test": car.get("crash_test"),
             "safety_warning": safety_warning(car),
             "annual_cost": cost,
             "monthly": affordability(car["price"], c.monthly_income, cost["total"] if cost else None),
@@ -529,7 +542,7 @@ def car_public(car, full=True):
     """One car for the catalogue / detail / compare screens (no scoring)."""
     base = {k: car.get(k) for k in ("id", "name", "brand", "model", "brand_group", "bodyType", "fuelType", "price",
                                      "seats", "horsepower", "airbags", "warrantyYears", "warrantyKm", "photo",
-                                     "asean_ncap_stars", "photo_is_ai_generated")}
+                                     "asean_ncap_stars", "crash_stars", "crash_test", "photo_is_ai_generated")}
     if not full:
         return base
     feats = car["_features"]

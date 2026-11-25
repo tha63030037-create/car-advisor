@@ -70,14 +70,17 @@ export function PhotoCredit({ credit }: { credit?: string | null }) {
     : <span className="credit" title={c.full}>{c.text}</span>;
 }
 
-export function Stars({ n }: { n: number | null }) {
+export function Stars({ n, program }: { n: number | null | undefined; program?: string }) {
   if (n === null || n === undefined) return <span className="muted small">ยังไม่มีผลทดสอบ</span>;
   return (
-    <span className="stars" aria-label={`ASEAN NCAP ${n} ดาว จาก 5`}>
+    <span className="stars" aria-label={`${program || "ผลทดสอบชน"} ${n} ดาว จาก 5`}>
       {"★".repeat(n)}<span className="off">{"★".repeat(5 - n)}</span>
     </span>
   );
 }
+
+/** "ASEAN NCAP" / "ANCAP 2024" / "Euro NCAP 2025" */
+export const crashLabel = (t?: { program: string; year: number | null } | null) => (t ? `${t.program}${t.year ? " " + t.year : ""}` : "");
 
 export function CompareButton({ id, compact = false }: { id: number; compact?: boolean }) {
   const cmp = useCompare();

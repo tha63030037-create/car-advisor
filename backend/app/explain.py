@@ -53,7 +53,7 @@ def _facts(r: Dict[str, Any]) -> Dict[str, Any]:
                                   for k, v in r["criteria"].items()},
         "best_at": [t["label"] for t in r["top_criteria"]],
         "over_budget": r["over_budget"],
-        "asean_ncap_stars": r.get("asean_ncap_stars"),
+        "crash_test": r.get("crash_test"),
         "safety_warning": r.get("safety_warning"),
         "annual_cost": r["annual_cost"],
         "lifestyle": [{"lifestyle": l["label"], "has": l["has"], "missing": l["missing"]}

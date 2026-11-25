@@ -1,0 +1,488 @@
+{
+ "_note": "Crash-test results from ASEAN NCAP, ANCAP and Euro NCAP gathered 26 Nov 2026. ASEAN NCAP (in car_specs) wins when a car has it; otherwise ANCAP (right-hand drive, closest spec to Thailand), then Euro NCAP. Euro NCAP/ANCAP ratings older than 2020 are left out because those programmes treat ratings as expired after six years.",
+ "results": {
+  "2": {
+   "program": "ASEAN NCAP",
+   "stars": 5,
+   "year": 2018,
+   "url": "https://www.aseancap.org/x/result.php?slug=toyota-yaris",
+   "note": null
+  },
+  "4": {
+   "program": "ASEAN NCAP",
+   "stars": 5,
+   "year": 2019,
+   "url": "https://www.aseancap.org/x/result.php?slug=toyota-corolla-altis-2019",
+   "note": null
+  },
+  "6": {
+   "program": "ASEAN NCAP",
+   "stars": 5,
+   "year": 2020,
+   "url": "https://www.aseancap.org/x/result.php?slug=toyota-corolla-cross",
+   "note": "ทดสอบรุ่น 1.8 HV"
+  },
+  "12": {
+   "program": "ASEAN NCAP",
+   "stars": 5,
+   "year": 2020,
+   "url": "https://www.aseancap.org/x/result.php?slug=toyota-fortuner-2020",
+   "note": null
+  },
+  "13": {
+   "program": "ASEAN NCAP",
+   "stars": 5,
+   "year": 2020,
+   "url": "https://www.aseancap.org/x/result.php?slug=toyota-fortuner-2020",
+   "note": "ใช้ผลของ Fortuner รุ่นเดียวกัน"
+  },
+  "15": {
+   "program": "ASEAN NCAP",
+   "stars": 5,
+   "year": 2020,
+   "url": "https://www.aseancap.org/x/result.php?slug=toyota-hilux-2020",
+   "note": null
+  },
+  "16": {
+   "program": "ASEAN NCAP",
+   "stars": 5,
+   "year": 2020,
+   "url": "https://www.aseancap.org/x/result.php?slug=toyota-hilux-2020",
+   "note": "ใช้ผลของ Hilux Revo รุ่นเดียวกัน"
+  },
+  "22": {
+   "program": "ASEAN NCAP",
+   "stars": 5,
+   "year": 2020,
+   "url": "https://www.aseancap.org/x/result.php?slug=honda-city-2020",
+   "note": null
+  },
+  "24": {
+   "program": "ASEAN NCAP",
+   "stars": 5,
+   "year": 2020,
+   "url": "https://www.aseancap.org/x/result.php?slug=honda-city-2020",
+   "note": "ใช้ผลของ City ซีดานรุ่นเดียวกัน"
+  },
+  "48": {
+   "program": "ASEAN NCAP",
+   "stars": 5,
+   "year": 2020,
+   "url": "https://www.aseancap.org/x/result.php?slug=nissan-kicks",
+   "note": "ทดสอบรุ่นไฮบริด (e-Power)"
+  },
+  "50": {
+   "program": "ASEAN NCAP",
+   "stars": 5,
+   "year": 2018,
+   "url": "https://www.aseancap.org/x/result.php?slug=nissan-terra",
+   "note": null
+  },
+  "59": {
+   "program": "ASEAN NCAP",
+   "stars": 4,
+   "year": 2018,
+   "url": "https://www.aseancap.org/x/result.php?slug=mitsubishi-xpander",
+   "note": "ผลของ Xpander รุ่นเบนซิน โครงสร้างเดียวกัน"
+  },
+  "60": {
+   "program": "ASEAN NCAP",
+   "stars": 4,
+   "year": 2018,
+   "url": "https://www.aseancap.org/x/result.php?slug=mitsubishi-xpander",
+   "note": "ผลของ Xpander รุ่นเบนซิน โครงสร้างเดียวกัน"
+  },
+  "64": {
+   "program": "ASEAN NCAP",
+   "stars": 4,
+   "year": 2019,
+   "url": "https://www.aseancap.org/x/result.php?slug=suzuki-ertiga-2",
+   "note": null
+  },
+  "7": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2024,
+   "url": "https://www.ancap.com.au/media-and-gallery/media-releases/51354a",
+   "note": "รุ่นไฮบริดโฉมใหม่"
+  },
+  "9": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2025,
+   "url": "https://www.euroncap.com/press-media/the-safety-of-all-road-users-remains-euro-ncap-s-driving-force-as-car-size-becomes-a-growing-concern/",
+   "note": null
+  },
+  "20": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2025,
+   "url": "https://autotrader.co.nz/news/byd-atto-1-among-latest-five-star-anacp-rated-cars",
+   "note": "Model Y รุ่นปรับโฉม"
+  },
+  "82": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2023,
+   "url": "https://www.which.co.uk/news/article/chinese-ev-brands-gain-full-marks-in-latest-euro-ncap-crash-tests-aEAl81v9kNA5",
+   "note": null
+  },
+  "83": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2022,
+   "url": "https://www.euroncap.com/press-media/eight-manufacturers-achieve-euro-ncap-5-stars-in-impressive-car-line-up/",
+   "note": null
+  },
+  "85": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2023,
+   "url": "https://www.autocar.co.uk/node/134570",
+   "note": "Euro NCAP ทดสอบในชื่อ Seal U / Seal U DM-i"
+  },
+  "114": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2025,
+   "url": "https://www.byd.com/sc/news-list/byd-sealion-7-scores-maximum-five-star-euro-acap-safety-rating",
+   "note": null
+  },
+  "138": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2025,
+   "url": "https://autotrader.co.nz/news/byd-atto-1-among-latest-five-star-anacp-rated-cars",
+   "note": "Euro NCAP ให้ 5 ดาวในชื่อ Dolphin Surf ด้วย"
+  },
+  "142": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2025,
+   "url": "https://cdn.euroncap.com/media/93561/euroncap-2025-byd-seal-6-datasheet.pdf",
+   "note": null
+  },
+  "78": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2022,
+   "url": "https://mgownersclub.co.uk/node/206946",
+   "note": null
+  },
+  "79": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2024,
+   "url": "https://news.euroncap.com/safercars/mg-hs---euro-ncap-2024-results---5-stars/s/883eea85-31b9-4934-a145-f5be27c6c0a1",
+   "note": null
+  },
+  "145": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2025,
+   "url": "https://cdn.euroncap.com/media/91336/euroncap-2025-im-im5-datasheet.pdf",
+   "note": null
+  },
+  "125": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2024,
+   "url": "https://www.ancap.com.au/media-and-gallery/media-releases/aa85a9",
+   "note": null
+  },
+  "174": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2024,
+   "url": "https://www.ancap.com.au/media-and-gallery/media-releases/aa85a9",
+   "note": null
+  },
+  "124": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2024,
+   "url": "https://www.ancap.com.au/media-and-gallery/media-releases/aa85a9",
+   "note": "ใช้กับรุ่นไฮบริด (Euro NCAP ให้ 4 ดาวในสเปกมาตรฐาน)"
+  },
+  "118": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2024,
+   "url": "https://www.ancap.com.au/media-and-gallery/media-releases/aa85a9",
+   "note": null
+  },
+  "71": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2024,
+   "url": "https://www.goauto.com.au/news/deepal.html",
+   "note": "Euro NCAP ให้ 5 ดาวปี 2025 ด้วย"
+  },
+  "72": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2023,
+   "url": "https://press.kia.com/eu/en/home/media-resouces/press-releases/2023/Kia-EV9-awarded-five-star-Euro-NCAP-safety-rating.html",
+   "note": null
+  },
+  "109": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2022,
+   "url": "https://www.kia.com/uk/about/news/ncap-safety-ratings-what-you-need-to-know/",
+   "note": null
+  },
+  "110": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2021,
+   "url": "https://www.autocarpro.in/news-international/e-gmp-achitecture-helps-hyundai-motor-group-evs-ace-euro-ncap-and-iihs-crash-tests-122209?amp=1",
+   "note": null
+  },
+  "123": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2025,
+   "url": "https://autotrader.co.nz/news/three-more-five-star-cars-after-ancap-testing",
+   "note": "ใช้กับทุกรุ่นรวมไฮบริด"
+  },
+  "43": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2022,
+   "url": "https://www.euroncap.com/press-media/eight-manufacturers-achieve-euro-ncap-5-stars-in-impressive-car-line-up/",
+   "note": null
+  },
+  "44": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2022,
+   "url": "https://www.carexpert.com.au/car-news/isuzu-d-max-mu-x-mazda-bt-50-re-tested-by-ancap-five-stars-again",
+   "note": null
+  },
+  "130": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2025,
+   "url": "https://www.ancap.com.au/safety-ratings/mazda/6e/da2d9a",
+   "note": null
+  },
+  "53": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2022,
+   "url": "https://www.ancap.com.au/safety-ratings/isuzu/d-max/d9fa82/images-and-video",
+   "note": "ใช้กับทุกรุ่นของ D-Max"
+  },
+  "54": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2022,
+   "url": "https://www.ancap.com.au/safety-ratings/isuzu/d-max/d9fa82/images-and-video",
+   "note": null
+  },
+  "98": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2022,
+   "url": "https://www.ancap.com.au/safety-ratings/ford/everest/f18eb7",
+   "note": null
+  },
+  "99": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2022,
+   "url": "https://www.ancap.com.au/safety-ratings/ford/ranger/58f98d",
+   "note": "ไม่รวม Raptor"
+  },
+  "63": {
+   "program": "Euro NCAP",
+   "stars": 3,
+   "year": 2024,
+   "url": "https://www.which.co.uk/news/article/the-cars-that-fail-to-rate-highly-in-safety-tests-aXYj20A914Q9",
+   "note": "ANCAP เคยให้ 1 ดาวกับสเปกออสเตรเลียก่อนปรับปรุง"
+  },
+  "68": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2025,
+   "url": "https://www.ancap.com.au/safety-ratings/subaru/forester/6a5ee7",
+   "note": "ผลของ Forester โฉมใหม่ปี 2025 ยังไม่ได้ยืนยันว่าตรงกับรุ่นที่ขายในไทย"
+  },
+  "112": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2024,
+   "url": "https://www.ancap.com.au/safety-ratings/subaru/crosstrek/3926f1",
+   "note": "ใช้กับรถผลิตตั้งแต่ เม.ย. 2025"
+  },
+  "87": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2022,
+   "url": "https://www.ancap.com.au/safety-ratings/haval/h6/db8b8c",
+   "note": null
+  },
+  "88": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2022,
+   "url": "https://www.ancap.com.au/safety-ratings/haval/h6/db8b8c",
+   "note": "ขยายผลถึงรุ่นไฮบริด"
+  },
+  "89": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2021,
+   "url": "https://www.ancap.com.au/safety-ratings/great-wall-motors/haval-jolion/016ae7",
+   "note": null
+  },
+  "91": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2022,
+   "url": "https://www.ancap.com.au/safety-ratings/great-wall-motors/tank-300/9cd3ff",
+   "note": null
+  },
+  "133": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2022,
+   "url": "https://www.carexpert.com.au/car-news/2022-mitsubishi-outlander-phev-scores-five-star-ancap-safety-rating",
+   "note": null
+  },
+  "164": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2023,
+   "url": "https://www.bmwblog.com/2023/12/06/2024-bmw-5-series-euro-ncap-crash-test",
+   "note": null
+  },
+  "170": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2023,
+   "url": "https://www.bmwblog.com/2023/12/06/2024-bmw-5-series-euro-ncap-crash-test",
+   "note": "ใช้ผลของ 5 Series รุ่นเดียวกัน"
+  },
+  "165": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2022,
+   "url": "https://euroncap.newsmarket.com/find-a-car/all/bmw-x1---euro-ncap-2022-results---5-stars/s/62c19f86-86da-43ed-8ad8-3fb1fdbe80c3",
+   "note": null
+  },
+  "166": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2022,
+   "url": "https://euroncap.newsmarket.com/find-a-car/all/bmw-x1---euro-ncap-2022-results---5-stars/s/62c19f86-86da-43ed-8ad8-3fb1fdbe80c3",
+   "note": "ขยายผลถึง iX1 ปี 2023"
+  },
+  "167": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2025,
+   "url": "https://www.bmwblog.com/?p=506579",
+   "note": null
+  },
+  "171": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2021,
+   "url": "https://www.motor1.com/news/553168/bmw-ix-euro-ncap-rating/",
+   "note": null
+  },
+  "157": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2025,
+   "url": "https://www.euroncap.com/press-media/mercedes-star-shines-bright-as-euro-ncap-s-final-results-deliver-safer-options-for-every-buyer/",
+   "note": null
+  },
+  "159": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2025,
+   "url": "https://www.carsales.com.au/editorial/details/ancap-five-stars-for-skoda-superb-mercedes-benz-e-class-and-kia-carnival-150142",
+   "note": null
+  },
+  "172": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2025,
+   "url": "https://www.motoringfile.com/2025/09/08/mini-cooper-and-aceman-earn-top-euro-ncap-safety-ratings/",
+   "note": "ทดสอบในชื่อ MINI Cooper E"
+  },
+  "173": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2025,
+   "url": "https://www.bmwblog.com/2025/09/08/mini-cooper-aceman-euro-ncap-5-star-safety/",
+   "note": null
+  },
+  "176": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2022,
+   "url": "https://cardealermagazine.co.uk/publish/volkswagens-polo-and-taigo-score-top-marks-in-latest-safety-tests-by-euro-ncap/256373",
+   "note": null
+  },
+  "155": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2024,
+   "url": "https://paultan.org/2024/11/26/chery-omoda-e5-gets-5-stars-from-euro-ncap-ancap/",
+   "note": "ทดสอบในชื่อ Omoda E5 ได้ 5 ดาวจาก ANCAP ด้วย"
+  },
+  "152": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2025,
+   "url": "https://global.geely.com/en/news/2025/geely-ex5-euro-ncap-ancap-ratings",
+   "note": "ได้ 5 ดาวจาก ANCAP ด้วย"
+  },
+  "151": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2026,
+   "url": "https://carnewschina.com/?p=265618",
+   "note": "ทดสอบในชื่อ Geely E2 ตามเกณฑ์ใหม่ปี 2026"
+  },
+  "97": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2025,
+   "url": "https://tools.prnewswire.com/en-us/live/20823/release/20251016EN99744",
+   "note": "ANCAP ให้ 5 ดาวด้วย (ธ.ค. 2025)"
+  },
+  "136": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2026,
+   "url": "https://www.euroncap.com/press-media/euro-ncap-tests-show-car-makers-continue-to-drive-for-safety/",
+   "note": "ตามเกณฑ์ใหม่ปี 2026"
+  },
+  "92": {
+   "program": "ANCAP",
+   "stars": 5,
+   "year": 2024,
+   "url": "https://www.ancap.com.au/safety-ratings/deepal/s07/850805",
+   "note": null
+  },
+  "135": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2025,
+   "url": "https://es.motor1.com/news/781402/informe-resultados-euroncap-diciembre-2025/",
+   "note": null
+  },
+  "137": {
+   "program": "Euro NCAP",
+   "stars": 5,
+   "year": 2025,
+   "url": "https://www.zeekrlife.com/en-my/posts/zeekr-7x-awarded-5-star-euro-ncap-rating",
+   "note": null
+  }
+ }
+}

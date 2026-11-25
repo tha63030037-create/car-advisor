@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
-import { CarPhoto, PhotoCredit, Stars, useCatalogue } from "../components/Site";
+import { CarPhoto, crashLabel, PhotoCredit, Stars, useCatalogue } from "../components/Site";
 import { ADAS_TH, baht, BODY_TH, CarDetail, COMPARE_MAX, FUEL_TH, getJSON, useCompare } from "../lib/api";
 
 type Row = {
@@ -39,7 +39,7 @@ const ROWS: { group: string; rows: Row[] }[] = [
   {
     group: "ความปลอดภัย",
     rows: [
-      { label: "ASEAN NCAP", get: (c) => <Stars n={c.asean_ncap_stars} />, best: "max", value: (c) => c.asean_ncap_stars },
+      { label: "ผลทดสอบชน", get: (c) => <><Stars n={c.crash_stars} program={c.crash_test?.program} />{c.crash_test && <span className="muted small"> {crashLabel(c.crash_test)}</span>}</>, best: "max", value: (c) => c.crash_stars },
       { label: "ถุงลมนิรภัย", get: (c) => `${c.airbags} ใบ`, best: "max", value: (c) => c.airbags },
       ...Object.entries(ADAS_TH).map(([k, label]): Row => ({
         label,

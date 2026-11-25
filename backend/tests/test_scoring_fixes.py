@@ -15,8 +15,8 @@ def run(**kw):
 
 
 def test_untested_cars_never_beat_a_well_equipped_five_star_car():
-    untested = [score_safety(c) for c in CARS_V2 if c.get("asean_ncap_stars") is None]
-    best_five = max(score_safety(c) for c in CARS_V2 if c.get("asean_ncap_stars") == 5)
+    untested = [score_safety(c) for c in CARS_V2 if c.get("crash_stars") is None]
+    best_five = max(score_safety(c) for c in CARS_V2 if c.get("crash_stars") == 5)
     assert max(untested) < best_five
     assert min(untested) > 0  # unknown is a middle result, never 0
 
@@ -105,3 +105,11 @@ def test_chat_is_not_done_without_income():
     from app.chat import next_topic
     assert next_topic({"budget": 900000, "budget_stretch": 0.1, "lifestyles": ["city"], "priorities": {"budget": 3}},
                       ["usage", "lifestyle", "budget", "stretch", "brand", "priorities"]) == "income"
+
+
+def test_crash_tests_come_from_several_programmes_with_a_source():
+    tested = [c for c in CARS_V2 if c.get("crash_test")]
+    assert len(tested) >= 90
+    assert {c["crash_test"]["program"] for c in tested} == {"ASEAN NCAP", "ANCAP", "Euro NCAP"}
+    assert all(c["crash_test"]["url"].startswith("https://") for c in tested)
+    assert all((c["crash_test"]["year"] or 2020) >= 2018 for c in tested)

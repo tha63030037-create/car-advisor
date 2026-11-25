@@ -71,6 +71,8 @@ export interface CarSummary {
   warrantyKm: number;
   photo: Photo;
   asean_ncap_stars: number | null;
+  crash_stars?: number | null;
+  crash_test?: { program: string; stars: number; year: number | null; url: string; note: string | null } | null;
   photo_is_ai_generated: boolean;
 }
 
