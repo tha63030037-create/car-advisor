@@ -442,6 +442,12 @@ def llm_turn(req, provider, api_key):
 EXCLUSIVE_BRAND = re.compile(r"เฉพาะ|เอาแต่|เท่านั้น|แค่(ยี่ห้อ|แบรนด์)?\s*[A-Za-zก-๙]|ต้องเป็น|ไม่เอา(ยี่ห้อ|แบรนด์)อื่น|ไม่ดู(ยี่ห้อ|แบรนด์)อื่น")
 
 
+def _brands_in(s):
+    found = [b for b in BRANDS if re.search(r"\b" + re.escape(b.lower()) + r"\b", s.lower())]
+    found += [v for k, v in BRAND_TH.items() if k in s]
+    return list(dict.fromkeys(found))
+
+
 def guard_brand_only(req, crit):
     """The model sometimes turns "ชอบ Subaru" into a hard brand filter, which can leave one car.
     A brand only becomes a filter when the user's own words say so; otherwise it is a preference."""
@@ -452,6 +458,14 @@ def guard_brand_only(req, crit):
         crit = dict(crit)
         crit["brand_only"] = [b for b in crit["brand_only"] if b in before]
         crit["brand_preferred"] = sorted(set(crit.get("brand_preferred") or []) | set(new))
+    # the model sometimes drops "ชอบ X" entirely; read it from the user's words as well
+    liked = []
+    for part in re.findall(r"ชอบ([^,\.\n]*)", last_user):
+        liked += _brands_in(part)
+    liked = [b for b in liked if b not in (crit.get("brand_only") or []) and b not in (crit.get("brand_exclude") or [])]
+    if liked:
+        crit = dict(crit)
+        crit["brand_preferred"] = sorted(set(crit.get("brand_preferred") or []) | set(liked))
     return crit
 
 
@@ -474,6 +488,9 @@ def chat_turn(req):
     else:
         crit, reply, nt, asked, quick = rules_turn(req)
 
+    if not (reply or "").strip():  # the model occasionally returns an empty reply
+        reply = ("ได้ข้อมูลครบแล้วค่ะ สรุปที่เข้าใจคือ %s กำลังจัดอันดับรถให้นะคะ" % summarize(crit)) if nt is None and crit.get("budget") \
+            else (QUESTIONS[nt][0] if nt in QUESTIONS else "ขอข้อมูลเพิ่มอีกนิดนะคะ")
     missing = [k for k in ("budget",) if not crit.get("budget")]
     return ChatResponse(
         reply=reply, criteria=crit, missing=missing, ready=not missing,

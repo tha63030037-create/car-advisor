@@ -79,3 +79,9 @@ def test_user_is_told_where_their_brand_and_body_ended_up():
 def test_one_car_left_comes_with_near_misses():
     r = run(budget=1500000, body_preferred=["coupe"], brand_only=["Subaru"])
     assert r["too_few_results"] and r["near_misses"][0]["name"] == "Subaru BRZ"
+
+
+def test_liked_brand_is_read_even_if_the_model_drops_it():
+    from app.chat import ChatRequest, guard_brand_only
+    req = ChatRequest(messages=[{"role": "user", "content": "ชอบ subaru ที่สุด อยากได้คูเป้"}], criteria={}, asked=[])
+    assert guard_brand_only(req, {"brand_only": []})["brand_preferred"] == ["Subaru"]
