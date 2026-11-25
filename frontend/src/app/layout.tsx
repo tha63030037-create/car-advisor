@@ -1,19 +1,23 @@
 import type { Metadata } from "next";
-import "./globals.css";
+import "./ui.css";
+import { CompareTray, SiteFooter, SiteHeader } from "./components/Site";
 
 export const metadata: Metadata = {
-  title: "Antigravity Car Advisor",
-  description: "ระบบช่วยเลือกรถที่ใช่พร้อมวิเคราะห์ความคุ้มทุนแบบเป็นกลาง",
+  title: "AI Car Advisor — ช่วยเลือกรถที่ใช่จากสิ่งที่สำคัญกับคุณ",
+  description: "บอกว่าอะไรสำคัญกับคุณ แล้วดูว่ารถคันไหนในตลาดไทยเข้ากับคุณที่สุด พร้อมเหตุผลและที่มาของคะแนน",
+  viewport: { width: "device-width", initialScale: 1 },
+  themeColor: "#F3F5F7",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="th" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="th">
+      <body className="site-body">
+        <SiteHeader />
+        <main id="main">{children}</main>
+        <SiteFooter />
+        <CompareTray />
+      </body>
     </html>
   );
 }

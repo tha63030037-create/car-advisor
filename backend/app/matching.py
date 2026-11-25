@@ -357,3 +357,46 @@ def recommend(c, cars=None):
         "too_few_results": too_few,
         "filter_impact": removed_by if too_few else removed_by[:3],
     }
+
+
+# ----------------------------------------------------------- catalogue views
+FEATURE_TH = {
+    "isofix": "จุดยึดคาร์ซีท ISOFIX", "compact": "ตัวรถกะทัดรัด จอดง่าย", "city_economy": "ประหยัดในเมือง",
+    "aeb": "เบรกฉุกเฉินอัตโนมัติ (AEB)", "ground_clearance": "ใต้ท้องสูง ลุยได้", "cargo_large": "ที่เก็บของกว้าง",
+    "roof_rails": "ราวหลังคา", "four_wd": "ขับเคลื่อน 4 ล้อ", "seven_seats": "7 ที่นั่ง", "easy_entry": "ขึ้นลงง่าย",
+    "rear_ac": "แอร์ตอนหลัง", "fold_flat": "เบาะหลังพับราบ", "parking_aid": "เซ็นเซอร์ช่วยจอด",
+    "adaptive_cruise": "ครูซคอนโทรลแบบปรับระยะ", "highway_economy": "ประหยัดทางไกล", "cargo_work": "บรรทุกของได้มาก",
+    "low_maintenance": "ค่าบำรุงรักษาต่ำ",
+}
+
+
+def car_public(car, full=True):
+    """One car for the catalogue / detail / compare screens (no scoring)."""
+    base = {k: car.get(k) for k in ("id", "name", "brand", "model", "brand_group", "bodyType", "fuelType", "price",
+                                     "seats", "horsepower", "airbags", "warrantyYears", "warrantyKm", "photo",
+                                     "asean_ncap_stars", "photo_is_ai_generated")}
+    if not full:
+        return base
+    feats = car["_features"]
+    base.update({k: car.get(k) for k in ("consumption", "economy", "economy_unit", "drivetrain", "doors",
+                                          "ground_clearance_mm", "cargo_l", "has_cargo_bed", "adas",
+                                          "maintenance_5y_thb", "source", "collected_on", "estimated",
+                                          "transmission", "serviceNetwork")})
+    base["annual_cost"] = annual_cost(car, cfg.DEFAULT_KM_PER_YEAR)
+    base["km_per_year"] = cfg.DEFAULT_KM_PER_YEAR
+    base["features_has"] = [FEATURE_TH[k] for k, v in feats.items() if v is True and k in FEATURE_TH]
+    base["features_missing"] = [FEATURE_TH[k] for k, v in feats.items() if v is False and k in FEATURE_TH]
+    base["lifestyle_fit"] = {cfg.LIFESTYLE_TH.get(k, k): v for k, v in car["lifestyle_fit"].items()}
+    base["safety_warning"] = safety_warning(car)
+    return base
+
+
+def catalogue(full=False):
+    return [car_public(c, full) for c in CARS_V2]
+
+
+def car_by_id(cid):
+    for c in CARS_V2:
+        if c["id"] == cid:
+            return car_public(c, True)
+    return None

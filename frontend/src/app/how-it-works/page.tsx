@@ -1,0 +1,148 @@
+"use client";
+
+import Link from "next/link";
+import React from "react";
+import { CARDS, CRIT_COLOR } from "../lib/api";
+
+const STEPS = [
+  { t: "คุณบอกความต้องการ", d: "เล่าให้ที่ปรึกษาฟังเป็นภาษาพูด หรือเรียงการ์ด 5 ใบเองก็ได้ ทั้งสองทางได้ผลเป็นเงื่อนไขชุดเดียวกัน" },
+  { t: "AI แปลงเป็นเงื่อนไข", d: "โมเดลภาษาอ่านข้อความแล้วกรอกเป็นข้อมูลโครงสร้าง เช่น งบ 900,000 บาท ใช้ในเมือง ต้องการ 7 ที่นั่ง และลำดับความสำคัญของการ์ด" },
+  { t: "กรองรถที่ไม่เข้าเงื่อนไข", d: "ตัดรถที่เกินเพดานงบ ที่นั่งไม่พอ แบรนด์หรือพลังงานที่คุณไม่เอา ออกก่อน ไม่มีการให้คะแนน" },
+  { t: "ให้คะแนน 5 ด้าน", d: "รถทุกคันที่เหลือได้คะแนน 0–1 ในแต่ละด้านด้วยสูตรเดียวกัน สูตรอยู่ด้านล่าง" },
+  { t: "ถ่วงน้ำหนักตามที่คุณจัด", d: "การ์ดในโซนสำคัญมากได้ 3 แต้ม ปานกลาง 2 แต้ม น้อย 1 แต้ม หารด้วยแต้มรวมเป็นน้ำหนัก แล้วรวมเป็นคะแนนเข้ากัน 0–100%" },
+  { t: "AI อธิบายผล", d: "ส่งรถ 3 อันดับแรกพร้อมตัวเลขให้ AI เขียนคำอธิบายภาษาไทย ระบบตรวจว่าชื่อรถที่ AI พูดถึงอยู่ในรายการจริงเท่านั้น" },
+];
+
+const FORMULAS: { key: string; how: string; detail: string }[] = [
+  { key: "budget", how: "ราคาไม่เกินงบได้เต็ม ถ้าเกินงบ คะแนนลดลงตามสัดส่วนที่เกิน จนเป็น 0 เมื่อเกินถึงเพดานที่ยอมรับได้ (ค่าเริ่มต้น 15%)", detail: "1 − ((ราคา − งบ) ÷ งบ) ÷ เพดานที่ยอมเกิน" },
+  { key: "lifestyle", how: "แต่ละการใช้งานต้องการอุปกรณ์ชุดหนึ่ง เช่น ครอบครัวต้องการ ISOFIX แอร์ตอนหลัง 7 ที่นั่ง คะแนนคือสัดส่วนที่รถมี", detail: "อุปกรณ์ที่มี ÷ อุปกรณ์ที่รู้ข้อมูล (ไม่นับช่องที่ไม่มีข้อมูล)" },
+  { key: "running_cost", how: "ค่าน้ำมันหรือค่าไฟบวกค่าบำรุงรักษาต่อปี แล้วเทียบกับรถที่ผ่านตัวกรองด้วยกัน คันที่ถูกที่สุดได้ 1 แพงที่สุดได้ 0", detail: "น้ำมัน 38 บาท/ลิตร ดีเซล 32 บาท/ลิตร ไฟ 6 บาท/kWh ที่ 15,000 กม./ปี" },
+  { key: "safety", how: "รวมผลทดสอบชน ASEAN NCAP จำนวนถุงลม และระบบช่วยขับ รถที่ยังไม่มีผล NCAP คิดจากสองส่วนหลัง และขึ้นป้ายเตือน", detail: "NCAP 50% · ถุงลม (เต็มที่ 8 ใบ) · ระบบช่วยขับ 6 รายการ" },
+  { key: "design", how: "ตรงกับประเภทตัวถังที่ชอบได้ 1 ประเภทใกล้เคียงกัน เช่น SUV กับ PPV ได้ 0.5 ถ้าไม่ระบุ ทุกคันได้เท่ากัน", detail: "ตรง 1 · ใกล้เคียง 0.5 · ไม่ตรง 0" },
+];
+
+export default function HowItWorks() {
+  return (
+    <div className="wrap page hiw">
+      <h1 className="page-title">ระบบคิดยังไง</h1>
+      <p className="page-lede">AI ช่วยสองจุด คือแปลงคำพูดเป็นเงื่อนไข และเขียนคำอธิบายผล ส่วนการเลือกและจัดอันดับรถใช้สูตรคำนวณที่ตรวจสอบได้ทุกขั้น รถคันเดียวกันกับเงื่อนไขเดียวกันจะได้คะแนนเท่ากันทุกครั้ง</p>
+
+      <section className="flow" aria-label="ขั้นตอนการทำงาน">
+        <ol>
+          {STEPS.map((s, i) => (
+            <li key={s.t} className={i === 1 || i === 5 ? "ai" : ""}>
+              <span className="n">{i + 1}</span>
+              <div>
+                <h3>{s.t} {(i === 1 || i === 5) && <span className="badge ai-b">AI</span>}</h3>
+                <p>{s.d}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="block">
+        <h2 className="h2">ตัวอย่างน้ำหนัก</h2>
+        <p className="muted">ถ้าวางงบประมาณกับความปลอดภัยไว้ในโซนสำคัญที่สุด ค่าใช้จ่ายระยะยาวในโซนสำคัญ และที่เหลือในโซนไม่ค่อยสำคัญ แต้มรวมคือ 3+3+2+1+1 = 10</p>
+        <div className="wex">
+          {[["budget", 3], ["safety", 3], ["running_cost", 2], ["lifestyle", 1], ["design", 1]].map(([k, p]) => {
+            const c = CARDS.find((x) => x.key === k)!;
+            return (
+              <div key={k as string} style={{ flex: p as number, background: CRIT_COLOR[c.key], ["--w" as string]: `${(p as number) * 10}%` }}>
+                <b>{(p as number) * 10}%</b><span>{c.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="block">
+        <h2 className="h2">สูตรคะแนนแต่ละด้าน</h2>
+        <div className="formulas">
+          {FORMULAS.map((f) => {
+            const c = CARDS.find((x) => x.key === f.key)!;
+            return (
+              <article key={f.key} className="panel f" style={{ borderTopColor: CRIT_COLOR[c.key] }}>
+                <h3>{c.label}</h3>
+                <p>{f.how}</p>
+                <p className="code small">{f.detail}</p>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="block grid2">
+        <div className="panel">
+          <h2 className="h2">สิ่งที่ AI ทำ</h2>
+          <ul>
+            <li>อ่านข้อความแล้วกรอกงบ การใช้งาน และลำดับความสำคัญ</li>
+            <li>ถามต่อเมื่อข้อมูลยังไม่พอ เช่น ยังไม่ได้บอกงบ</li>
+            <li>เขียนคำอธิบายว่าทำไมรถ 3 อันดับแรกถึงเหมาะ โดยอ้างตัวเลขจริง</li>
+          </ul>
+        </div>
+        <div className="panel">
+          <h2 className="h2">สิ่งที่ AI ไม่ได้ทำ</h2>
+          <ul>
+            <li>ไม่ได้เลือกหรือจัดอันดับรถ อันดับมาจากสูตรด้านบนเท่านั้น</li>
+            <li>ไม่แต่งชื่อรถหรือสเปกขึ้นมาเอง ชื่อรถทุกคันถูกตรวจกับฐานข้อมูล</li>
+            <li>ไม่ได้รับค่าตอบแทนจากแบรนด์ใด ทุกแบรนด์ใช้สูตรเดียวกัน</li>
+          </ul>
+        </div>
+      </section>
+
+      <section className="block panel">
+        <h2 className="h2">ข้อมูลและข้อจำกัด</h2>
+        <ul>
+          <li>รถ 175 รุ่นที่ขายในไทย ราคาขายปกติของรุ่นเริ่มต้นจากเว็บไซต์ผู้ผลิต เก็บข้อมูลเดือนพฤศจิกายน 2569 ไม่ใช่ราคาโปรโมชัน</li>
+          <li>ผลทดสอบชนจาก ASEAN NCAP รถที่ยังไม่ได้ทดสอบแสดงเป็น ไม่มีข้อมูล ไม่ได้ถือว่าได้ 0 ดาว</li>
+          <li>บางช่อง เช่น ความจุท้ายรถ หรือระบบช่วยขับ ยังเป็นค่าประมาณ หน้ารถแต่ละคันบอกไว้ว่าช่องไหนเป็นการประมาณ</li>
+          <li>ค่าใช้จ่ายต่อปีไม่รวมประกัน ค่าผ่อน และค่าเสื่อมราคา ราคาน้ำมันและไฟใช้ค่าคงที่</li>
+          <li>ภาษีสรรพสามิตรถไฟฟ้าจะปรับขึ้นในปี 2570 ราคารถ EV อาจเปลี่ยน</li>
+        </ul>
+      </section>
+
+      <section className="block panel">
+        <h2 className="h2">ทดสอบยังไง</h2>
+        <p>มีชุดทดสอบอัตโนมัติ 44 กรณี ครอบคลุมสูตรคะแนนทุกด้าน ตัวกรอง และการตรวจชื่อรถที่ AI พูดถึง รวมถึงผู้ใช้สมมติ 8 แบบ เช่น ครอบครัวมีลูกเล็ก นักศึกษางบจำกัด สายเดินทางต่างจังหวัด เพื่อดูว่าอันดับที่ได้สมเหตุสมผล</p>
+      </section>
+
+      <div className="cta">
+        <Link href="/advisor" className="btn btn-primary">ลองหาคันที่ใช่</Link>
+        <Link href="/cars" className="btn btn-ghost">ดูรถทั้งหมด</Link>
+      </div>
+
+      <style jsx>{`
+        .flow ol { list-style: none; padding: 0; margin: 8px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; counter-reset: s; }
+        @media (max-width: 900px) { .flow ol { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 560px) { .flow ol { grid-template-columns: 1fr; } }
+        .flow li { display: flex; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px; }
+        .flow li.ai { border-color: #CFE6DF; background: var(--accent-wash); }
+        .n { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 14px; }
+        .flow li.ai .n { background: var(--accent); }
+        h3 { margin: 2px 0 4px; font-size: 16px; }
+        .flow p { margin: 0; font-size: 14px; color: var(--ink-2); }
+        .ai-b { background: var(--accent); color: #fff; border-color: var(--accent); margin-left: 4px; }
+        .block { margin-top: 32px; }
+        .wex { display: flex; gap: 3px; border-radius: 14px; overflow: hidden; margin-top: 10px; }
+        .wex div { color: #fff; padding: 12px 10px; display: flex; flex-direction: column; min-width: 0; }
+        .wex b { font-size: 20px; }
+        @media (max-width: 560px) {
+          .wex { flex-direction: column; border-radius: 0; gap: 6px; }
+          .wex div { flex: none !important; width: max(var(--w) * 3, 46%); flex-direction: row; align-items: baseline; gap: 8px; border-radius: 10px; padding: 8px 12px; }
+          .wex b { font-size: 16px; }
+        }
+        .wex span { font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .formulas { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+        .f { border-top: 5px solid; }
+        .f p { margin: 0 0 8px; font-size: 14.5px; }
+        .code { background: #F3F5F7; border-radius: 8px; padding: 8px 10px; color: var(--ink-2); margin: 0 !important; }
+        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+        ul { margin: 0; padding-left: 20px; }
+        li { margin: 4px 0; }
+        .cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 32px; }
+      `}</style>
+    </div>
+  );
+}

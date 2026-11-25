@@ -104,7 +104,7 @@ def root():
                 <p>ระบบเซิร์ฟเวอร์ Backend (FastAPI) ประมวลผลแนะนำรถยนต์สไตล์ไซเบอร์เทคโฉมใหม่</p>
                 <div class="links">
                     <a href="/docs" target="_blank">📖 เปิดดูคู่มือทดสอบ API (Swagger Docs)</a>
-                    <a href="/api/cars" target="_blank">📦 ดึงฐานข้อมูลรถยนต์ทั้งหมด 125 คัน (JSON)</a>
+                    <a href="/api/cars" target="_blank">📦 ดึงฐานข้อมูลรถยนต์ทั้งหมด (JSON)</a>
                 </div>
             </div>
         </body>
@@ -182,6 +182,24 @@ def get_v2_options():
         "default_stretch": match_cfg.DEFAULT_STRETCH,
         "default_km_per_year": match_cfg.DEFAULT_KM_PER_YEAR,
     }
+
+
+@app.get("/api/v2/cars")
+def get_catalogue_v2(full: bool = False):
+    """Every car on sale (compact by default; ?full=true adds specs, costs and features)."""
+    from .matching import catalogue
+    return catalogue(full)
+
+
+@app.get("/api/v2/cars/{car_id}")
+def get_car_v2(car_id: int):
+    """One car with specs, yearly cost, lifestyle fit, features and data sources."""
+    from fastapi import HTTPException
+    from .matching import car_by_id
+    car = car_by_id(car_id)
+    if car is None:
+        raise HTTPException(status_code=404, detail="ไม่พบรถคันนี้ หรือรุ่นนี้เลิกขายแล้ว")
+    return car
 
 
 @app.post("/api/chat", response_model=ChatResponse)
