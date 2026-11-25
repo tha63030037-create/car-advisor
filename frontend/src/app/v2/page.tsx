@@ -566,7 +566,7 @@ export default function MatchV2() {
         .rank { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; display: flex; flex-direction: column; gap: 2px; }
         .rank span { font-size: 11px; font-weight: 600; }
         .up { color: #34d399; } .down { color: #f87171; } .new { color: #38bdf8; }
-        .res img { width: 168px; height: 95px; object-fit: cover; border-radius: 10px; background: #12141a; box-shadow: 0 6px 18px rgba(0,0,0,.35); transition: transform .25s ease; } .res:hover img { transform: scale(1.04); }
+        .res img { width: 168px; height: 95px; object-fit: cover; border-radius: 10px; background: #12141a; box-shadow: 0 6px 18px rgba(0,0,0,.35); transition: transform .25s ease; } .res:hover img { transform: scale(1.04); } .res .info { min-width: 0; } @media (max-width: 600px) { .res img { width: 100% !important; height: auto !important; } }
         .name { font-weight: 600; font-size: 16px; }
         .meta { font-size: 13px; color: #94a3b8; }
         .over { display: inline-block; margin-top: 4px; font-size: 12px; padding: 2px 8px; border-radius: 6px; background: rgba(245,158,11,.15); color: #fbbf24; border: 1px solid rgba(245,158,11,.4); }
