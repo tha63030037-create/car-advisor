@@ -109,14 +109,15 @@ NCAP_UNKNOWN_STARS = 3
 # yearly cost), so a car's score no longer changes when other cars are filtered in or out.
 COST_SCALE_PERCENTILES = (5, 95)
 
-# Monthly income (added 26 Nov 2026). Thai car-buying guides put the installment at no more than 30% of
+# Monthly income (added 26 Nov 2026; since 26 Nov late evening only asked of buyers who finance and used
+# for information only: installment and its share of income, never a filter or a score). Thai car-buying guides put the installment at no more than 30% of
 # income (Sanook Auto, Autospinn); lenders rarely approve more than about half of income (Sanook Auto).
 # The installment is an estimate with fixed assumptions, not a finance quote.
 FIN_DOWN = 0.25          # down payment share (guides suggest 15-25%+)
 FIN_YEARS = 5            # 60 monthly payments
 FIN_FLAT_RATE = 0.03     # flat interest per year, assumed
 INCOME_COMFORT = 0.30    # installment <= 30% of income: comfortable
-INCOME_MAX = 0.50        # above 50%: lenders rarely approve -> filtered out
+INCOME_MAX = 0.50        # above 50%: lenders rarely approve -> labelled 'เกินกำลังผ่อน'
 
 MIN_RESULTS = 3
 DEFAULT_TOP_N = 10

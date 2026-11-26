@@ -72,14 +72,15 @@ class ChatResponse(BaseModel):
 
 
 # Conversation order (spec 5.5). budget is the only hard requirement to show results.
-TOPICS = ["usage", "lifestyle", "income", "budget", "stretch", "brand", "design", "priorities"]
+TOPICS = ["usage", "lifestyle", "payment", "income", "budget", "stretch", "brand", "design", "priorities"]
 # every one of the 5 cards must count, so these are asked again once if the answer did not stick,
 # and fall back to a stated, explained default after that (see fill_required)
-REQUIRED = {"usage", "income", "budget", "design"}
+REQUIRED = {"usage", "payment", "income", "budget", "design"}
 BODY_FOR_LIFESTYLE = {"city": ["hatchback", "suv"], "school_run": ["suv", "hatchback"], "camping": ["suv", "ppv", "pickup"],
                       "merit_family": ["mpv", "ppv"], "pets": ["suv"], "long_trips": ["sedan", "suv"], "work_cargo": ["pickup"]}
 BODY_TH_CHAT = {"sedan": "เก๋ง", "hatchback": "แฮทช์แบ็ก", "suv": "SUV", "ppv": "PPV", "mpv": "รถตู้/MPV", "pickup": "กระบะ", "coupe": "คูเป้"}
 QUESTIONS = {
+    "payment": ("ตั้งใจจะซื้อเงินสดหรือผ่อนคะ", ["ซื้อเงินสด", "ผ่อน"]),
     "income": ("ขอถามเรื่องรายได้หน่อยนะคะ รายได้ต่อเดือนประมาณเท่าไรคะ (รวมของคนที่ช่วยผ่อนด้วยก็ได้) จะได้แนะนำรถที่ผ่อนไหวจริง ๆ ค่ะ",
                ["รายได้ 2 หมื่น", "รายได้ 3 หมื่น", "รายได้ 5 หมื่น", "รายได้ 1 แสน"]),
     "usage": ("สวัสดีค่ะ เล่าให้ฟังหน่อยว่าจะใช้รถทำอะไรเป็นหลักคะ เช่น ขับไปทำงานในเมือง พาครอบครัวเที่ยว หรือใช้ขนของ",
@@ -102,7 +103,7 @@ SYSTEM_PROMPT = """คุณคือที่ปรึกษาการเล�
 หน้าที่
 - ถามให้รู้การใช้ชีวิตจริงของลูกค้า แล้วสรุปเป็นเงื่อนไขตามโครง JSON ที่กำหนด
 - ถามทีละ 1 ข้อ สั้น เป็นกันเอง ไม่ใช้ศัพท์เทคนิค
-- ข้อมูลที่ต้องได้ก่อนแนะนำ: รายได้ต่อเดือน (ต้องถามทุกครั้ง ถ้าลูกค้าไม่อยากบอกให้ขอเป็นช่วงคร่าว ๆ), งบ, ทรงรถที่ชอบ (ต้องถามทุกครั้ง), จำนวนคนที่นั่งประจำ, การใช้งานหลัก, แบรนด์ที่เจาะจงหรือไม่เอา, ลำดับความสำคัญของ 5 เรื่อง
+- ข้อมูลที่ต้องได้ก่อนแนะนำ: ซื้อเงินสดหรือผ่อน (payment: "cash" หรือ "finance"), รายได้ต่อเดือนเฉพาะคนที่ผ่อน (ใช้บอกค่างวดเท่านั้น), งบ, ทรงรถที่ชอบ (ต้องถามทุกครั้ง), จำนวนคนที่นั่งประจำ, การใช้งานหลัก, แบรนด์ที่เจาะจงหรือไม่เอา, ลำดับความสำคัญของ 5 เรื่อง
 - แบรนด์: "ชอบ X" หรือ "ชอบ X ที่สุด" ใส่ใน brand_preferred (ยังดูแบรนด์อื่นด้วย) ; ใส่ brand_only เฉพาะเมื่อลูกค้าพูดชัดว่า "เอาแค่ X", "เฉพาะ X" หรือ "ไม่เอาแบรนด์อื่น" เท่านั้น
 - ถามเรื่องงบให้รู้ว่ายืดได้แค่ไหน: ไม่ยืดเลย (0) ยืดได้นิดหน่อย (0.1) หรือยืดได้ถ้าคุ้ม (0.2)
 
@@ -115,7 +116,7 @@ SYSTEM_PROMPT = """คุณคือที่ปรึกษาการเล�
 - ถ้าลูกค้าคุยเรื่องอื่นที่ไม่เกี่ยวกับการเลือกรถ ให้พากลับมาอย่างสุภาพ
 
 โครง criteria (ส่งกลับทุกช่อง ค่าที่ไม่รู้ให้เป็น null):
-{"monthly_income": int|null, "budget": int|null, "budget_stretch": 0|0.1|0.15|0.2|null, "brand_only": [str], "brand_exclude": [str], "brand_preferred": [str],
+{"payment": "cash"|"finance"|null, "monthly_income": int|null, "budget": int|null, "budget_stretch": 0|0.1|0.15|0.2|null, "brand_only": [str], "brand_exclude": [str], "brand_preferred": [str],
  "seats_min": int|null, "fuel_exclude": [str], "min_ncap_stars": 3|null, "body_preferred": [str], "lifestyles": [str], "km_per_year": int|null,
  "priorities": {"budget":1-3,"lifestyle":1-3,"running_cost":1-3,"safety":1-3,"design":1-3}|null}
 lifestyles ใช้ได้เฉพาะ: school_run, camping, merit_family, pets, city, long_trips, work_cargo
@@ -175,6 +176,10 @@ def parse_budget(t):
 def rules_extract(text, crit):
     t = text.lower()
     c = dict(crit)
+    if re.search(r"เงินสด|ซื้อสด|จ่ายสด|ไม่ผ่อน", text):
+        c["payment"] = "cash"
+    elif re.search(r"ผ่อน|ไฟแนนซ์|จัดไฟแนนซ์|สินเชื่อ", text):
+        c["payment"] = "finance"
     # "เงินเดือน 3 หมื่น" / "รายได้ 50,000" is income, not the car budget
     inc = re.search(r"(?:เงินเดือน|รายได้(?:ต่อเดือน)?|ได้เดือนละ)\s*(?:ประมาณ|ราว ?ๆ?|ก็|อยู่ที่|คือ)?\s*"
                     r"((?:\d[\d,\.]*|" + "|".join(THAI_NUM) + r")\s*(?:ล้าน|แสน|หมื่น|k|K|พัน)?)", text)
@@ -274,8 +279,10 @@ def _answered(t, c):
         return bool(c.get("lifestyles"))
     if t == "lifestyle":
         return bool(c.get("lifestyles")) and bool(c.get("seats_min"))
+    if t == "payment":
+        return c.get("payment") in ("cash", "finance")
     if t == "income":
-        return bool(c.get("monthly_income"))
+        return c.get("payment") == "cash" or bool(c.get("monthly_income"))
     if t == "budget":
         return bool(c.get("budget"))
     if t == "stretch":
@@ -318,6 +325,8 @@ def fill_required(c):
 
 def summarize(c):
     parts = []
+    if c.get("payment"):
+        parts.append("ซื้อเงินสด" if c["payment"] == "cash" else "ผ่อน")
     if c.get("monthly_income"):
         parts.append("รายได้ %s บาท/เดือน" % format(c["monthly_income"], ","))
     if c.get("budget"):
@@ -372,6 +381,8 @@ def _clean_criteria(raw):
     out = {}
     if not isinstance(raw, dict):
         raise ValueError("criteria is not an object")
+    if raw.get("payment") in ("cash", "finance"):
+        out["payment"] = raw["payment"]
     mi = raw.get("monthly_income")
     if isinstance(mi, (int, float)) and 3000 <= mi <= 10000000:
         out["monthly_income"] = int(mi)
@@ -545,7 +556,8 @@ def chat_turn(req):
     if not (reply or "").strip():  # the model occasionally returns an empty reply
         reply = ("ได้ข้อมูลครบแล้วค่ะ สรุปที่เข้าใจคือ %s กำลังจัดอันดับรถให้นะคะ" % summarize(crit)) if nt is None and crit.get("budget") \
             else (QUESTIONS[nt][0] if nt in QUESTIONS else "ขอข้อมูลเพิ่มอีกนิดนะคะ")
-    if nt is None and crit.get("budget") and crit.get("monthly_income"):
+    paid = crit.get("payment") == "cash" or bool(crit.get("monthly_income"))
+    if nt is None and crit.get("budget") and paid:
         crit, notes = fill_required(crit)
         if notes:
             reply = (reply.rstrip() + "\n\n" + " ".join(notes)).strip()
@@ -553,5 +565,5 @@ def chat_turn(req):
     return ChatResponse(
         reply=reply, criteria=crit, missing=missing, ready=not missing,
         next_topic=nt, asked=asked, quick_replies=quick, engine=engine,
-        done=bool(crit.get("budget")) and bool(crit.get("monthly_income")) and nt is None,
+        done=bool(crit.get("budget")) and paid and nt is None,
     )

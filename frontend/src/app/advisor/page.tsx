@@ -50,6 +50,7 @@ export default function Advisor() {
   const [budgetText, setBudgetText] = useState("");
   const [income, setIncome] = useState<number | null>(null);
   const [incomeText, setIncomeText] = useState("");
+  const [payment, setPayment] = useState<"cash" | "finance" | null>(null);
   const [down, setDown] = useState(0.25);
   const [years, setYears] = useState(5);
   const digits = (t: string) => Number(t.replace(/[^\d]/g, "")) || 0;
@@ -118,7 +119,8 @@ export default function Advisor() {
 
   const criteria = useMemo(() => ({
     budget: Math.round(budgetK * 1000),
-    monthly_income: income,
+    payment,
+    monthly_income: payment === "finance" ? income : null,
     down_payment_pct: down,
     loan_years: years,
     budget_stretch: stretch,
@@ -134,12 +136,13 @@ export default function Advisor() {
     km_per_year: 15000,
     priorities: zones,
     top_n: 10,
-  }), [budgetK, income, down, years, stretch, brandOnly, brandPref, brandExclude, seatsMin, noEv, bodies, lifestyles, zones, ncapMin]);
+  }), [budgetK, payment, income, down, years, stretch, brandOnly, brandPref, brandExclude, seatsMin, noEv, bodies, lifestyles, zones, ncapMin]);
 
   // ---------------------------------------------------------------- chat
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const applyChatCriteria = (c: any) => {
     if (c.budget) { setBudgetK(c.budget / 1000); setBudgetSet(true); setBudgetText(baht(c.budget)); }
+    if (c.payment === "cash" || c.payment === "finance") setPayment(c.payment);
     if (c.monthly_income) { setIncome(c.monthly_income); setIncomeText(baht(c.monthly_income)); }
     if (typeof c.budget_stretch === "number") { setStretch(c.budget_stretch); setStretchSet(true); }
     if (Array.isArray(c.lifestyles)) setLifestyles(c.lifestyles);
@@ -163,7 +166,7 @@ export default function Advisor() {
       // send what the controls show now, so manual edits and chat stay in sync
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       // defaults the visitor never chose are sent as null, so the advisor still asks about them
-      const sent = { ...criteria, monthly_income: income, budget: budgetSet ? criteria.budget : null, budget_stretch: stretchSet ? stretch : null, priorities: zonesSet ? zones : null };
+      const sent = { ...criteria, payment, monthly_income: payment === "finance" ? income : null, budget: budgetSet ? criteria.budget : null, budget_stretch: stretchSet ? stretch : null, priorities: zonesSet ? zones : null };
       const r: any = await postJSON("/api/chat", { messages: msgs, criteria: sent, asked });
       setChatMsgs([...msgs, { role: "assistant", content: r.reply }]);
       setAsked(r.asked);
@@ -239,22 +242,23 @@ export default function Advisor() {
   }, [criteria, revealed]);
 
   const manualMissing = [
-    !income && "กรอกรายได้ต่อเดือน",
+    !payment && "เลือกซื้อเงินสดหรือผ่อน",
+    payment === "finance" && !income && "กรอกรายได้ต่อเดือน",
     !budgetSet && "กรอกงบซื้อรถ",
     lifestyles.length === 0 && "เลือกไลฟ์สไตล์อย่างน้อย 1 ข้อ",
     bodies.length === 0 && brandPref.length === 0 && "เลือกทรงหรือแบรนด์ที่ชอบอย่างน้อย 1 อย่าง",
   ].filter(Boolean) as string[];
   // same estimate as the backend: 25% down, 5 years, 3% flat — shown live under the budget box
   const inst = (price: number) => (price * (1 - down) * (1 + 0.03 * years)) / (12 * years);
-  const afford = income && budgetSet ? {
+  const afford = payment === "finance" && income && budgetSet ? {
     inst: Math.round(inst(budgetK * 1000)),
     pct: Math.round((1000 * inst(budgetK * 1000)) / income) / 10,
     comfortable: Math.round((income * 0.3 * 12 * years) / ((1 - down) * (1 + 0.03 * years)) / 1000) * 1000,
     level: inst(budgetK * 1000) / income <= 0.3 ? "ok" : inst(budgetK * 1000) / income <= 0.5 ? "tight" : "over",
   } : null;
   const reveal = () => { setRevealed(true); setTimeout(() => scrollTo(resultsTop.current), 350); };
-  const TOPIC_TH: Record<string, string> = { usage: "การใช้งาน", lifestyle: "ไลฟ์สไตล์", income: "รายได้ต่อเดือน", budget: "งบประมาณ", stretch: "งบยืดได้แค่ไหน", brand: "แบรนด์", design: "ทรงรถที่ชอบ", priorities: "เรื่องที่สำคัญ" };
-  const answered = chatDone ? Object.keys({ usage: 1, lifestyle: 1, income: 1, budget: 1, stretch: 1, brand: 1, design: 1, priorities: 1 }) : asked.slice(0, -1);
+  const TOPIC_TH: Record<string, string> = { usage: "การใช้งาน", lifestyle: "ไลฟ์สไตล์", payment: "ซื้อเงินสดหรือผ่อน", income: "รายได้ (ถ้าผ่อน)", budget: "งบประมาณ", stretch: "งบยืดได้แค่ไหน", brand: "แบรนด์", design: "ทรงรถที่ชอบ", priorities: "เรื่องที่สำคัญ" };
+  const answered = chatDone ? Object.keys({ usage: 1, lifestyle: 1, payment: 1, income: 1, budget: 1, stretch: 1, brand: 1, design: 1, priorities: 1 }) : asked.slice(0, -1);
 
   const toggle = (arr: string[], v: string, set: (x: string[]) => void) =>
     set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
@@ -328,17 +332,7 @@ export default function Advisor() {
           )}
 
           {mode === "manual" && (<>
-          <h2>1. รายได้และงบ</h2>
-          <label className="sub" htmlFor="income">รายได้ต่อเดือน (รวมคนที่ช่วยผ่อน) <b className="req">จำเป็น</b></label>
-          <div className="money">
-            <input id="income" inputMode="numeric" autoComplete="off" placeholder="เช่น 35,000" value={incomeText} onChange={(e) => setIncomeFrom(e.target.value)} />
-            <span>บาท/เดือน</span>
-          </div>
-          <div className="chips small">
-            {[20000, 30000, 50000, 80000, 150000].map((v) => (
-              <button key={v} className={`chip ${income === v ? "on" : ""}`} onClick={() => setIncomeFrom(String(v))}>{baht(v)}</button>
-            ))}
-          </div>
+          <h2>1. งบและการจ่าย</h2>
           <label className="sub" htmlFor="budget">งบซื้อรถ <b className="req">จำเป็น</b></label>
           <div className="money">
             <input id="budget" inputMode="numeric" autoComplete="off" placeholder="เช่น 900,000" value={budgetText} onChange={(e) => setBudgetFrom(e.target.value)} />
@@ -347,6 +341,22 @@ export default function Advisor() {
           <div className="chips small">
             {[500000, 800000, 1000000, 1500000, 2000000, 3000000, 5000000].map((v) => (
               <button key={v} className={`chip ${budgetSet && budgetK * 1000 === v ? "on" : ""}`} onClick={() => setBudgetFrom(String(v))}>{v >= 1000000 ? `${v / 1000000} ล้าน` : `${v / 100000} แสน`}</button>
+            ))}
+          </div>
+          <label className="sub">ซื้อเงินสดหรือผ่อน <b className="req">จำเป็น</b></label>
+          <div className="tabs pay">
+            <button className={payment === "cash" ? "on" : ""} onClick={() => setPayment("cash")}>ซื้อเงินสด</button>
+            <button className={payment === "finance" ? "on" : ""} onClick={() => setPayment("finance")}>ผ่อน</button>
+          </div>
+          {payment === "finance" && (<>
+          <label className="sub" htmlFor="income">รายได้ต่อเดือน (รวมคนที่ช่วยผ่อน) <b className="req">จำเป็น</b> <span className="muted">ใช้บอกค่างวดเท่านั้น ไม่มีผลกับคะแนน</span></label>
+          <div className="money">
+            <input id="income" inputMode="numeric" autoComplete="off" placeholder="เช่น 35,000" value={incomeText} onChange={(e) => setIncomeFrom(e.target.value)} />
+            <span>บาท/เดือน</span>
+          </div>
+          <div className="chips small">
+            {[20000, 30000, 50000, 80000, 150000].map((v) => (
+              <button key={v} className={`chip ${income === v ? "on" : ""}`} onClick={() => setIncomeFrom(String(v))}>{baht(v)}</button>
             ))}
           </div>
           <div className="loan">
@@ -365,9 +375,10 @@ export default function Advisor() {
           </div>
           {afford && (
             <p className={`afford ${afford.level}`}>
-              งบนี้ผ่อนราว {baht(afford.inst)} บาท/เดือน = {afford.pct}% ของรายได้ · แนะนำค่างวดไม่เกิน 30% คือรถราคาไม่เกินราว {baht(afford.comfortable)} บาท (ดอกเบี้ยสมมติ 3% ต่อปี)
+              งบนี้ผ่อนราว {baht(afford.inst)} บาท/เดือน = {afford.pct}% ของรายได้ · คู่มือซื้อรถแนะนำค่างวดไม่เกิน 30% คือรถราคาราว {baht(afford.comfortable)} บาท (ดอกเบี้ยสมมติ 3% ต่อปี)
             </p>
           )}
+          </>)}
           <label className="sub">ยอมเกินงบได้แค่ไหน</label>
           <div className="chips">
             {STRETCH.map((s) => (
@@ -477,7 +488,7 @@ export default function Advisor() {
               <h2>รถที่เหมาะกับคุณจะขึ้นตรงนี้</h2>
               {mode === "chat" ? (
                 <>
-                  <p className="muted">ที่ปรึกษาจะถามประมาณ 8 เรื่อง ตอบครบแล้วระบบจะจัดอันดับจากรถ 175 รุ่นให้ทันที</p>
+                  <p className="muted">ที่ปรึกษาจะถามประมาณ 8–9 เรื่อง ตอบครบแล้วระบบจะจัดอันดับจากรถ 175 รุ่นให้ทันที</p>
                   <ul className="todo">
                     {Object.entries(TOPIC_TH).map(([k, v]) => (
                       <li key={k} className={answered.includes(k) ? "ok" : asked[asked.length - 1] === k ? "now" : ""}>
@@ -488,10 +499,10 @@ export default function Advisor() {
                 </>
               ) : (
                 <>
-                  <p className="muted">กรอกรายได้ งบ เลือกไลฟ์สไตล์ และทรงหรือแบรนด์ที่ชอบทางซ้าย แล้วกด &quot;ดูรถที่เหมาะกับคุณ&quot;</p>
+                  <p className="muted">กรอกงบ เลือกเงินสดหรือผ่อน เลือกไลฟ์สไตล์ และทรงหรือแบรนด์ที่ชอบทางซ้าย แล้วกด &quot;ดูรถที่เหมาะกับคุณ&quot;</p>
                   <ul className="todo">
                     <li className="ok"><span aria-hidden>✓</span>ลำดับการ์ด (ใช้ตั้งต้นได้)</li>
-                    <li className={income ? "ok" : ""}><span aria-hidden>{income ? "✓" : ""}</span>รายได้ต่อเดือน</li>
+                    <li className={payment && (payment === "cash" || income) ? "ok" : ""}><span aria-hidden>{payment && (payment === "cash" || income) ? "✓" : ""}</span>ซื้อเงินสดหรือผ่อน (ถ้าผ่อน กรอกรายได้)</li>
                     <li className={budgetSet ? "ok" : ""}><span aria-hidden>{budgetSet ? "✓" : ""}</span>งบประมาณ</li>
                     <li className={lifestyles.length ? "ok" : ""}><span aria-hidden>{lifestyles.length ? "✓" : ""}</span>ไลฟ์สไตล์</li>
                     <li className={bodies.length || brandPref.length ? "ok" : ""}><span aria-hidden>{bodies.length || brandPref.length ? "✓" : ""}</span>ทรงหรือแบรนด์ที่ชอบ</li>
@@ -519,11 +530,11 @@ export default function Advisor() {
           {data?.affordability?.budget_above_income && (
             <div className="alert warn">
               งบ {baht(Math.round(budgetK * 1000))} บาท ผ่อนราว {baht(data.affordability.budget_installment)} บาท/เดือน คิดเป็น {data.affordability.budget_pct_of_income}% ของรายได้ ซึ่งเกิน 30% ที่แนะนำ
-              ระบบจึงให้คะแนนงบเต็มเฉพาะรถไม่เกินราว {baht(data.affordability.comfortable_price)} บาท และไม่แสดงรถเกิน {baht(data.affordability.max_price)} บาท
+              ลองเพิ่มเงินดาวน์ ผ่อนนานขึ้น หรือดูรถราคาไม่เกินราว {baht(data.affordability.comfortable_price)} บาท (คะแนนและอันดับไม่ได้เปลี่ยนตามรายได้)
             </div>
           )}
           {data?.affordability && (
-            <p className="aff-note">รายได้ {baht(data.affordability.income)} บาท/เดือน: ผ่อนสบายถ้ารถไม่เกินราว {baht(data.affordability.comfortable_price)} บาท · ไม่แสดงรถที่ค่างวดเกินครึ่งหนึ่งของรายได้ (เกิน {baht(data.affordability.max_price)} บาท) · {data.affordability.assumptions}</p>
+            <p className="aff-note">รายได้ {baht(data.affordability.income)} บาท/เดือน: ผ่อนสบายถ้ารถไม่เกินราว {baht(data.affordability.comfortable_price)} บาท · {data.affordability.assumptions}</p>
           )}
           {data?.preference_notes && data.preference_notes.length > 0 && (
             <div className="prefs">
@@ -734,6 +745,7 @@ export default function Advisor() {
         .money input { flex: 1; min-width: 0; min-height: 46px; border-radius: 12px; border: 1px solid var(--line); padding: 0 14px; font: inherit; font-size: 18px; font-weight: 600; color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
         .money input:focus { outline: 2.5px solid var(--accent); border-color: transparent; }
         .money span { color: var(--muted); font-size: 14px; white-space: nowrap; }
+        .pay { margin-top: 6px; margin-bottom: 4px; }
         .loan { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .loan select { width: 100%; margin-top: 6px; min-height: 42px; border-radius: 11px; border: 1px solid var(--line); padding: 0 10px; font: inherit; font-size: 15px; color: var(--ink); background: var(--surface); }
         .afford { margin: 10px 0 0; font-size: 13.5px; padding: 8px 12px; border-radius: 10px; }

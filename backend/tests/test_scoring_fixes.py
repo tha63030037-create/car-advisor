@@ -93,20 +93,6 @@ def test_income_is_parsed_apart_from_the_budget():
     assert c["monthly_income"] == 30000 and c["budget"] == 800000 and c["lifestyles"] == ["city"]
 
 
-def test_income_caps_what_is_shown_and_flags_tight_installments():
-    r = run(budget=1500000, monthly_income=30000)
-    cap = r["affordability"]["max_price"]
-    assert all(x["price"] <= cap + 1000 for x in r["results"])
-    assert {x["monthly"]["level"] for x in r["results"]} <= {"comfortable", "tight"}
-    assert r["affordability"]["comfortable_price"] < r["affordability"]["max_price"]
-
-
-def test_chat_is_not_done_without_income():
-    from app.chat import next_topic
-    assert next_topic({"budget": 900000, "budget_stretch": 0.1, "lifestyles": ["city"], "priorities": {"budget": 3}},
-                      ["usage", "lifestyle", "budget", "stretch", "brand", "priorities"]) == "income"
-
-
 def test_crash_tests_come_from_several_programmes_with_a_source():
     tested = [c for c in CARS_V2 if c.get("crash_test")]
     assert len(tested) >= 90
@@ -115,18 +101,12 @@ def test_crash_tests_come_from_several_programmes_with_a_source():
     assert all((c["crash_test"]["year"] or 2020) >= 2018 for c in tested)
 
 
-def test_bigger_down_payment_lowers_installment_and_raises_the_cap():
-    a = run(budget=1200000, monthly_income=30000)
-    b = run(budget=1200000, monthly_income=30000, down_payment_pct=0.5, loan_years=7)
-    assert b["affordability"]["max_price"] > a["affordability"]["max_price"]
-    assert b["passed_filters"] >= a["passed_filters"]
-
-
 def test_chat_asks_body_type_and_never_leaves_a_card_out():
     from app.chat import next_topic, fill_required
     base = {"lifestyles": ["merit_family"], "seats_min": 7, "monthly_income": 40000, "budget": 1200000,
             "budget_stretch": 0.1, "priorities": {"budget": 3}}
-    asked = ["usage", "lifestyle", "income", "budget", "stretch", "brand"]
+    base["payment"] = "cash"
+    asked = ["usage", "lifestyle", "payment", "budget", "stretch", "brand"]
     assert next_topic(base, asked) == "design"
     assert next_topic(base, asked + ["design"]) == "design"          # asked once more if unanswered
     assert next_topic(base, asked + ["design", "design"]) is None   # then a stated default fills it
@@ -136,12 +116,27 @@ def test_chat_asks_body_type_and_never_leaves_a_card_out():
     assert r["inactive_criteria"] == []
 
 
-def test_income_bounds_the_budget_card_and_notes_say_why():
-    r = run(budget=3000000, monthly_income=50000, body_preferred=["coupe"])
-    a = r["affordability"]
-    assert a["budget_above_income"]
-    for x in r["results"]:
-        if x["price"] > a["comfortable_price"] + 1000:
-            assert x["criteria"]["budget"] < 1 and "ค่างวด" in x["over_budget"]["label"]
-    body_note = next(n["text"] for n in r["preference_notes"] if n["kind"] == "body")
-    assert "ผ่อนไหว" in body_note and "3,450,000" not in body_note
+def test_income_informs_but_never_filters_or_scores():
+    a = run(budget=3000000)
+    b = run(budget=3000000, payment="finance", monthly_income=30000)
+    assert a["passed_filters"] == b["passed_filters"]
+    assert [x["id"] for x in a["results"][:10]] == [x["id"] for x in b["results"][:10]]
+    assert b["results"][0]["monthly"]["installment"] > 0 and b["affordability"]["budget_above_income"]
+    c = run(budget=3000000, payment="cash", monthly_income=30000)
+    assert c["results"][0]["monthly"] is None and c["affordability"] is None
+
+
+def test_bigger_down_payment_lowers_installment():
+    a = run(budget=1200000, payment="finance", monthly_income=30000)
+    b = run(budget=1200000, payment="finance", monthly_income=30000, down_payment_pct=0.5, loan_years=7)
+    assert b["affordability"]["budget_installment"] < a["affordability"]["budget_installment"]
+
+
+def test_chat_asks_cash_or_finance_and_income_only_when_financing():
+    from app.chat import next_topic, rules_extract
+    c = {"lifestyles": ["city"], "seats_min": 1}
+    assert next_topic(c, ["usage", "lifestyle"]) == "payment"
+    assert next_topic(dict(c, payment="cash"), ["usage", "lifestyle", "payment"]) == "budget"
+    assert next_topic(dict(c, payment="finance"), ["usage", "lifestyle", "payment"]) == "income"
+    assert rules_extract("ซื้อเงินสด", {})["payment"] == "cash"
+    assert rules_extract("ผ่อนค่ะ เงินเดือน 4 หมื่น", {})["payment"] == "finance"
