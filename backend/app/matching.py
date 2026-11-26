@@ -435,11 +435,8 @@ def recommend(c, cars=None):
     costs = {car["id"]: annual_cost(car, c.km_per_year) for car in passed}
     lo, hi = cost_scale(c.km_per_year)
 
-    # a wanted body type that no car within the filters has (e.g. a coupe on a 1.5M budget) would give
-    # every car 0 and only drown out the brand taste: leave it out and say so in preference_notes
+    # every card counts once the user has given input for it, even when it does not separate the cars
     body_pref = c.body_preferred
-    if body_pref and len({score_design(car, body_pref) for car in passed}) <= 1:
-        body_pref = []
 
     rows = []
     for car in passed:

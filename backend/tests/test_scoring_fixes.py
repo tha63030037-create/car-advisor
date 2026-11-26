@@ -120,3 +120,17 @@ def test_bigger_down_payment_lowers_installment_and_raises_the_cap():
     b = run(budget=1200000, monthly_income=30000, down_payment_pct=0.5, loan_years=7)
     assert b["affordability"]["max_price"] > a["affordability"]["max_price"]
     assert b["passed_filters"] >= a["passed_filters"]
+
+
+def test_chat_asks_body_type_and_never_leaves_a_card_out():
+    from app.chat import next_topic, fill_required
+    base = {"lifestyles": ["merit_family"], "seats_min": 7, "monthly_income": 40000, "budget": 1200000,
+            "budget_stretch": 0.1, "priorities": {"budget": 3}}
+    asked = ["usage", "lifestyle", "income", "budget", "stretch", "brand"]
+    assert next_topic(base, asked) == "design"
+    assert next_topic(base, asked + ["design"]) == "design"          # asked once more if unanswered
+    assert next_topic(base, asked + ["design", "design"]) is None   # then a stated default fills it
+    filled, notes = fill_required(base)
+    assert filled["body_preferred"] == ["mpv", "ppv"] and notes
+    r = recommend(Criteria(**{k: v for k, v in filled.items() if k != "seats_min"}, seats_min=7, top_n=5))
+    assert r["inactive_criteria"] == []

@@ -242,6 +242,7 @@ export default function Advisor() {
     !income && "กรอกรายได้ต่อเดือน",
     !budgetSet && "กรอกงบซื้อรถ",
     lifestyles.length === 0 && "เลือกไลฟ์สไตล์อย่างน้อย 1 ข้อ",
+    bodies.length === 0 && brandPref.length === 0 && "เลือกทรงหรือแบรนด์ที่ชอบอย่างน้อย 1 อย่าง",
   ].filter(Boolean) as string[];
   // same estimate as the backend: 25% down, 5 years, 3% flat — shown live under the budget box
   const inst = (price: number) => (price * (1 - down) * (1 + 0.03 * years)) / (12 * years);
@@ -252,8 +253,8 @@ export default function Advisor() {
     level: inst(budgetK * 1000) / income <= 0.3 ? "ok" : inst(budgetK * 1000) / income <= 0.5 ? "tight" : "over",
   } : null;
   const reveal = () => { setRevealed(true); setTimeout(() => scrollTo(resultsTop.current), 350); };
-  const TOPIC_TH: Record<string, string> = { usage: "การใช้งาน", lifestyle: "ไลฟ์สไตล์", income: "รายได้ต่อเดือน", budget: "งบประมาณ", stretch: "งบยืดได้แค่ไหน", brand: "แบรนด์", priorities: "เรื่องที่สำคัญ" };
-  const answered = chatDone ? asked : asked.slice(0, -1);
+  const TOPIC_TH: Record<string, string> = { usage: "การใช้งาน", lifestyle: "ไลฟ์สไตล์", income: "รายได้ต่อเดือน", budget: "งบประมาณ", stretch: "งบยืดได้แค่ไหน", brand: "แบรนด์", design: "ทรงรถที่ชอบ", priorities: "เรื่องที่สำคัญ" };
+  const answered = chatDone ? Object.keys({ usage: 1, lifestyle: 1, income: 1, budget: 1, stretch: 1, brand: 1, design: 1, priorities: 1 }) : asked.slice(0, -1);
 
   const toggle = (arr: string[], v: string, set: (x: string[]) => void) =>
     set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
@@ -399,7 +400,7 @@ export default function Advisor() {
             <button className={`chip ${ncapMin ? "on" : ""}`} onClick={() => setNcapMin(!ncapMin)} title="รถที่ยังไม่มีผลทดสอบจะยังแสดงอยู่">🛡️ ไม่เอารถผลทดสอบชนต่ำกว่า 3 ดาว</button>
           </div>
 
-          <h2>4. ทรงและแบรนด์ที่ชอบ <small>(ใช้กับการ์ดดีไซน์ ไม่ตัดรถคันอื่น)</small></h2>
+          <h2>4. ทรงและแบรนด์ที่ชอบ <b className="req">จำเป็น</b> <small>(ใช้กับการ์ดดีไซน์ ไม่ตัดรถคันอื่น)</small></h2>
           <div className="chips">
             {BODIES.map((b) => (
               <button key={b.key} className={`chip ${bodies.includes(b.key) ? "on" : ""}`} onClick={() => toggle(bodies, b.key, setBodies)}>{b.label}</button>
@@ -463,7 +464,7 @@ export default function Advisor() {
           {!revealed && (
             <div className="submit">
               <button className="go" disabled={manualMissing.length > 0} onClick={reveal}>ดูรถที่เหมาะกับคุณ</button>
-              <p className="hint">{manualMissing.length > 0 ? `ยังขาด: ${manualMissing.join(" และ ")}` : "พร้อมแล้ว ข้อ 3–5 ไม่ตอบก็ได้"}</p>
+              <p className="hint">{manualMissing.length > 0 ? `ยังขาด: ${manualMissing.join(" และ ")}` : "พร้อมแล้ว ข้อ 3 ไม่ตอบก็ได้ ข้อ 5 ใช้ลำดับตั้งต้นได้"}</p>
             </div>
           )}
           </>)}
@@ -476,7 +477,7 @@ export default function Advisor() {
               <h2>รถที่เหมาะกับคุณจะขึ้นตรงนี้</h2>
               {mode === "chat" ? (
                 <>
-                  <p className="muted">ที่ปรึกษาจะถามประมาณ 7 เรื่อง ตอบครบแล้วระบบจะจัดอันดับจากรถ 175 รุ่นให้ทันที</p>
+                  <p className="muted">ที่ปรึกษาจะถามประมาณ 8 เรื่อง ตอบครบแล้วระบบจะจัดอันดับจากรถ 175 รุ่นให้ทันที</p>
                   <ul className="todo">
                     {Object.entries(TOPIC_TH).map(([k, v]) => (
                       <li key={k} className={answered.includes(k) ? "ok" : asked[asked.length - 1] === k ? "now" : ""}>
@@ -487,12 +488,13 @@ export default function Advisor() {
                 </>
               ) : (
                 <>
-                  <p className="muted">กรอกรายได้ งบ และเลือกไลฟ์สไตล์ทางซ้าย แล้วกด &quot;ดูรถที่เหมาะกับคุณ&quot;</p>
+                  <p className="muted">กรอกรายได้ งบ เลือกไลฟ์สไตล์ และทรงหรือแบรนด์ที่ชอบทางซ้าย แล้วกด &quot;ดูรถที่เหมาะกับคุณ&quot;</p>
                   <ul className="todo">
                     <li className="ok"><span aria-hidden>✓</span>ลำดับการ์ด (ใช้ตั้งต้นได้)</li>
                     <li className={income ? "ok" : ""}><span aria-hidden>{income ? "✓" : ""}</span>รายได้ต่อเดือน</li>
                     <li className={budgetSet ? "ok" : ""}><span aria-hidden>{budgetSet ? "✓" : ""}</span>งบประมาณ</li>
                     <li className={lifestyles.length ? "ok" : ""}><span aria-hidden>{lifestyles.length ? "✓" : ""}</span>ไลฟ์สไตล์</li>
+                    <li className={bodies.length || brandPref.length ? "ok" : ""}><span aria-hidden>{bodies.length || brandPref.length ? "✓" : ""}</span>ทรงหรือแบรนด์ที่ชอบ</li>
                   </ul>
                 </>
               )}

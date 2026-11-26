@@ -72,7 +72,13 @@ class ChatResponse(BaseModel):
 
 
 # Conversation order (spec 5.5). budget is the only hard requirement to show results.
-TOPICS = ["usage", "lifestyle", "income", "budget", "stretch", "brand", "priorities"]
+TOPICS = ["usage", "lifestyle", "income", "budget", "stretch", "brand", "design", "priorities"]
+# every one of the 5 cards must count, so these are asked again once if the answer did not stick,
+# and fall back to a stated, explained default after that (see fill_required)
+REQUIRED = {"usage", "income", "budget", "design"}
+BODY_FOR_LIFESTYLE = {"city": ["hatchback", "suv"], "school_run": ["suv", "hatchback"], "camping": ["suv", "ppv", "pickup"],
+                      "merit_family": ["mpv", "ppv"], "pets": ["suv"], "long_trips": ["sedan", "suv"], "work_cargo": ["pickup"]}
+BODY_TH_CHAT = {"sedan": "เก๋ง", "hatchback": "แฮทช์แบ็ก", "suv": "SUV", "ppv": "PPV", "mpv": "รถตู้/MPV", "pickup": "กระบะ", "coupe": "คูเป้"}
 QUESTIONS = {
     "income": ("ขอถามเรื่องรายได้หน่อยนะคะ รายได้ต่อเดือนประมาณเท่าไรคะ (รวมของคนที่ช่วยผ่อนด้วยก็ได้) จะได้แนะนำรถที่ผ่อนไหวจริง ๆ ค่ะ",
                ["รายได้ 2 หมื่น", "รายได้ 3 หมื่น", "รายได้ 5 หมื่น", "รายได้ 1 แสน"]),
@@ -85,6 +91,8 @@ QUESTIONS = {
                 ["ห้ามเกินเลย", "เกินได้นิดหน่อย", "เกินได้ถ้าคุ้มจริง"]),
     "brand": ("มียี่ห้อที่อยากได้เป็นพิเศษ หรือยี่ห้อที่ไม่เอาไหมคะ",
               ["ไม่จำกัดยี่ห้อ", "เอาแต่ Toyota", "ไม่เอารถจีน"]),
+    "design": ("ชอบรถทรงไหนคะ เลือกได้มากกว่าหนึ่งแบบ (ใช้ในคะแนนดีไซน์ ไม่ได้ตัดรถทรงอื่นออก)",
+               ["SUV", "เก๋ง", "แฮทช์แบ็ก", "รถตู้ / 7 ที่นั่ง", "กระบะ"]),
     "priorities": ("ข้อสุดท้ายค่ะ ระหว่าง งบ / การใช้งาน / ค่าใช้จ่ายระยะยาว / ความปลอดภัย / ดีไซน์ เรื่องไหนสำคัญที่สุดคะ (หรือแตะแท็บ “ตั้งค่าเอง” เพื่อจัดการ์ดเองก็ได้นะคะ)",
                    ["ความปลอดภัยสำคัญสุด", "งบสำคัญสุด", "ค่าใช้จ่ายระยะยาวสำคัญสุด", "ดีไซน์สำคัญสุด"]),
 }
@@ -94,7 +102,7 @@ SYSTEM_PROMPT = """คุณคือที่ปรึกษาการเล�
 หน้าที่
 - ถามให้รู้การใช้ชีวิตจริงของลูกค้า แล้วสรุปเป็นเงื่อนไขตามโครง JSON ที่กำหนด
 - ถามทีละ 1 ข้อ สั้น เป็นกันเอง ไม่ใช้ศัพท์เทคนิค
-- ข้อมูลที่ต้องได้ก่อนแนะนำ: รายได้ต่อเดือน (ต้องถามทุกครั้ง ถ้าลูกค้าไม่อยากบอกให้ขอเป็นช่วงคร่าว ๆ), งบ, จำนวนคนที่นั่งประจำ, การใช้งานหลัก, แบรนด์ที่เจาะจงหรือไม่เอา, ลำดับความสำคัญของ 5 เรื่อง
+- ข้อมูลที่ต้องได้ก่อนแนะนำ: รายได้ต่อเดือน (ต้องถามทุกครั้ง ถ้าลูกค้าไม่อยากบอกให้ขอเป็นช่วงคร่าว ๆ), งบ, ทรงรถที่ชอบ (ต้องถามทุกครั้ง), จำนวนคนที่นั่งประจำ, การใช้งานหลัก, แบรนด์ที่เจาะจงหรือไม่เอา, ลำดับความสำคัญของ 5 เรื่อง
 - แบรนด์: "ชอบ X" หรือ "ชอบ X ที่สุด" ใส่ใน brand_preferred (ยังดูแบรนด์อื่นด้วย) ; ใส่ brand_only เฉพาะเมื่อลูกค้าพูดชัดว่า "เอาแค่ X", "เฉพาะ X" หรือ "ไม่เอาแบรนด์อื่น" เท่านั้น
 - ถามเรื่องงบให้รู้ว่ายืดได้แค่ไหน: ไม่ยืดเลย (0) ยืดได้นิดหน่อย (0.1) หรือยืดได้ถ้าคุ้ม (0.2)
 
@@ -261,25 +269,51 @@ def rules_extract(text, crit):
     return c
 
 
+def _answered(t, c):
+    if t == "usage":
+        return bool(c.get("lifestyles"))
+    if t == "lifestyle":
+        return bool(c.get("lifestyles")) and bool(c.get("seats_min"))
+    if t == "income":
+        return bool(c.get("monthly_income"))
+    if t == "budget":
+        return bool(c.get("budget"))
+    if t == "stretch":
+        return c.get("budget_stretch") is not None
+    if t == "design":
+        return bool(c.get("body_preferred")) or bool(c.get("brand_preferred"))
+    if t == "priorities":
+        return bool(c.get("priorities"))
+    return False
+
+
 def next_topic(c, asked):
-    """First topic not yet asked and not already answered by what the user volunteered."""
+    """First topic not answered yet. Optional topics are asked once; required ones (REQUIRED) once more
+    if the answer did not come through, so all five cards end up with real input."""
     for t in TOPICS:
-        if t in asked:
+        if _answered(t, c):
             continue
-        if t == "usage" and c.get("lifestyles"):
-            continue
-        if t == "lifestyle" and c.get("lifestyles") and c.get("seats_min"):
-            continue
-        if t == "income" and c.get("monthly_income"):
-            continue
-        if t == "budget" and c.get("budget"):
-            continue
-        if t == "stretch" and c.get("budget_stretch") is not None:
-            continue
-        if t == "priorities" and c.get("priorities"):
-            continue
-        return t
+        n = asked.count(t)
+        if n == 0 or (t in REQUIRED and n < 2):
+            return t
     return None
+
+
+def fill_required(c):
+    """After two tries, fill what is still missing with a default that follows from the user's own
+    answers, and say so — never leave a card out of the score."""
+    c, notes = dict(c), []
+    if not c.get("lifestyles"):
+        c["lifestyles"] = ["city"]
+        notes.append("ยังไม่ทราบการใช้งานหลัก ขอคิดเป็นขับในเมืองไปก่อนนะคะ")
+    if not c.get("body_preferred") and not c.get("brand_preferred"):
+        bodies = []
+        for ls in c["lifestyles"]:
+            bodies += [b for b in BODY_FOR_LIFESTYLE.get(ls, []) if b not in bodies]
+        c["body_preferred"] = bodies or ["suv"]
+        notes.append("ยังไม่ได้บอกทรงที่ชอบ ขอใช้ทรงที่เหมาะกับการใช้งานของคุณคือ %s ในคะแนนดีไซน์ไปก่อน เปลี่ยนได้ตลอดค่ะ"
+                     % ", ".join(BODY_TH_CHAT.get(b, b) for b in c["body_preferred"]))
+    return c, notes
 
 
 def summarize(c):
@@ -511,6 +545,10 @@ def chat_turn(req):
     if not (reply or "").strip():  # the model occasionally returns an empty reply
         reply = ("ได้ข้อมูลครบแล้วค่ะ สรุปที่เข้าใจคือ %s กำลังจัดอันดับรถให้นะคะ" % summarize(crit)) if nt is None and crit.get("budget") \
             else (QUESTIONS[nt][0] if nt in QUESTIONS else "ขอข้อมูลเพิ่มอีกนิดนะคะ")
+    if nt is None and crit.get("budget") and crit.get("monthly_income"):
+        crit, notes = fill_required(crit)
+        if notes:
+            reply = (reply.rstrip() + "\n\n" + " ".join(notes)).strip()
     missing = [k for k in ("budget",) if not crit.get("budget")]
     return ChatResponse(
         reply=reply, criteria=crit, missing=missing, ready=not missing,
