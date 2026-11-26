@@ -50,6 +50,8 @@ export default function Advisor() {
   const [budgetText, setBudgetText] = useState("");
   const [income, setIncome] = useState<number | null>(null);
   const [incomeText, setIncomeText] = useState("");
+  const [down, setDown] = useState(0.25);
+  const [years, setYears] = useState(5);
   const digits = (t: string) => Number(t.replace(/[^\d]/g, "")) || 0;
   const setBudgetFrom = (t: string) => {
     const n = digits(t);
@@ -117,6 +119,8 @@ export default function Advisor() {
   const criteria = useMemo(() => ({
     budget: Math.round(budgetK * 1000),
     monthly_income: income,
+    down_payment_pct: down,
+    loan_years: years,
     budget_stretch: stretch,
     brand_only: brandOnly,
     brand_preferred: brandPref,
@@ -130,7 +134,7 @@ export default function Advisor() {
     km_per_year: 15000,
     priorities: zones,
     top_n: 10,
-  }), [budgetK, income, stretch, brandOnly, brandPref, brandExclude, seatsMin, noEv, bodies, lifestyles, zones, ncapMin]);
+  }), [budgetK, income, down, years, stretch, brandOnly, brandPref, brandExclude, seatsMin, noEv, bodies, lifestyles, zones, ncapMin]);
 
   // ---------------------------------------------------------------- chat
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -240,11 +244,11 @@ export default function Advisor() {
     lifestyles.length === 0 && "เลือกไลฟ์สไตล์อย่างน้อย 1 ข้อ",
   ].filter(Boolean) as string[];
   // same estimate as the backend: 25% down, 5 years, 3% flat — shown live under the budget box
-  const inst = (price: number) => (price * 0.75 * 1.15) / 60;
+  const inst = (price: number) => (price * (1 - down) * (1 + 0.03 * years)) / (12 * years);
   const afford = income && budgetSet ? {
     inst: Math.round(inst(budgetK * 1000)),
     pct: Math.round((1000 * inst(budgetK * 1000)) / income) / 10,
-    comfortable: Math.round((income * 0.3 * 60) / (0.75 * 1.15) / 1000) * 1000,
+    comfortable: Math.round((income * 0.3 * 12 * years) / ((1 - down) * (1 + 0.03 * years)) / 1000) * 1000,
     level: inst(budgetK * 1000) / income <= 0.3 ? "ok" : inst(budgetK * 1000) / income <= 0.5 ? "tight" : "over",
   } : null;
   const reveal = () => { setRevealed(true); setTimeout(() => scrollTo(resultsTop.current), 350); };
@@ -344,9 +348,23 @@ export default function Advisor() {
               <button key={v} className={`chip ${budgetSet && budgetK * 1000 === v ? "on" : ""}`} onClick={() => setBudgetFrom(String(v))}>{v >= 1000000 ? `${v / 1000000} ล้าน` : `${v / 100000} แสน`}</button>
             ))}
           </div>
+          <div className="loan">
+            <div>
+              <label className="sub" htmlFor="down">เงินดาวน์</label>
+              <select id="down" value={down} onChange={(e) => setDown(+e.target.value)}>
+                {[0, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5].map((v) => <option key={v} value={v}>{Math.round(v * 100)}%</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="sub" htmlFor="years">ผ่อนกี่ปี</label>
+              <select id="years" value={years} onChange={(e) => setYears(+e.target.value)}>
+                {[3, 4, 5, 6, 7, 8].map((v) => <option key={v} value={v}>{v} ปี</option>)}
+              </select>
+            </div>
+          </div>
           {afford && (
             <p className={`afford ${afford.level}`}>
-              งบนี้ผ่อนราว {baht(afford.inst)} บาท/เดือน = {afford.pct}% ของรายได้ · แนะนำค่างวดไม่เกิน 30% คือรถราคาไม่เกินราว {baht(afford.comfortable)} บาท
+              งบนี้ผ่อนราว {baht(afford.inst)} บาท/เดือน = {afford.pct}% ของรายได้ · แนะนำค่างวดไม่เกิน 30% คือรถราคาไม่เกินราว {baht(afford.comfortable)} บาท (ดอกเบี้ยสมมติ 3% ต่อปี)
             </p>
           )}
           <label className="sub">ยอมเกินงบได้แค่ไหน</label>
@@ -708,6 +726,8 @@ export default function Advisor() {
         .money input { flex: 1; min-width: 0; min-height: 46px; border-radius: 12px; border: 1px solid var(--line); padding: 0 14px; font: inherit; font-size: 18px; font-weight: 600; color: var(--ink); background: var(--surface); font-variant-numeric: tabular-nums; }
         .money input:focus { outline: 2.5px solid var(--accent); border-color: transparent; }
         .money span { color: var(--muted); font-size: 14px; white-space: nowrap; }
+        .loan { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .loan select { width: 100%; margin-top: 6px; min-height: 42px; border-radius: 11px; border: 1px solid var(--line); padding: 0 10px; font: inherit; font-size: 15px; color: var(--ink); background: var(--surface); }
         .afford { margin: 10px 0 0; font-size: 13.5px; padding: 8px 12px; border-radius: 10px; }
         .afford.ok { background: var(--accent-wash); color: var(--accent-ink); }
         .afford.tight { background: var(--signal-wash); color: #7A5200; }

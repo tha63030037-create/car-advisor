@@ -59,6 +59,9 @@ class Criteria(BaseModel):
     lifestyles: List[str] = []
     # monthly income (household, before tax); required by the UI, optional here so old callers still work
     monthly_income: Optional[int] = Field(None, gt=0, le=10000000)
+    # loan assumptions the user may change; defaults from matching_config
+    down_payment_pct: float = Field(cfg.FIN_DOWN, ge=0, le=0.9)
+    loan_years: int = Field(cfg.FIN_YEARS, ge=1, le=8)
     km_per_year: int = Field(cfg.DEFAULT_KM_PER_YEAR, gt=0, le=200000)
     priorities: Priorities = Priorities()
     top_n: int = Field(cfg.DEFAULT_TOP_N, ge=1, le=200)
@@ -83,7 +86,8 @@ def _load_cars():
             raise RuntimeError("car_specs.json is missing car id %s — run scripts/build_car_specs.py" % car["id"])
         merged.append(dict(car, **{k: v for k, v in s.items() if k != "id"}))
     with open(DIM_PATH, encoding="utf-8") as f:
-        lengths = json.load(f)["length_mm"]
+        dims = json.load(f)
+    lengths, verified_len = dims["length_mm"], dims.get("verified", {})
     with open(CRASH_PATH, encoding="utf-8") as f:
         crash = json.load(f)["results"]
     for car in merged:
@@ -96,7 +100,7 @@ def _load_cars():
         car["crash_stars"] = car["crash_test"]["stars"] if car["crash_test"] else None
     for car in merged:
         car["length_mm"] = lengths.get(str(car["id"]))
-        if car["length_mm"] is not None:
+        if car["length_mm"] is not None and not verified_len.get(str(car["id"])):
             car["estimated"] = list(car.get("estimated", [])) + ["length_mm"]
     return merged
 
@@ -210,20 +214,20 @@ def annual_cost(car, km_per_year):
     }
 
 
-def monthly_installment(price):
-    """Estimated monthly installment: 25% down, 5 years, 3% flat interest (assumptions in matching_config)."""
-    financed = price * (1 - cfg.FIN_DOWN)
-    return financed * (1 + cfg.FIN_FLAT_RATE * cfg.FIN_YEARS) / (12 * cfg.FIN_YEARS)
+def monthly_installment(price, down=cfg.FIN_DOWN, years=cfg.FIN_YEARS):
+    """Estimated monthly installment with a flat interest rate (defaults in matching_config)."""
+    financed = price * (1 - down)
+    return financed * (1 + cfg.FIN_FLAT_RATE * years) / (12 * years)
 
 
-def price_for_installment(amount):
-    return amount * 12 * cfg.FIN_YEARS / ((1 - cfg.FIN_DOWN) * (1 + cfg.FIN_FLAT_RATE * cfg.FIN_YEARS))
+def price_for_installment(amount, down=cfg.FIN_DOWN, years=cfg.FIN_YEARS):
+    return amount * 12 * years / ((1 - down) * (1 + cfg.FIN_FLAT_RATE * years))
 
 
-def affordability(price, income, annual_cost_total=None):
+def affordability(price, income, annual_cost_total=None, down=cfg.FIN_DOWN, years=cfg.FIN_YEARS):
     if not income:
         return None
-    inst = monthly_installment(price)
+    inst = monthly_installment(price, down, years)
     pct = inst / income
     level = "comfortable" if pct <= cfg.INCOME_COMFORT else ("tight" if pct <= cfg.INCOME_MAX else "over")
     label = {"comfortable": "ผ่อนสบาย", "tight": "ผ่อนตึง", "over": "เกินกำลังผ่อน"}[level]
@@ -272,7 +276,7 @@ def _filter_checks(c):
     checks.append(("budget_ceiling", "ราคาไม่เกินงบ + ยืดได้ %d%%" % round(c.budget_stretch * 100),
                    lambda car: car["price"] <= ceiling))
     if c.monthly_income:
-        cap = price_for_installment(c.monthly_income * cfg.INCOME_MAX)
+        cap = price_for_installment(c.monthly_income * cfg.INCOME_MAX, c.down_payment_pct, c.loan_years)
         checks.append(("income_cap", "ค่างวดไม่เกินครึ่งหนึ่งของรายได้ (รถไม่เกิน %s บาท)" % format(int(round(cap, -3)), ","),
                        lambda car: car["price"] <= cap))
     return checks
@@ -486,7 +490,7 @@ def recommend(c, cars=None):
             "crash_test": car.get("crash_test"),
             "safety_warning": safety_warning(car),
             "annual_cost": cost,
-            "monthly": affordability(car["price"], c.monthly_income, cost["total"] if cost else None),
+            "monthly": affordability(car["price"], c.monthly_income, cost["total"] if cost else None, c.down_payment_pct, c.loan_years),
             "lifestyle_detail": life_detail,
             "estimated_fields": car.get("estimated", []),
         })
@@ -517,12 +521,12 @@ def recommend(c, cars=None):
         "preference_notes": preference_notes(cars, rows, c),
         "affordability": None if not c.monthly_income else {
             "income": c.monthly_income,
-            "comfortable_price": int(round(price_for_installment(c.monthly_income * cfg.INCOME_COMFORT), -3)),
-            "max_price": int(round(price_for_installment(c.monthly_income * cfg.INCOME_MAX), -3)),
-            "budget_installment": round(monthly_installment(c.budget)),
-            "budget_pct_of_income": round(100 * monthly_installment(c.budget) / c.monthly_income, 1),
+            "comfortable_price": int(round(price_for_installment(c.monthly_income * cfg.INCOME_COMFORT, c.down_payment_pct, c.loan_years), -3)),
+            "max_price": int(round(price_for_installment(c.monthly_income * cfg.INCOME_MAX, c.down_payment_pct, c.loan_years), -3)),
+            "budget_installment": round(monthly_installment(c.budget, c.down_payment_pct, c.loan_years)),
+            "budget_pct_of_income": round(100 * monthly_installment(c.budget, c.down_payment_pct, c.loan_years) / c.monthly_income, 1),
             "assumptions": "ดาวน์ %d%% ผ่อน %d ปี ดอกเบี้ย %.1f%% ต่อปีแบบคงที่ (ค่าประมาณ ไม่ใช่ข้อเสนอสินเชื่อ)" % (
-                round(cfg.FIN_DOWN * 100), cfg.FIN_YEARS, cfg.FIN_FLAT_RATE * 100),
+                round(c.down_payment_pct * 100), c.loan_years, cfg.FIN_FLAT_RATE * 100),
         },
     }
 

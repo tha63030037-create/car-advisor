@@ -113,3 +113,10 @@ def test_crash_tests_come_from_several_programmes_with_a_source():
     assert {c["crash_test"]["program"] for c in tested} == {"ASEAN NCAP", "ANCAP", "Euro NCAP"}
     assert all(c["crash_test"]["url"].startswith("https://") for c in tested)
     assert all((c["crash_test"]["year"] or 2020) >= 2018 for c in tested)
+
+
+def test_bigger_down_payment_lowers_installment_and_raises_the_cap():
+    a = run(budget=1200000, monthly_income=30000)
+    b = run(budget=1200000, monthly_income=30000, down_payment_pct=0.5, loan_years=7)
+    assert b["affordability"]["max_price"] > a["affordability"]["max_price"]
+    assert b["passed_filters"] >= a["passed_filters"]

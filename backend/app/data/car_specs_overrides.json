@@ -119,8 +119,9 @@
       "lane_assist": true,
       "adaptive_cruise": true
     },
-    "source": "Price: EV5 Air list 1,399,000 (special 1,080,000 in Nov 2026): car250.com/kia-ev5-light-2025-3.html, kia.com/th/en/util/promotion/thekiaev5-2026.html · ADAS: headlightmag.com/?p=314928",
-    "collected_on": "2026-11-24"
+    "source": "Price: EV5 Air list 1,399,000 (special 1,080,000 in Nov 2026): car250.com/kia-ev5-light-2025-3.html, kia.com/th/en/util/promotion/thekiaev5-2026.html · ADAS: headlightmag.com/?p=314928 · Specs checked 26 Nov 2026 — Length 4,615, ground clearance 175 (Air): kia.com/th/th/cars/ev5/specification.html",
+    "collected_on": "2026-11-26",
+    "ground_clearance_mm": 175
   },
   "90": {
     "discontinued": true,
@@ -129,9 +130,11 @@
   },
   "93": {
     "price_thb_entry": 899000,
-    "source": "Price: The New ZEEKR X 2026 from 899,000: autospinn.com/2026/06/zeekr-x-2026-official-price-and-specification-thailand-149770 · ASEAN NCAP 5 stars, 94.64 pts (Nov 2025): aseancap.org/v4/?p=12579",
-    "collected_on": "2026-11-24",
-    "asean_ncap_stars": 5
+    "source": "Price: The New ZEEKR X 2026 from 899,000: autospinn.com/2026/06/zeekr-x-2026-official-price-and-specification-thailand-149770 · ASEAN NCAP 5 stars, 94.64 pts (Nov 2025): aseancap.org/v4/?p=12579 · Specs checked 26 Nov 2026 — Length 4,432: zeekrlife.com/th-th/models/x · ground clearance 191 / boot 362 L: pcauto.com/th/car-compare/zeekr-x-vs-zeekr-009",
+    "collected_on": "2026-11-26",
+    "asean_ncap_stars": 5,
+    "ground_clearance_mm": 191,
+    "cargo_l": 362
   },
   "94": {
     "price_thb_entry": 549000,
@@ -461,8 +464,10 @@
   },
   "82": {
     "price_thb_entry": 509900,
-    "source": "Price 509,900: car250.com/?p=292626 (BYD price table, updated 19 May 2026)",
-    "collected_on": "2026-11-25"
+    "source": "Price 509,900: car250.com/?p=292626 (BYD price table, updated 19 May 2026) · Specs checked 26 Nov 2026 — Length 4,290, ground clearance 155 unladen, boot 345 L: reverautomotive.com/en/model/new-dolphin/tech-spec",
+    "collected_on": "2026-11-26",
+    "ground_clearance_mm": 155,
+    "cargo_l": 345
   },
   "84": {
     "price_thb_entry": 989900,
@@ -586,8 +591,8 @@
   },
   "135": {
     "price_thb_entry": 799000,
-    "source": "New model added 25 Nov 2026. Price 799,000 — S05 LITE BEV: 9carthai.com/deepal-price/ (24 Feb 2026). · Specs: 6 airbags (front, side, curtain), ground clearance 169 mm, cargo 492 L: autodeal.com.ph Deepal S05 comparison Not yet verified: horsepower, consumption, warranty",
-    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 799,000 — S05 LITE BEV: 9carthai.com/deepal-price/ (24 Feb 2026). · Specs: 6 airbags (front, side, curtain), ground clearance 169 mm, cargo 492 L: autodeal.com.ph Deepal S05 comparison Not yet verified: horsepower, consumption, warranty · Specs checked 26 Nov 2026 — Length 4,620 (Thai spec): autospinn.com/2025/03/deepal-s05-official-price-and-spec-thailand-142237 · ground clearance 169 / boot 492 L (EU spec sheet): changaneurope.com/gr/en/Models/Changan-Deepal-S05/Specifications",
+    "collected_on": "2026-11-26",
     "estimated": [
       "economy"
     ],
@@ -596,9 +601,10 @@
   },
   "136": {
     "price_thb_entry": 469900,
-    "source": "New model added 25 Nov 2026. Price 469,900: 9carthai.com/aion-price/ (31 Mar 2026). · Specs: 100 kW, 11.4 kWh/100 km CLTC: data.carnewschina.com/database/aion/aion-ut (x0.75 real-world factor); cargo 440 L, battery/drive warranty 8 yr/200,000 km: headlightmag.com/?p=297487 Not yet verified: airbags",
-    "collected_on": "2026-11-25",
-    "cargo_l": 440
+    "source": "New model added 25 Nov 2026. Price 469,900: 9carthai.com/aion-price/ (31 Mar 2026). · Specs: 100 kW, 11.4 kWh/100 km CLTC: data.carnewschina.com/database/aion/aion-ut (x0.75 real-world factor); cargo 440 L, battery/drive warranty 8 yr/200,000 km: headlightmag.com/?p=297487 Not yet verified: airbags · Specs checked 26 Nov 2026 — Length 4,270: headlightmag.com/?p=297487 · boot 440 L: zigwheels.co.th/new-cars/aion/ut/specifications · ISOFIX: gacgroup.com/th-th/configuration/aion-ut/2024",
+    "collected_on": "2026-11-26",
+    "cargo_l": 440,
+    "isofix": true
   },
   "137": {
     "price_thb_entry": 1399000,
@@ -610,11 +616,13 @@
   },
   "138": {
     "price_thb_entry": 429900,
-    "source": "New model added 25 Nov 2026. Price 429,900: car250.com/?p=292626 (BYD price table, updated 19 May 2026). Not yet verified: horsepower, airbags, consumption, warranty",
-    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 429,900: car250.com/?p=292626 (BYD price table, updated 19 May 2026). Not yet verified: horsepower, airbags, consumption, warranty · Specs checked 26 Nov 2026 — Length 3,925, ground clearance 155, boot 230 L: en.thairath.co.th/news/auto/2922039",
+    "collected_on": "2026-11-26",
     "estimated": [
       "economy"
-    ]
+    ],
+    "ground_clearance_mm": 155,
+    "cargo_l": 230
   },
   "139": {
     "price_thb_entry": 629900,
@@ -714,9 +722,9 @@
   },
   "151": {
     "price_thb_entry": 429990,
-    "source": "New model added 25 Nov 2026. Price 429,990: autolifethailand.tv/tag/geely-ex2 (EX2 official 429,990–459,990); autolifethailand.tv/tag/geely-ex5 (EX5 official 759,000–929,000 from 5 May 2026). · Specs: 85 kW motor, 39.4 kWh / 355 km (≈310 km real-world): en.thairath.co.th/news/auto/2916423, thedriven.io; ground clearance 161 mm, cargo 375 L, warranty 6 yr/150,000 km: headlightmag.com/?p=323594. Consumption = NEDC range/battery x 0.75 (same real-world factor as the other EVs). Not yet verified: airbags",
-    "collected_on": "2026-11-25",
-    "ground_clearance_mm": 161,
+    "source": "New model added 25 Nov 2026. Price 429,990: autolifethailand.tv/tag/geely-ex2 (EX2 official 429,990–459,990); autolifethailand.tv/tag/geely-ex5 (EX5 official 759,000–929,000 from 5 May 2026). · Specs: 85 kW motor, 39.4 kWh / 355 km (≈310 km real-world): en.thairath.co.th/news/auto/2916423, thedriven.io; ground clearance 161 mm, cargo 375 L, warranty 6 yr/150,000 km: headlightmag.com/?p=323594. Consumption = NEDC range/battery x 0.75 (same real-world factor as the other EVs). Not yet verified: airbags · Specs checked 26 Nov 2026 — Length 4,135, ground clearance 160.8-162, boot 375 L: headlightmag.com/official-price-geely-ex2/",
+    "collected_on": "2026-11-26",
+    "ground_clearance_mm": 162,
     "cargo_l": 375
   },
   "152": {
@@ -731,20 +739,23 @@
   },
   "153": {
     "price_thb_entry": 469900,
-    "source": "New model added 25 Nov 2026. Price 469,900 — 6 airbags, 360 camera: 9carthai.com/?p=480322: car250.com/chery-q-ev-2026-11.html (Chery Q QLICK 469,900 regular); thansettakij.com/motor/654699 (V23 759,900). Not yet verified: consumption, warranty",
-    "collected_on": "2026-11-25",
-    "estimated": [
-      "economy"
-    ]
-  },
-  "154": {
-    "price_thb_entry": 759900,
-    "source": "New model added 25 Nov 2026. Price 759,900: car250.com/chery-q-ev-2026-11.html (Chery Q QLICK 469,900 regular); thansettakij.com/motor/654699 (V23 759,900). Not yet verified: horsepower, airbags, consumption, warranty · ASEAN NCAP 5★ (CHERY iCAUR V23): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026)",
-    "collected_on": "2026-11-25",
+    "source": "New model added 25 Nov 2026. Price 469,900 — 6 airbags, 360 camera: 9carthai.com/?p=480322: car250.com/chery-q-ev-2026-11.html (Chery Q QLICK 469,900 regular); thansettakij.com/motor/654699 (V23 759,900). Not yet verified: consumption, warranty · Specs checked 26 Nov 2026 — Length 4,195: thairath.co.th/news/auto/evcar/2936288 · ground clearance 128: zigwheels.co.th/new-cars/chery/q/specifications",
+    "collected_on": "2026-11-26",
     "estimated": [
       "economy"
     ],
-    "asean_ncap_stars": 5
+    "ground_clearance_mm": 128
+  },
+  "154": {
+    "price_thb_entry": 759900,
+    "source": "New model added 25 Nov 2026. Price 759,900: car250.com/chery-q-ev-2026-11.html (Chery Q QLICK 469,900 regular); thansettakij.com/motor/654699 (V23 759,900). Not yet verified: horsepower, airbags, consumption, warranty · ASEAN NCAP 5★ (CHERY iCAUR V23): aseancap.org/x/results.php (official results list, pages 1–3, read 25 Nov 2026) · Specs checked 26 Nov 2026 — Length 4,220, boot 234 L: paultan.org/cn/2025/10/02/chery-v23-ev-launched-in-thailand · ground clearance 212 (China launch): carsguide.com.au",
+    "collected_on": "2026-11-26",
+    "estimated": [
+      "economy"
+    ],
+    "asean_ncap_stars": 5,
+    "ground_clearance_mm": 212,
+    "cargo_l": 234
   },
   "155": {
     "price_thb_entry": 629000,
@@ -991,5 +1002,15 @@
     "estimated": [
       "economy"
     ]
+  },
+  "111": {
+    "ground_clearance_mm": 225,
+    "has_cargo_bed": true,
+    "source": "Specs checked 26 Nov 2026 — Length 5,260, ground clearance 225, bed 1,525 x 1,450 mm: headlightmag.com/?p=297854",
+    "collected_on": "2026-11-26"
+  },
+  "125": {
+    "source": "Specs checked 26 Nov 2026 — Length 4,233 (Volvo EX30)",
+    "collected_on": "2026-11-26"
   }
 }
