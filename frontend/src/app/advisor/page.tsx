@@ -516,6 +516,12 @@ export default function Advisor() {
               )}
             </div>
           )}
+          {data?.affordability?.budget_above_income && (
+            <div className="alert warn">
+              งบ {baht(Math.round(budgetK * 1000))} บาท ผ่อนราว {baht(data.affordability.budget_installment)} บาท/เดือน คิดเป็น {data.affordability.budget_pct_of_income}% ของรายได้ ซึ่งเกิน 30% ที่แนะนำ
+              ระบบจึงให้คะแนนงบเต็มเฉพาะรถไม่เกินราว {baht(data.affordability.comfortable_price)} บาท และไม่แสดงรถเกิน {baht(data.affordability.max_price)} บาท
+            </div>
+          )}
           {data?.affordability && (
             <p className="aff-note">รายได้ {baht(data.affordability.income)} บาท/เดือน: ผ่อนสบายถ้ารถไม่เกินราว {baht(data.affordability.comfortable_price)} บาท · ไม่แสดงรถที่ค่างวดเกินครึ่งหนึ่งของรายได้ (เกิน {baht(data.affordability.max_price)} บาท) · {data.affordability.assumptions}</p>
           )}

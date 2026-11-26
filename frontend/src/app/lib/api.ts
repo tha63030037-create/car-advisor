@@ -51,7 +51,7 @@ export interface RecommendResponse {
   too_few_results: boolean;
   filter_impact: { filter: string; label: string; removed: number }[];
   near_misses?: { id: number; name: string; price: number; bodyType: string; reason: string }[];
-  affordability?: { income: number; comfortable_price: number; max_price: number; budget_installment: number; budget_pct_of_income: number; assumptions: string } | null;
+  affordability?: { income: number; comfortable_price: number; max_price: number; budget_installment: number; budget_pct_of_income: number; budget_above_income?: boolean; assumptions: string } | null;
   preference_notes?: { kind: "brand" | "body"; key: string; car_id: number; text: string }[];
 }
 

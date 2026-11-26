@@ -134,3 +134,14 @@ def test_chat_asks_body_type_and_never_leaves_a_card_out():
     assert filled["body_preferred"] == ["mpv", "ppv"] and notes
     r = recommend(Criteria(**{k: v for k, v in filled.items() if k != "seats_min"}, seats_min=7, top_n=5))
     assert r["inactive_criteria"] == []
+
+
+def test_income_bounds_the_budget_card_and_notes_say_why():
+    r = run(budget=3000000, monthly_income=50000, body_preferred=["coupe"])
+    a = r["affordability"]
+    assert a["budget_above_income"]
+    for x in r["results"]:
+        if x["price"] > a["comfortable_price"] + 1000:
+            assert x["criteria"]["budget"] < 1 and "ค่างวด" in x["over_budget"]["label"]
+    body_note = next(n["text"] for n in r["preference_notes"] if n["kind"] == "body")
+    assert "ผ่อนไหว" in body_note and "3,450,000" not in body_note

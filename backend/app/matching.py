@@ -399,6 +399,9 @@ def preference_notes(cars, rows, c):
     even when they are not in the top 10, or did not pass the filters at all."""
     notes = []
     ceiling = round(c.budget * (1 + c.budget_stretch))
+    income_cap = None
+    if c.monthly_income:
+        income_cap = round(price_for_installment(c.monthly_income * cfg.INCOME_MAX, c.down_payment_pct, c.loan_years), -3)
     checks = _filter_checks(c)
     for b in c.brand_preferred or []:
         mine = [r for r in rows if _norm_brand(r["brand"]) == _norm_brand(b)]
@@ -420,8 +423,12 @@ def preference_notes(cars, rows, c):
             continue
         theirs = sorted((x for x in cars if x["bodyType"] == body), key=lambda x: x["price"])[:3]
         if theirs:
+            if income_cap and income_cap < ceiling:
+                why = "ที่ผ่อนไหวด้วยรายได้ของคุณ (ค่างวดไม่เกินครึ่งหนึ่งของรายได้ คือรถไม่เกิน %s บาท)" % format(int(income_cap), ",")
+            else:
+                why = "ในงบ (เพดาน %s บาท)" % format(ceiling, ",")
             notes.append({"kind": "body", "key": body, "car_id": theirs[0]["id"],
-                          "text": "ไม่มี%sในงบ (เพดาน %s บาท) รุ่นที่ถูกที่สุดคือ %s" % (BODY_TH.get(body, body), format(ceiling, ","),
+                          "text": "ไม่มี%s%s รุ่นที่ถูกที่สุดคือ %s" % (BODY_TH.get(body, body), why,
                                   ", ".join("%s %s บาท" % (x["name"], format(x["price"], ",")) for x in theirs))})
     return notes
 
@@ -438,9 +445,18 @@ def recommend(c, cars=None):
     # every card counts once the user has given input for it, even when it does not separate the cars
     body_pref = c.body_preferred
 
+    # with an income, what the user can comfortably repay also bounds the budget card: full marks up to
+    # an installment of 30% of income, falling to 0 at 50% (the hard cut). Cars under both stay equal.
+    p30 = p50 = None
+    if c.monthly_income:
+        p30 = price_for_installment(c.monthly_income * cfg.INCOME_COMFORT, c.down_payment_pct, c.loan_years)
+        p50 = price_for_installment(c.monthly_income * cfg.INCOME_MAX, c.down_payment_pct, c.loan_years)
+
     rows = []
     for car in passed:
         s_budget = score_budget(car["price"], c.budget, c.budget_stretch)
+        if p30 and s_budget is not None and car["price"] > p30:
+            s_budget = min(s_budget, max(0.0, 1 - (car["price"] - p30) / (p50 - p30)))
         s_life, life_detail = score_lifestyle(car, c.lifestyles)
         cost = costs[car["id"]]
         if cost is None:
@@ -461,7 +477,11 @@ def recommend(c, cars=None):
         total = 100 * sum(contrib.values())
 
         over = None
-        if car["price"] > c.budget:
+        if p30 and car["price"] > p30:
+            inst = monthly_installment(car["price"], c.down_payment_pct, c.loan_years)
+            over = {"amount": int(car["price"] - p30), "pct": round(100 * inst / c.monthly_income, 1),
+                    "label": "ค่างวดราว %s บาท/เดือน เกิน 30%% ของรายได้ คะแนนงบจึงลดลง" % format(int(round(inst)), ",")}
+        elif car["price"] > c.budget:
             amt = car["price"] - c.budget
             over = {"amount": amt, "pct": round(100.0 * amt / c.budget, 1),
                     "label": "เกินงบ %.1f%% (+%s บาท)" % (100.0 * amt / c.budget, format(amt, ","))}
@@ -522,6 +542,7 @@ def recommend(c, cars=None):
             "max_price": int(round(price_for_installment(c.monthly_income * cfg.INCOME_MAX, c.down_payment_pct, c.loan_years), -3)),
             "budget_installment": round(monthly_installment(c.budget, c.down_payment_pct, c.loan_years)),
             "budget_pct_of_income": round(100 * monthly_installment(c.budget, c.down_payment_pct, c.loan_years) / c.monthly_income, 1),
+            "budget_above_income": c.budget > price_for_installment(c.monthly_income * cfg.INCOME_COMFORT, c.down_payment_pct, c.loan_years),
             "assumptions": "ดาวน์ %d%% ผ่อน %d ปี ดอกเบี้ย %.1f%% ต่อปีแบบคงที่ (ค่าประมาณ ไม่ใช่ข้อเสนอสินเชื่อ)" % (
                 round(c.down_payment_pct * 100), c.loan_years, cfg.FIN_FLAT_RATE * 100),
         },
