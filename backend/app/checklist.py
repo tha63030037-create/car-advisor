@@ -93,7 +93,10 @@ def checklist(car_id, budget=None):
             got = json.loads(m.group(0)).get("tips", []) if m else []
             tips = [re.sub(r"[*#`]", "", str(t)).strip()[:200] for t in got if str(t).strip()]
             # keep Thai tips only: the model sometimes answers in English
-            tips = [t for t in tips if len(re.findall(r"[\u0E00-\u0E7F]", t)) >= len(t) * 0.4][:3]
+            tips = [t for t in tips if len(re.findall(r"[\u0E00-\u0E7F]", t)) >= len(t) * 0.4]
+            # drop a tip that carries a number we never gave the model (e.g. an invented tyre size)
+            given = re.sub(r"[,\s]", "", json.dumps(facts, ensure_ascii=False))
+            tips = [t for t in tips if all(n in given for n in re.findall(r"\d+(?:\.\d+)?", t.replace(",", "")))][:3]
             engine = "llm:" + provider if tips else "rules"
         except Exception as e:  # rules list is complete on its own
             print("[checklist] LLM failed:", repr(e)[:200])

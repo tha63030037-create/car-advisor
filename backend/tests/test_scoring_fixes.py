@@ -179,3 +179,12 @@ def test_checklist_rules_without_llm(monkeypatch):
     assert keys == ["ask", "drive", "money"] and out["engine"] == "rules"
     money = " ".join(out["sections"][2]["items"])
     assert "899,000" in money and "99,000" in money             # official price and the amount over budget
+
+
+def test_checklist_drops_tips_with_invented_numbers(monkeypatch):
+    import app.checklist as ck
+    monkeypatch.setattr(ck, "pick_provider", lambda: ("groq", "k"))
+    monkeypatch.setattr(ck, "_call_llm", lambda *a, **k: '{"tips": ["ถามขนาดยาง 185/55R15 ที่เหมาะสม", "ถามเรื่องรับประกัน 3 ปี ว่าครอบคลุมอะไร"]}')
+    out = ck.checklist(1)
+    tips = out["sections"][0]["items"]
+    assert out["sections"][0]["key"] == "tips" and tips == ["ถามเรื่องรับประกัน 3 ปี ว่าครอบคลุมอะไร"]
