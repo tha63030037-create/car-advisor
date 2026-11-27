@@ -2,7 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
-from typing import List
+from typing import List, Optional
 from app.database import CARS
 from app.models import QuizState, RecommendationResult, Car
 from app.services import generate_recommendations
@@ -200,6 +200,29 @@ def get_car_v2(car_id: int):
     if car is None:
         raise HTTPException(status_code=404, detail="ไม่พบรถคันนี้ หรือรุ่นนี้เลิกขายแล้ว")
     return car
+
+
+@app.get("/api/v2/cars/{car_id}/reviews")
+def car_reviews(car_id: int):
+    """Recent Pantip threads for this model (titles and links, refreshed weekly) with theme counts."""
+    from fastapi import HTTPException
+    from .matching import car_by_id
+    from . import reviews
+    car = car_by_id(car_id)
+    if car is None:
+        raise HTTPException(status_code=404, detail="ไม่พบรถคันนี้")
+    return reviews.for_car(car_id, car["name"])
+
+
+@app.get("/api/v2/cars/{car_id}/checklist")
+def car_checklist(car_id: int, budget: Optional[int] = None):
+    """What to ask, what to try on the test drive and what not to pay, before visiting a showroom."""
+    from fastapi import HTTPException
+    from .checklist import checklist
+    out = checklist(car_id, budget)
+    if out is None:
+        raise HTTPException(status_code=404, detail="ไม่พบรถคันนี้")
+    return out
 
 
 @app.post("/api/chat", response_model=ChatResponse)

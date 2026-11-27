@@ -77,6 +77,7 @@ export interface CarSummary {
 }
 
 export interface CarDetail extends CarSummary {
+  aftersales?: { score: number; registrations: number | null; source: string };
   consumption: string;
   economy: number | null;
   economy_unit: string | null;

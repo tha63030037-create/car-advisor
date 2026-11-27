@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import { OwnerVoices, ShowroomPrep } from "../../components/CarExtras";
 import { CarPhoto, CompareButton, crashLabel, PhotoCredit, Stars } from "../../components/Site";
 import {
   ADAS_TH, baht, BODY_TH, CarDetail, CARDS, CRIT_COLOR, FUEL_TH, getJSON, loadLastCriteria, parseCredit, postJSON,
@@ -27,6 +28,7 @@ export default function CarPage({ params }: { params: { id: string } }) {
   const [err, setErr] = useState<string | null>(null);
   const [fit, setFit] = useState<{ r: Result; total: number; weights: RecommendResponse["weights_pct"]; inactive: string[] } | null>(null);
   const [fitState, setFitState] = useState<"none" | "loading" | "filtered" | "ok">("none");
+  const [lastBudget, setLastBudget] = useState<number | null>(null);
 
   useEffect(() => {
     getJSON<CarDetail>(`/api/v2/cars/${id}`)
@@ -35,6 +37,7 @@ export default function CarPage({ params }: { params: { id: string } }) {
     // if the visitor came from the advisor, show how this car scores for their criteria
     const c = loadLastCriteria();
     if (!c) return;
+    if (c.budget) setLastBudget(c.budget);
     setFitState("loading");
     postJSON<RecommendResponse>("/api/v2/recommend", { ...c, top_n: 200 })
       .then((resp) => {
@@ -160,6 +163,19 @@ export default function CarPage({ params }: { params: { id: string } }) {
               <p className="muted small">คิดที่ {baht(car.km_per_year)} กม. ต่อปี น้ำมัน 38 บาท/ลิตร ดีเซล 32 บาท/ลิตร ไฟฟ้า 6 บาท/kWh ไม่รวมประกันและค่าผ่อน</p>
             </>
           ) : <p className="muted">ยังไม่มีข้อมูลพอจะคำนวณ</p>}
+          {car.aftersales && (
+            <div className="after">
+              <div className="cost-row">
+                <span>ความแพร่หลายของแบรนด์ในไทย</span>
+                <b className="num">{car.aftersales.registrations ? `${baht(car.aftersales.registrations)} คัน` : "ไม่มีข้อมูล"}</b>
+              </div>
+              <div className="bar" aria-hidden><span style={{ width: `${Math.round(car.aftersales.score * 100)}%` }} /></div>
+              <p className="muted small">
+                ยิ่งมีรถแบรนด์นี้บนถนนมาก ยิ่งหาศูนย์บริการ อะไหล่ และคนซื้อต่อได้ง่าย คิดเป็น 25% ของการ์ดค่าใช้จ่ายระยะยาว ·
+                ที่มา: {car.aftersales.source}
+              </p>
+            </div>
+          )}
         </section>
 
         {/* ------------------------------------------------------ safety */}
@@ -204,6 +220,11 @@ export default function CarPage({ params }: { params: { id: string } }) {
           {car.features_has.length > 0 && <p className="small"><b>มี</b> {car.features_has.join(" · ")}</p>}
           {car.features_missing.length > 0 && <p className="small muted"><b>ไม่มี</b> {car.features_missing.join(" · ")}</p>}
         </section>
+      </div>
+
+      <div className="block extras">
+        <ShowroomPrep id={id} budget={lastBudget} />
+        <OwnerVoices id={id} name={car.name} />
       </div>
 
       {/* --------------------------------------------------------- sources */}
@@ -263,6 +284,9 @@ export default function CarPage({ params }: { params: { id: string } }) {
         .ls-row { display: grid; grid-template-columns: 1fr 160px; gap: 12px; align-items: center; padding: 7px 0; font-size: 14.5px; }
         .specs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 12px; }
         .est-mark { font-size: 11px; font-weight: 600; color: #8A5D00; background: var(--signal-wash); border-radius: 6px; padding: 1px 6px; margin-left: 4px; vertical-align: 1px; }
+        .extras { display: grid; gap: 16px; }
+        .after { margin-top: 14px; }
+        .after .bar { max-width: none; margin: 4px 0 6px; }
         .src p { margin: 4px 0; max-width: 90ch; overflow-wrap: anywhere; }
       `}</style>
     </div>

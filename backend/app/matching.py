@@ -191,6 +191,16 @@ def cost_scale(km_per_year):
     return _percentile(totals, p_lo), _percentile(totals, p_hi)
 
 
+def aftersales_score(car):
+    """0-1 from the brand's Thai registrations (more cars on the road = more service and parts)."""
+    import math
+    reg = cfg.BRAND_REGISTRATIONS_2569.get(car.get("brand"))
+    if not reg:
+        return cfg.AFTERSALES_UNKNOWN
+    lo, hi = (math.log10(v) for v in cfg.AFTERSALES_REG_RANGE)
+    return max(0.0, min(1.0, (math.log10(reg) - lo) / (hi - lo)))
+
+
 # ----------------------------------------------------------------- helpers
 def weights_from_priorities(p):
     pts = {k: getattr(p, k) for k in cfg.CRITERIA}
@@ -446,7 +456,8 @@ def recommend(c, cars=None):
         if cost is None:
             s_cost = None
         else:
-            s_cost = _scale(cost["total"], hi, lo)
+            sh = cfg.AFTERSALES_SHARE
+            s_cost = (1 - sh) * _scale(cost["total"], hi, lo) + sh * aftersales_score(car)
         scores = {
             "budget": s_budget,
             "lifestyle": s_life,
@@ -568,5 +579,9 @@ def catalogue(full=False):
 def car_by_id(cid):
     for c in CARS_V2:
         if c["id"] == cid:
-            return car_public(c, True)
+            out = car_public(c, True)
+            out["aftersales"] = {"score": round(aftersales_score(c), 2),
+                                 "registrations": cfg.BRAND_REGISTRATIONS_2569.get(c["brand"]),
+                                 "source": cfg.AFTERSALES_SOURCE}
+            return out
     return None

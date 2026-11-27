@@ -22,6 +22,7 @@ const ROWS: { group: string; rows: Row[] }[] = [
       { label: "ค่าบำรุงรักษา 5 ปี", get: (c) => (c.maintenance_5y_thb ? `${baht(c.maintenance_5y_thb)} บาท` : null), best: "min", value: (c) => c.maintenance_5y_thb, est: "maintenance_5y_thb" },
       { label: "อัตราสิ้นเปลือง", get: (c) => (c.economy ? `${c.economy} ${c.economy_unit === "km/kWh" ? "กม./kWh" : "กม./ลิตร"}` : c.consumption), est: "economy" },
       { label: "รับประกัน", get: (c) => `${c.warrantyYears} ปี`, best: "max", value: (c) => c.warrantyYears },
+      { label: "รถแบรนด์นี้ที่จดทะเบียนในไทย (ม.ค.–ต.ค. 69)", get: (c) => (c.aftersales?.registrations ? `${baht(c.aftersales.registrations)} คัน` : null), best: "max", value: (c) => c.aftersales?.registrations },
     ],
   },
   {

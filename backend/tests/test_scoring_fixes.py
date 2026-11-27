@@ -153,3 +153,29 @@ def test_spoken_thai_money_and_rules_override_llm():
     out = _rules_override(req, {"budget": 2000000, "body_preferred": ["sedan"]})
     assert out["budget"] == 1200000 and out["payment"] == "cash"
     assert "BYD" in out["brand_exclude"] and out["body_preferred"] == ["sedan"]
+
+
+def test_aftersales_from_brand_registrations():
+    from app.matching import aftersales_score
+    assert aftersales_score({"brand": "Toyota"}) == 1.0
+    assert aftersales_score({"brand": "Subaru"}) == 0.0          # 223 cars Jan-Oct 2569
+    assert 0.7 < aftersales_score({"brand": "BYD"}) < 0.9
+    assert aftersales_score({"brand": "Unknown"}) == 0.5          # not in the list: middle, not zero
+
+
+def test_pantip_titles_only_and_themes():
+    from app import reviews
+    assert "problem" in reviews.themes_of("แอร์ไม่เย็น มีปัญหาครับ")
+    assert "problem" not in reviews.themes_of("เสียงลมดังตอน 100")   # "เสียง" is noise, not a breakdown
+    assert "noise" in reviews.themes_of("เสียงลมดังตอน 100")
+
+
+def test_checklist_rules_without_llm(monkeypatch):
+    for k in ("GEMINI_API_KEY", "GROQ_API_KEY", "ANTHROPIC_API_KEY"):
+        monkeypatch.delenv(k, raising=False)
+    from app.checklist import checklist
+    out = checklist(93, budget=800000)
+    keys = [s["key"] for s in out["sections"]]
+    assert keys == ["ask", "drive", "money"] and out["engine"] == "rules"
+    money = " ".join(out["sections"][2]["items"])
+    assert "899,000" in money and "99,000" in money             # official price and the amount over budget

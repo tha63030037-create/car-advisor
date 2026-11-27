@@ -576,6 +576,7 @@ export default function Advisor() {
                   <div className="acts">
                     <button className="link" onClick={() => setOpen(open === r.id ? null : r.id)} aria-expanded={open === r.id}>{open === r.id ? "ซ่อนที่มาคะแนน" : "ดูที่มาคะแนน"}</button>
                     <Link href={`/car/${r.id}`} className="link">รายละเอียดรถ</Link>
+                    <Link href={`/car/${r.id}#prep`} className="link">เตรียมตัวไปโชว์รูม</Link>
                     <CompareButton id={r.id} compact />
                   </div>
                   {open === r.id && (

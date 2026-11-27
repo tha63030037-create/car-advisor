@@ -121,3 +121,22 @@ INCOME_MAX = 0.50        # above 50%: lenders rarely approve -> labelled 'เก
 
 MIN_RESULTS = 3
 DEFAULT_TOP_N = 10
+
+# After-sales (added 28 Nov 2026, from the empathy map: buyers lean to brands that are "easy to fix,
+# cheap parts, easy to resell"). Proxy: how many cars of the brand were registered in Thailand
+# Jan-Oct 2569 (Department of Land Transport, compiled by car250.com, 14 Nov 2026). More cars on the
+# road means more service points, parts and buyers for a used car. Log scale: <= 300 cars scores 0,
+# >= 100,000 scores 1. A brand not in the list scores in the middle (0.5), like an untested car.
+AFTERSALES_SHARE = 0.25            # share of the running-cost card; the rest is yearly energy + maintenance
+AFTERSALES_REG_RANGE = (300, 100000)
+AFTERSALES_UNKNOWN = 0.5
+AFTERSALES_SOURCE = "ยอดจดทะเบียนรถใหม่ ม.ค.–ต.ค. 2569 กรมการขนส่งทางบก (รวบรวมโดย car250.com 14 พ.ย. 2569)"
+BRAND_REGISTRATIONS_2569 = {
+    "Toyota": 208209, "Honda": 64016, "Isuzu": 54912, "BYD": 37721, "Omoda": 29894, "Jaecoo": 29894,
+    "MG": 28191, "Mitsubishi": 22538, "GWM": 16895, "GAC": 16515, "Hyptec": 16515, "Geely": 14795,
+    "Ford": 13908, "Deepal": 12096, "Tesla": 9732, "Chery": 8526, "BMW": 7850, "Mazda": 7507,
+    "Nissan": 6750, "Mercedes-Benz": 6041, "Zeekr": 5951, "Changan": 5672, "XPENG": 5443,
+    "Suzuki": 3978, "Hyundai": 2120, "Riddara": 1694, "MINI": 1559, "Volvo": 1503, "Porsche": 1276,
+    "Kia": 1238, "AVATR": 1200, "Denza": 1049, "Lexus": 699, "Audi": 360, "Neta": 299, "Subaru": 223,
+    "Peugeot": 72,
+}
