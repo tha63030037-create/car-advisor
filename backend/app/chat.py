@@ -28,11 +28,13 @@ from app import matching_config as cfg
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 # OpenAI-compatible chat endpoints (Gemini and Groq both offer one)
 OPENAI_COMPAT = {
-    "gemini": ("GEMINI_API_KEY", "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", "gemini-3.5-flash-lite"),
+    # Groq first: ~1-3 s per reply on the free tier vs ~20 s for free Gemini; Gemini is the fallback
     "groq": ("GROQ_API_KEY", "https://api.groq.com/openai/v1/chat/completions", "openai/gpt-oss-120b"),
+    "gemini": ("GEMINI_API_KEY", "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", "gemini-3.5-flash-lite"),
 }
 
 # tried in order after CHAT_MODEL / the default when a model is busy or closed
+GROQ_FALLBACKS = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"]  # 8k TPM each on the free tier
 GEMINI_FALLBACKS = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.5-flash", "gemini-3.8-flash"]
 
 
@@ -105,6 +107,7 @@ SYSTEM_PROMPT = """คุณคือที่ปรึกษาการเล�
 - ถามทีละ 1 ข้อ สั้น เป็นกันเอง ไม่ใช้ศัพท์เทคนิค
 - ข้อมูลที่ต้องได้ก่อนแนะนำ: ซื้อเงินสดหรือผ่อน (payment: "cash" หรือ "finance"), รายได้ต่อเดือนเฉพาะคนที่ผ่อน (ใช้บอกค่างวดเท่านั้น), งบ, ทรงรถที่ชอบ (ต้องถามทุกครั้ง), จำนวนคนที่นั่งประจำ, การใช้งานหลัก, แบรนด์ที่เจาะจงหรือไม่เอา, ลำดับความสำคัญของ 5 เรื่อง
 - แบรนด์: "ชอบ X" หรือ "ชอบ X ที่สุด" ใส่ใน brand_preferred (ยังดูแบรนด์อื่นด้วย) ; ใส่ brand_only เฉพาะเมื่อลูกค้าพูดชัดว่า "เอาแค่ X", "เฉพาะ X" หรือ "ไม่เอาแบรนด์อื่น" เท่านั้น
+- งบ = ราคารถที่ผู้ใช้ตั้งไว้เอง (ราคาตัวรถ) อย่าบอกว่างบรวมเงินดาวน์หรือดอกเบี้ย และอย่าใช้คำชมแปลก ๆ เช่น "ยอดดี"
 - ถามเรื่องงบให้รู้ว่ายืดได้แค่ไหน: ไม่ยืดเลย (0) ยืดได้นิดหน่อย (0.1) หรือยืดได้ถ้าคุ้ม (0.2)
 
 ข้อห้าม
@@ -163,6 +166,20 @@ def _num(s):
 
 def parse_budget(t):
     t = t.replace(",", "")
+    # "ล้านห้าแสน" / "1 ล้าน 2 แสน"
+    m = re.search(r"(\d+(?:\.\d+)?|" + "|".join(THAI_NUM) + r")?\s*ล้าน\s*(\d+|" + "|".join(THAI_NUM) + r")\s*แสน", t)
+    if m:
+        lead = _num(m.group(1)) if m.group(1) else 1
+        hund = _num(m.group(2))
+        if lead and hund is not None:
+            return int(lead * 1000000 + hund * 100000)
+    # spoken Thai: "ล้านสอง" = 1.2M, "สองล้านห้า" = 2.5M, "แปดแสนห้า" = 850k
+    m = re.search(r"(\d+|" + "|".join(THAI_NUM) + r")?\s*(ล้าน|แสน)(" + "|".join(THAI_NUM) + r")(?!\s*(?:แสน|หมื่น|พัน))", t)
+    if m:
+        lead = _num(m.group(1)) if m.group(1) else 1
+        unit = 1000000 if m.group(2) == "ล้าน" else 100000
+        if lead:
+            return int(lead * unit + THAI_NUM[m.group(3)] * unit / 10)
     m = re.search(r"(\d+(?:\.\d+)?|" + "|".join(THAI_NUM) + r")\s*(ล้าน|แสน|หมื่น|k|K|พัน)", t)
     if m:
         n = _num(m.group(1))
@@ -424,7 +441,22 @@ def _extract_json(text):
     return json.loads(m.group(0))
 
 
-def _call_llm(provider, api_key, system, history):
+def _call_llm(provider, api_key, system, history, json_mode=False):
+    """Call the chosen provider; if it fails (rate limit, outage), try the other configured ones."""
+    try:
+        return _call_one(provider, api_key, system, history, json_mode)
+    except Exception as first:
+        for name, (env, _, _) in OPENAI_COMPAT.items():
+            if name != provider and os.getenv(env):
+                try:
+                    print("[llm] %s failed (%s), trying %s" % (provider, repr(first)[:120], name))
+                    return _call_one(name, os.getenv(env), system, history, json_mode)
+                except Exception:
+                    continue
+        raise
+
+
+def _call_one(provider, api_key, system, history, json_mode=False):
     if provider == "anthropic":
         body = {"model": os.getenv("CHAT_MODEL", "claude-haiku-5-5"), "max_tokens": 700, "temperature": 0,
                 "system": system, "messages": history}
@@ -434,6 +466,8 @@ def _call_llm(provider, api_key, system, history):
         return "".join(p.get("text", "") for p in r.json().get("content", []))
     _, url, default_model = OPENAI_COMPAT[provider]
     models = [os.getenv("CHAT_MODEL", default_model)]
+    if provider == "groq":
+        models += [m for m in GROQ_FALLBACKS if m not in models]
     if provider == "gemini":
         # free-tier Gemini models return 503 "high demand" in bursts and older ones get closed
         # to new keys (2.5-flash in Nov 2026): walk a short list instead of failing on one
@@ -442,18 +476,23 @@ def _call_llm(provider, api_key, system, history):
     for model in models:
         body = {"model": model, "temperature": 0, "max_tokens": 1200,
                 "messages": [{"role": "system", "content": system}] + history}
-        if provider == "gemini":
+        if provider in ("gemini", "groq"):
             # thinking tokens count against max_tokens and slow the reply; keep them low
             body["max_tokens"] = 4096
             body["reasoning_effort"] = "low"
+        if provider == "groq" and json_mode:
+            body["response_format"] = {"type": "json_object"}  # guarantees parseable JSON
         r = None
-        for attempt in range(2):
+        for attempt in range(3):
             try:
                 r = httpx.post(url, json=body, headers={"Authorization": "Bearer " + api_key},
                                timeout=float(os.getenv("LLM_TIMEOUT", "18")))
             except httpx.TimeoutException:
                 r = None
                 break  # a slow model: try the next one instead of waiting
+            if r.status_code == 400 and "json" in r.text.lower() and "response_format" in body:
+                body.pop("response_format")  # strict JSON mode failed: ask again in plain mode
+                continue
             if r.status_code == 400 and "reasoning" in r.text.lower() and "reasoning_effort" in body:
                 body.pop("reasoning_effort")  # model without thinking control
                 continue
@@ -488,11 +527,12 @@ def llm_turn(req, provider, api_key):
     system = SYSTEM_PROMPT + "\n\nเงื่อนไขที่เก็บได้แล้ว (อัปเดตต่อจากนี้): " + json.dumps(req.criteria, ensure_ascii=False)
     last_err = None
     for _ in range(2):  # one retry on malformed output (spec 5.6)
-        text = _call_llm(provider, api_key, system, history)
+        text = _call_llm(provider, api_key, system, history, json_mode=True)
         try:
             data = _extract_json(text)
             crit = dict(req.criteria)
             crit.update(_clean_criteria(data.get("criteria", {})))
+            crit = _rules_override(req, crit)
             reply = re.sub(r"[^\u0000-\u024F\u0E00-\u0E7F\u2000-\u206F\u0E3F]", "",
                            str(data.get("reply", ""))).strip()[:1500]
             quick = [str(q)[:40] for q in (data.get("quick_replies") or [])][:4]
@@ -502,6 +542,22 @@ def llm_turn(req, provider, api_key):
         except (ValueError, json.JSONDecodeError) as e:
             last_err = e
     raise RuntimeError("LLM returned invalid JSON twice: %s" % last_err)
+
+
+def _rules_override(req, crit):
+    """Money, payment and "no Chinese cars" are parsed more reliably by rules than by the model
+    (it once read "ล้านสอง" as 2,000,000): where the user's latest words set one, the rules win."""
+    last_user = next((m.content for m in reversed(req.messages) if m.role == "user"), "")
+    before = dict(req.criteria)
+    rc = rules_extract(last_user, dict(before))
+    crit = dict(crit)
+    for k in ("payment", "monthly_income", "budget"):
+        if rc.get(k) is not None and rc.get(k) != before.get(k):
+            crit[k] = rc[k]
+    extra = set(rc.get("brand_exclude") or []) - set(before.get("brand_exclude") or [])
+    if extra:
+        crit["brand_exclude"] = sorted(set(crit.get("brand_exclude") or []) | extra)
+    return crit
 
 
 EXCLUSIVE_BRAND = re.compile(r"เฉพาะ|เอาแต่|เท่านั้น|แค่(ยี่ห้อ|แบรนด์)?\s*[A-Za-zก-๙]|ต้องเป็น|ไม่เอา(ยี่ห้อ|แบรนด์)อื่น|ไม่ดู(ยี่ห้อ|แบรนด์)อื่น")
@@ -558,6 +614,9 @@ def chat_turn(req):
             else (QUESTIONS[nt][0] if nt in QUESTIONS else "ขอข้อมูลเพิ่มอีกนิดนะคะ")
     paid = crit.get("payment") == "cash" or bool(crit.get("monthly_income"))
     if nt is None and crit.get("budget") and paid:
+        if engine.startswith("llm"):
+            # every topic is answered: a model that asks one more question would contradict the results shown
+            reply = "ได้ข้อมูลครบแล้วค่ะ สรุปที่เข้าใจคือ %s จัดอันดับรถให้ด้านล่างแล้วนะคะ" % summarize(crit)
         crit, notes = fill_required(crit)
         if notes:
             reply = (reply.rstrip() + "\n\n" + " ".join(notes)).strip()

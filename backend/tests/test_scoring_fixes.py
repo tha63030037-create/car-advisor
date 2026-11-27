@@ -140,3 +140,16 @@ def test_chat_asks_cash_or_finance_and_income_only_when_financing():
     assert next_topic(dict(c, payment="finance"), ["usage", "lifestyle", "payment"]) == "income"
     assert rules_extract("ซื้อเงินสด", {})["payment"] == "cash"
     assert rules_extract("ผ่อนค่ะ เงินเดือน 4 หมื่น", {})["payment"] == "finance"
+
+
+def test_spoken_thai_money_and_rules_override_llm():
+    from app.chat import parse_budget, _rules_override, ChatRequest
+    assert parse_budget("ล้านสอง") == 1200000
+    assert parse_budget("สองล้านห้า") == 2500000
+    assert parse_budget("แปดแสนห้า") == 850000
+    assert parse_budget("ล้านห้าแสน") == 1500000
+    req = ChatRequest(messages=[{"role": "user", "content": "ซื้อสดงบล้านสอง ชอบซีดาน ไม่เอารถจีน"}], criteria={}, asked=[])
+    # the model misread the budget and missed payment and the exclusion
+    out = _rules_override(req, {"budget": 2000000, "body_preferred": ["sedan"]})
+    assert out["budget"] == 1200000 and out["payment"] == "cash"
+    assert "BYD" in out["brand_exclude"] and out["body_preferred"] == ["sedan"]
