@@ -546,7 +546,7 @@ export default function Advisor() {
             const prev = prevRank[r.id];
             const delta = prev ? prev - r.rank : null;
             return (
-              <article key={r.id} className={`res ${r.rank <= 3 ? "top" : ""}`}>
+              <article key={r.id} className={`res ${r.rank <= 3 ? "top" : ""} ${r.rank === 1 ? "lead" : ""}`}>
                 <div className="rank">{r.rank}
                   {delta !== null && delta !== 0 && <span className={delta > 0 ? "up" : "down"}>{delta > 0 ? `▲${delta}` : `▼${-delta}`}</span>}
                   {delta === null && Object.keys(prevRank).length > 0 && <span className="new">ใหม่</span>}
@@ -692,8 +692,21 @@ export default function Advisor() {
         .num { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.5px; }
         .res.top .num { color: var(--accent); }
         .lbl { font-size: 12.5px; color: var(--muted); }
+        /* the #1 car gets the showroom treatment: full-width photo on the studio backdrop */
+        .res.lead { grid-template-columns: 34px 1fr 90px; padding-top: 10px; }
+        .res.lead :global(.res-img) { order: -1; grid-column: 1 / -1; border-radius: 22px; background: radial-gradient(110% 90% at 50% 58%, #fff 0%, #F1F3F5 60%, #E4E8EC 100%); border: 1px solid var(--line-soft); }
+        .res.lead :global(.res-photo) { aspect-ratio: 2 / 1; object-fit: cover; background: transparent; mix-blend-mode: multiply;
+          -webkit-mask-image: radial-gradient(ellipse 58% 66% at 50% 54%, #000 64%, transparent 100%); mask-image: radial-gradient(ellipse 58% 66% at 50% 54%, #000 64%, transparent 100%); }
+        .res.lead :global(.res-img:hover .res-photo) { transform: translateX(2%); }
+        .res.lead .rank { font-size: 28px; }
+        .res.lead :global(.name) { font-size: clamp(22px, 2.4vw, 28px); letter-spacing: -0.02em; }
+        .res.lead .meta { font-size: 15.5px; }
+        .res.lead .stack { height: 12px; }
+        .res.lead .num { font-size: 44px; letter-spacing: -1px; }
         @media (max-width: 640px) {
           .res { grid-template-columns: 30px 1fr 64px; gap: 10px 12px; }
+          .res.lead { grid-template-columns: 30px 1fr 72px; }
+          .res.lead .num { font-size: 32px; }
           .v2 :global(.res-img) { order: -1; grid-column: 1 / -1; }
           .num { font-size: 24px; }
         }
