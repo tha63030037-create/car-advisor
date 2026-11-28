@@ -12,13 +12,17 @@ const ZONES: { z: Zone; label: string }[] = [
   { z: 1, label: "ไม่ค่อยสำคัญ" },
 ];
 const LIFESTYLES: { key: string; label: string; icon: string }[] = [
-  { key: "school_run", label: "ส่งลูกไปเรียน", icon: "🎒" },
-  { key: "camping", label: "แคมป์ปิ้ง", icon: "🏕️" },
-  { key: "merit_family", label: "พาผู้ใหญ่ไปทำบุญ", icon: "🛕" },
-  { key: "pets", label: "เลี้ยงสัตว์", icon: "🐕" },
-  { key: "city", label: "ขับในเมือง", icon: "🏙️" },
-  { key: "long_trips", label: "เดินทางไกลบ่อย", icon: "🛣️" },
-  { key: "work_cargo", label: "ใช้งาน ขนของ", icon: "📦" },
+  { key: "city", label: "ขับในเมือง รถติด จอดบ่อย", icon: "🏙️" },
+  { key: "long_trips", label: "ขับทางไกล ต่างจังหวัดบ่อย", icon: "🛣️" },
+  { key: "offroad", label: "ทางลุย ลูกรัง ขึ้นเขา น้ำท่วม", icon: "⛰️" },
+  { key: "cargo", label: "บรรทุกของ ใช้ทำงาน", icon: "📦" },
+  { key: "people", label: "พาคนเยอะ ผู้สูงอายุ", icon: "👨‍👩‍👧‍👦" },
+  { key: "kids", label: "มีเด็กเล็ก", icon: "🧒" },
+  { key: "bulky", label: "ขนของใหญ่ สัตว์เลี้ยง จักรยาน", icon: "🐕" },
+];
+const LEGACY: Record<string, string[]> = { school_run: ["kids", "city"], camping: ["offroad", "bulky"], merit_family: ["people"], pets: ["bulky"], work_cargo: ["cargo"] };
+const FUELS: { key: string; label: string }[] = [
+  { key: "petrol", label: "น้ำมัน" }, { key: "diesel", label: "ดีเซล" }, { key: "hybrid", label: "ไฮบริด" }, { key: "ev", label: "ไฟฟ้า" }, { key: "any", label: "ไม่สนใจ" },
 ];
 const STRETCH = [
   { v: 0, label: "ไม่ยืดเลย" },
@@ -40,7 +44,7 @@ export default function Advisor() {
   const { cars } = useCatalogue();
   const BRANDS = useMemo(() => Array.from(new Set((cars || []).map((c) => c.brand))).sort((x, y) => x.localeCompare(y)), [cars]);
   const [zones, setZones] = useState<Record<Key, Zone>>({
-    budget: 3, lifestyle: 3, running_cost: 2, safety: 2, design: 1,
+    budget: 3, lifestyle: 3, running_cost: 2, safety: 2, design: 1, powertrain: 2,
   });
   const [picked, setPicked] = useState<Key | null>(null);
   const [budgetK, setBudgetK] = useState(800);
@@ -74,6 +78,8 @@ export default function Advisor() {
   const [brandPref, setBrandPref] = useState<string[]>([]);
   const [seatsMin, setSeatsMin] = useState<number | null>(null);
   const [noEv, setNoEv] = useState(false);
+  const [fuelPref, setFuelPref] = useState<string[]>([]);
+  const toggleFuel = (k: string) => setFuelPref((cur) => k === "any" ? (cur.includes("any") ? [] : ["any"]) : (cur.includes(k) ? cur.filter((x) => x !== k) : [...cur.filter((x) => x !== "any"), k]));
   const [ncapMin, setNcapMin] = useState(false);
   const [brandExclude, setBrandExclude] = useState<string[]>([]);
 
@@ -130,13 +136,14 @@ export default function Advisor() {
     seats_min: seatsMin,
     fuel_only: null,
     fuel_exclude: noEv ? ["ev"] : [],
+    fuel_preferred: fuelPref,
     min_ncap_stars: ncapMin ? 3 : null,
     body_preferred: bodies,
     lifestyles,
     km_per_year: 15000,
     priorities: zones,
     top_n: 10,
-  }), [budgetK, payment, income, down, years, stretch, brandOnly, brandPref, brandExclude, seatsMin, noEv, bodies, lifestyles, zones, ncapMin]);
+  }), [budgetK, payment, income, down, years, stretch, brandOnly, brandPref, brandExclude, seatsMin, noEv, fuelPref, bodies, lifestyles, zones, ncapMin]);
 
   // ---------------------------------------------------------------- chat
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -145,7 +152,8 @@ export default function Advisor() {
     if (c.payment === "cash" || c.payment === "finance") setPayment(c.payment);
     if (c.monthly_income) { setIncome(c.monthly_income); setIncomeText(baht(c.monthly_income)); }
     if (typeof c.budget_stretch === "number") { setStretch(c.budget_stretch); setStretchSet(true); }
-    if (Array.isArray(c.lifestyles)) setLifestyles(c.lifestyles);
+    if (Array.isArray(c.lifestyles)) setLifestyles(Array.from(new Set((c.lifestyles as string[]).flatMap((x) => LEGACY[x] || [x]))));
+    if (Array.isArray(c.fuel_preferred) && c.fuel_preferred.length) setFuelPref(c.fuel_preferred);
     if (Array.isArray(c.body_preferred)) setBodies(c.body_preferred);
     if (Array.isArray(c.brand_only)) setBrandOnly(c.brand_only);
     if (Array.isArray(c.brand_preferred)) setBrandPref(c.brand_preferred);
@@ -153,7 +161,7 @@ export default function Advisor() {
     if (c.seats_min !== undefined) setSeatsMin(c.seats_min ?? null);
     if (Array.isArray(c.fuel_exclude)) setNoEv(c.fuel_exclude.includes("ev"));
     if (c.min_ncap_stars !== undefined) setNcapMin(!!c.min_ncap_stars);
-    if (c.priorities) { setZones(c.priorities); setZonesSet(true); }
+    if (c.priorities) { setZones({ powertrain: 2, ...c.priorities }); setZonesSet(true); }
   };
 
   const sendChat = async (text: string | null) => {
@@ -245,7 +253,8 @@ export default function Advisor() {
     !payment && "เลือกซื้อเงินสดหรือผ่อน",
     payment === "finance" && !income && "กรอกรายได้ต่อเดือน",
     !budgetSet && "กรอกงบซื้อรถ",
-    lifestyles.length === 0 && "เลือกไลฟ์สไตล์อย่างน้อย 1 ข้อ",
+    lifestyles.length === 0 && "เลือกการใช้งานอย่างน้อย 1 ข้อ",
+    fuelPref.length === 0 && "เลือกขุมพลังที่อยากได้ (หรือไม่สนใจ)",
     bodies.length === 0 && brandPref.length === 0 && "เลือกทรงหรือแบรนด์ที่ชอบอย่างน้อย 1 อย่าง",
   ].filter(Boolean) as string[];
   // same estimate as the backend: 25% down, 5 years, 3% flat — shown live under the budget box
@@ -257,8 +266,8 @@ export default function Advisor() {
     level: inst(budgetK * 1000) / income <= 0.3 ? "ok" : inst(budgetK * 1000) / income <= 0.5 ? "tight" : "over",
   } : null;
   const reveal = () => { setRevealed(true); setTimeout(() => scrollTo(resultsTop.current), 350); };
-  const TOPIC_TH: Record<string, string> = { usage: "การใช้งาน", lifestyle: "ไลฟ์สไตล์", payment: "ซื้อเงินสดหรือผ่อน", income: "รายได้ (ถ้าผ่อน)", budget: "งบประมาณ", stretch: "งบยืดได้แค่ไหน", brand: "แบรนด์", design: "ทรงรถที่ชอบ", priorities: "เรื่องที่สำคัญ" };
-  const answered = chatDone ? Object.keys({ usage: 1, lifestyle: 1, payment: 1, income: 1, budget: 1, stretch: 1, brand: 1, design: 1, priorities: 1 }) : asked.slice(0, -1);
+  const TOPIC_TH: Record<string, string> = { usage: "การใช้งาน", lifestyle: "ใครนั่ง ขนอะไร", payment: "ซื้อเงินสดหรือผ่อน", income: "รายได้ (ถ้าผ่อน)", budget: "งบประมาณ", stretch: "งบยืดได้แค่ไหน", brand: "แบรนด์", fuel: "ขุมพลังที่อยากได้", design: "ทรงรถที่ชอบ", priorities: "เรื่องที่สำคัญ" };
+  const answered = chatDone ? Object.keys({ usage: 1, lifestyle: 1, payment: 1, income: 1, budget: 1, stretch: 1, fuel: 1, brand: 1, design: 1, priorities: 1 }) : asked.slice(0, -1);
 
   const toggle = (arr: string[], v: string, set: (x: string[]) => void) =>
     set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
@@ -275,7 +284,7 @@ export default function Advisor() {
         <h1>หาคันที่ใช่</h1>
         <p>{mode === "chat"
           ? "ตอบคำถามของที่ปรึกษาสักครู่ พอได้ข้อมูลครบ ระบบจะจัดอันดับรถที่เหมาะกับคุณที่สุด"
-          : "เรียงการ์ด 5 ใบตามความสำคัญ ตั้งงบและไลฟ์สไตล์ แล้วกดดูรถที่เหมาะกับคุณ หลังจากนั้นอันดับจะเปลี่ยนตามทุกครั้งที่คุณขยับ"}</p>
+          : "เรียงการ์ด 6 ใบตามความสำคัญ ตั้งงบและการใช้งาน แล้วกดดูรถที่เหมาะกับคุณ หลังจากนั้นอันดับจะเปลี่ยนตามทุกครั้งที่คุณขยับ"}</p>
       </header>
 
       <div className="layout">
@@ -386,7 +395,7 @@ export default function Advisor() {
             ))}
           </div>
 
-          <h2>2. ไลฟ์สไตล์ <small>(เลือกได้หลายข้อ)</small></h2>
+          <h2>2. การใช้งาน <small>(เลือกได้หลายข้อ)</small></h2>
           <div className="chips">
             {LIFESTYLES.map((l) => (
               <button key={l.key} className={`chip ${lifestyles.includes(l.key) ? "on" : ""}`} onClick={() => toggle(lifestyles, l.key, setLifestyles)}>
@@ -423,7 +432,14 @@ export default function Advisor() {
               <button key={b} className={`chip ${brandPref.includes(b) ? "on" : ""}`} onClick={() => toggle(brandPref, b, setBrandPref)}>{b}</button>
             ))}
           </div>
-          <h2>5. จัดการ์ดความสำคัญ <small>(ทำท้ายสุด ใช้ลำดับตั้งต้นก็ได้)</small></h2>
+          <h2>5. ขุมพลังที่อยากได้ <b className="req">จำเป็น</b> <small>(ใช้กับการ์ดขุมพลัง ไม่ตัดรถคันอื่น)</small></h2>
+          <div className="chips">
+            {FUELS.map((f) => (
+              <button key={f.key} className={`chip ${fuelPref.includes(f.key) ? "on" : ""}`} onClick={() => toggleFuel(f.key)}>{f.label}</button>
+            ))}
+          </div>
+          <p className="muted small" style={{ margin: "6px 0 0" }}>ตรงที่เลือกได้เต็ม · แบบใกล้เคียงได้ครึ่ง (ไฮบริดใกล้กับน้ำมันและไฟฟ้า, น้ำมันใกล้กับดีเซล) · ไม่สนใจ = ทุกคันได้เท่ากัน</p>
+          <h2>6. จัดการ์ดความสำคัญ <small>(ทำท้ายสุด ใช้ลำดับตั้งต้นก็ได้)</small></h2>
           <div className="zones">
             {ZONES.map(({ z, label }) => (
               <div
@@ -452,7 +468,7 @@ export default function Advisor() {
                     >
                       <span className="ic">{c.icon}</span>
                       <span className="cl">{c.label}</span>
-                      <span className="cw" style={{ color: inactive.includes(c.key) ? "var(--muted)" : CRIT_COLOR[c.key] }} title={inactive.includes(c.key) ? (c.key === "design" ? "ยังไม่ได้เลือกทรงรถในข้อ 5 จึงไม่นับเกณฑ์นี้" : "ยังไม่ได้เลือกไลฟ์สไตล์ จึงไม่นับเกณฑ์นี้") : undefined}>{wLabel(c.key)}</span>
+                      <span className="cw" style={{ color: inactive.includes(c.key) ? "var(--muted)" : CRIT_COLOR[c.key] }} title={inactive.includes(c.key) ? (c.key === "design" ? "ยังไม่ได้เลือกทรงรถในข้อ 4 จึงไม่นับเกณฑ์นี้" : "ยังไม่ได้เลือกการใช้งาน จึงไม่นับเกณฑ์นี้") : undefined}>{wLabel(c.key)}</span>
                     </button>
                   ))}
                   {CARDS.every((c) => zones[c.key] !== z) && <span className="empty">วางการ์ดที่นี่</span>}
@@ -488,7 +504,7 @@ export default function Advisor() {
               <h2>รถที่เหมาะกับคุณจะขึ้นตรงนี้</h2>
               {mode === "chat" ? (
                 <>
-                  <p className="muted">ที่ปรึกษาจะถามประมาณ 8–9 เรื่อง ตอบครบแล้วระบบจะจัดอันดับจากรถ 175 รุ่นให้ทันที</p>
+                  <p className="muted">ที่ปรึกษาจะถามประมาณ 9–10 เรื่อง ตอบครบแล้วระบบจะจัดอันดับจากรถ 175 รุ่นให้ทันที</p>
                   <ul className="todo">
                     {Object.entries(TOPIC_TH).map(([k, v]) => (
                       <li key={k} className={answered.includes(k) ? "ok" : asked[asked.length - 1] === k ? "now" : ""}>
@@ -499,12 +515,13 @@ export default function Advisor() {
                 </>
               ) : (
                 <>
-                  <p className="muted">กรอกงบ เลือกเงินสดหรือผ่อน เลือกไลฟ์สไตล์ และทรงหรือแบรนด์ที่ชอบทางซ้าย แล้วกด &quot;ดูรถที่เหมาะกับคุณ&quot;</p>
+                  <p className="muted">กรอกงบ เลือกเงินสดหรือผ่อน เลือกการใช้งาน ขุมพลัง และทรงหรือแบรนด์ที่ชอบทางซ้าย แล้วกด &quot;ดูรถที่เหมาะกับคุณ&quot;</p>
                   <ul className="todo">
                     <li className="ok"><span aria-hidden>✓</span>ลำดับการ์ด (ใช้ตั้งต้นได้)</li>
                     <li className={payment && (payment === "cash" || income) ? "ok" : ""}><span aria-hidden>{payment && (payment === "cash" || income) ? "✓" : ""}</span>ซื้อเงินสดหรือผ่อน (ถ้าผ่อน กรอกรายได้)</li>
                     <li className={budgetSet ? "ok" : ""}><span aria-hidden>{budgetSet ? "✓" : ""}</span>งบประมาณ</li>
-                    <li className={lifestyles.length ? "ok" : ""}><span aria-hidden>{lifestyles.length ? "✓" : ""}</span>ไลฟ์สไตล์</li>
+                    <li className={lifestyles.length ? "ok" : ""}><span aria-hidden>{lifestyles.length ? "✓" : ""}</span>การใช้งาน</li>
+                    <li className={fuelPref.length ? "ok" : ""}><span aria-hidden>{fuelPref.length ? "✓" : ""}</span>ขุมพลังที่อยากได้</li>
                     <li className={bodies.length || brandPref.length ? "ok" : ""}><span aria-hidden>{bodies.length || brandPref.length ? "✓" : ""}</span>ทรงหรือแบรนด์ที่ชอบ</li>
                   </ul>
                 </>

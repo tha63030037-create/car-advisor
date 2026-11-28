@@ -106,7 +106,8 @@ def test_chat_asks_body_type_and_never_leaves_a_card_out():
     base = {"lifestyles": ["merit_family"], "seats_min": 7, "monthly_income": 40000, "budget": 1200000,
             "budget_stretch": 0.1, "priorities": {"budget": 3}}
     base["payment"] = "cash"
-    asked = ["usage", "lifestyle", "payment", "budget", "stretch", "brand"]
+    base["fuel_preferred"] = ["any"]
+    asked = ["usage", "lifestyle", "payment", "budget", "stretch", "fuel", "brand"]
     assert next_topic(base, asked) == "design"
     assert next_topic(base, asked + ["design"]) == "design"          # asked once more if unanswered
     assert next_topic(base, asked + ["design", "design"]) is None   # then a stated default fills it
@@ -188,3 +189,36 @@ def test_checklist_drops_tips_with_invented_numbers(monkeypatch):
     out = ck.checklist(1)
     tips = out["sections"][0]["items"]
     assert out["sections"][0]["key"] == "tips" and tips == ["ถามเรื่องรับประกัน 3 ปี ว่าครอบคลุมอะไร"]
+
+
+def test_powertrain_card_match_neighbour_any():
+    from app.matching import score_powertrain
+    hyb, ev, dsl, pet = ({"fuelType": f} for f in ("hybrid", "ev", "diesel", "petrol"))
+    assert score_powertrain(hyb, ["hybrid"]) == 1.0
+    assert score_powertrain(pet, ["hybrid"]) == 0.5 and score_powertrain(ev, ["hybrid"]) == 0.5
+    assert score_powertrain(dsl, ["hybrid"]) == 0.0
+    assert score_powertrain(dsl, ["any"]) == 1.0 and score_powertrain(dsl, []) == 1.0
+
+
+def test_usage_lifestyles_and_legacy_mapping():
+    from app.matching import Criteria, CARS_V2
+    from app import matching_config as cfg
+    c = Criteria(budget=900000, lifestyles=["camping", "school_run", "city"])
+    assert c.lifestyles == ["offroad", "bulky", "kids", "city"]
+    # driver-assist systems are scored in the safety card only, never in a lifestyle
+    feats = {k for v in cfg.LIFESTYLE_FEATURES.values() for k in v}
+    assert not feats & {"aeb", "lane_assist", "adaptive_cruise", "parking_aid"}
+    # a petrol car never worries about EV range
+    car = next(x for x in CARS_V2 if x["fuelType"] == "petrol")
+    assert car["_features"]["ev_range"] == 1.0
+
+
+def test_six_cards_and_chat_asks_fuel():
+    from app.matching import recommend, Criteria
+    from app.chat import rules_extract, QUESTIONS, REQUIRED
+    r = recommend(Criteria(budget=1000000, lifestyles=["city"], body_preferred=["suv"], fuel_preferred=["hybrid"], top_n=3))
+    assert set(r["results"][0]["criteria"]) == {"budget", "lifestyle", "running_cost", "safety", "design", "powertrain"}
+    assert "fuel" in REQUIRED and "fuel" in QUESTIONS
+    assert rules_extract("อยากได้ไฮบริด", {})["fuel_preferred"] == ["hybrid"]
+    assert rules_extract("ไม่สนใจแบบรถ", {})["fuel_preferred"] == ["any"]
+    assert "petrol" not in (rules_extract("อยากประหยัดค่าน้ำมัน", {}).get("fuel_preferred") or [])

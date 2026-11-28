@@ -19,7 +19,7 @@ def test_parse_budget_thai_units():
 
 def test_rules_extract_core_fields():
     c = rules_extract("พาพ่อแม่ไปทำบุญ บ้านมี 7 คน ไม่เอารถจีน ห้ามเกินงบ", {})
-    assert "merit_family" in c["lifestyles"]
+    assert "people" in c["lifestyles"]
     assert c["seats_min"] == 7
     assert "BYD" in c["brand_exclude"] and "Toyota" not in c["brand_exclude"]
     assert c["budget_stretch"] == 0.0
@@ -35,7 +35,7 @@ def test_brand_only_and_relative_budget():
 def test_llm_output_is_sanitised():
     out = _clean_criteria({"budget": -5, "lifestyles": ["camping", "moon"], "brand_only": ["Toyota", "Fake"],
                            "priorities": {"budget": 9}})
-    assert "budget" not in out and out["lifestyles"] == ["camping"] and out["brand_only"] == ["Toyota"]
+    assert "budget" not in out and out["lifestyles"] == ["offroad", "bulky"] and out["brand_only"] == ["Toyota"]
     assert "priorities" not in out
 
 

@@ -74,12 +74,12 @@ class ChatResponse(BaseModel):
 
 
 # Conversation order (spec 5.5). budget is the only hard requirement to show results.
-TOPICS = ["usage", "lifestyle", "payment", "income", "budget", "stretch", "brand", "design", "priorities"]
+TOPICS = ["usage", "lifestyle", "payment", "income", "budget", "stretch", "fuel", "brand", "design", "priorities"]
 # every one of the 5 cards must count, so these are asked again once if the answer did not stick,
 # and fall back to a stated, explained default after that (see fill_required)
-REQUIRED = {"usage", "payment", "income", "budget", "design"}
-BODY_FOR_LIFESTYLE = {"city": ["hatchback", "suv"], "school_run": ["suv", "hatchback"], "camping": ["suv", "ppv", "pickup"],
-                      "merit_family": ["mpv", "ppv"], "pets": ["suv"], "long_trips": ["sedan", "suv"], "work_cargo": ["pickup"]}
+REQUIRED = {"usage", "payment", "income", "budget", "fuel", "design"}
+BODY_FOR_LIFESTYLE = {"city": ["hatchback", "suv"], "kids": ["suv", "hatchback"], "offroad": ["suv", "ppv", "pickup"],
+                      "people": ["mpv", "ppv"], "bulky": ["suv"], "long_trips": ["sedan", "suv"], "cargo": ["pickup"]}
 BODY_TH_CHAT = {"sedan": "เก๋ง", "hatchback": "แฮทช์แบ็ก", "suv": "SUV", "ppv": "PPV", "mpv": "รถตู้/MPV", "pickup": "กระบะ", "coupe": "คูเป้"}
 QUESTIONS = {
     "payment": ("ตั้งใจจะซื้อเงินสดหรือผ่อนคะ", ["ซื้อเงินสด", "ผ่อน"]),
@@ -87,8 +87,10 @@ QUESTIONS = {
                ["รายได้ 2 หมื่น", "รายได้ 3 หมื่น", "รายได้ 5 หมื่น", "รายได้ 1 แสน"]),
     "usage": ("สวัสดีค่ะ เล่าให้ฟังหน่อยว่าจะใช้รถทำอะไรเป็นหลักคะ เช่น ขับไปทำงานในเมือง พาครอบครัวเที่ยว หรือใช้ขนของ",
               ["ขับในเมืองไปทำงาน", "พาครอบครัวเที่ยวต่างจังหวัด", "ใช้ขนของทำงาน"]),
-    "lifestyle": ("ปกติใครนั่งประจำบ้างคะ มีเด็ก ผู้ใหญ่ หรือสัตว์เลี้ยงไปด้วยไหม วันหยุดชอบไปไหน",
-                  ["ส่งลูกไปโรงเรียน", "พาพ่อแม่ไปทำบุญ", "มีหมาไปด้วย", "ชอบไปแคมป์ปิ้ง"]),
+    "lifestyle": ("ปกติใครนั่งประจำบ้างคะ มีเด็กเล็ก ผู้สูงอายุ หรือของใหญ่ ๆ อย่างสัตว์เลี้ยง จักรยาน ไปด้วยไหม แล้วเคยขับทางลุยหรือน้ำท่วมบ่อยไหม",
+                  ["มีเด็กเล็ก", "พาคนเยอะ 7 คน", "มีหมาไปด้วย", "ขับทางลุยบ่อย"]),
+    "fuel": ("อยากได้รถแบบไหนคะ น้ำมัน ดีเซล ไฮบริด หรือไฟฟ้า (เลือกได้มากกว่าหนึ่ง หรือไม่สนใจก็ได้ค่ะ)",
+             ["ไฮบริด", "ไฟฟ้า", "น้ำมัน", "ไม่สนใจแบบรถ"]),
     "budget": ("งบที่ตั้งไว้ประมาณเท่าไหร่คะ", ["5 แสน", "8 แสน", "1 ล้าน", "1.5 ล้าน"]),
     "stretch": ("ถ้าเจอคันที่คุ้มกว่าแต่เกินงบนิดหน่อย รับได้แค่ไหนคะ",
                 ["ห้ามเกินเลย", "เกินได้นิดหน่อย", "เกินได้ถ้าคุ้มจริง"]),
@@ -96,7 +98,7 @@ QUESTIONS = {
               ["ไม่จำกัดยี่ห้อ", "เอาแต่ Toyota", "ไม่เอารถจีน"]),
     "design": ("ชอบรถทรงไหนคะ เลือกได้มากกว่าหนึ่งแบบ (ใช้ในคะแนนดีไซน์ ไม่ได้ตัดรถทรงอื่นออก)",
                ["SUV", "เก๋ง", "แฮทช์แบ็ก", "รถตู้ / 7 ที่นั่ง", "กระบะ"]),
-    "priorities": ("ข้อสุดท้ายค่ะ ระหว่าง งบ / การใช้งาน / ค่าใช้จ่ายระยะยาว / ความปลอดภัย / ดีไซน์ เรื่องไหนสำคัญที่สุดคะ (หรือแตะแท็บ “ตั้งค่าเอง” เพื่อจัดการ์ดเองก็ได้นะคะ)",
+    "priorities": ("ข้อสุดท้ายค่ะ ระหว่าง งบ / การใช้งาน / ค่าใช้จ่ายระยะยาว / ความปลอดภัย / ดีไซน์ / ขุมพลัง เรื่องไหนสำคัญที่สุดคะ (หรือแตะแท็บ “ตั้งค่าเอง” เพื่อจัดการ์ดเองก็ได้นะคะ)",
                    ["ความปลอดภัยสำคัญสุด", "งบสำคัญสุด", "ค่าใช้จ่ายระยะยาวสำคัญสุด", "ดีไซน์สำคัญสุด"]),
 }
 
@@ -105,7 +107,7 @@ SYSTEM_PROMPT = """คุณคือที่ปรึกษาการเล�
 หน้าที่
 - ถามให้รู้การใช้ชีวิตจริงของลูกค้า แล้วสรุปเป็นเงื่อนไขตามโครง JSON ที่กำหนด
 - ถามทีละ 1 ข้อ สั้น เป็นกันเอง ไม่ใช้ศัพท์เทคนิค
-- ข้อมูลที่ต้องได้ก่อนแนะนำ: ซื้อเงินสดหรือผ่อน (payment: "cash" หรือ "finance"), รายได้ต่อเดือนเฉพาะคนที่ผ่อน (ใช้บอกค่างวดเท่านั้น), งบ, ทรงรถที่ชอบ (ต้องถามทุกครั้ง), จำนวนคนที่นั่งประจำ, การใช้งานหลัก, แบรนด์ที่เจาะจงหรือไม่เอา, ลำดับความสำคัญของ 5 เรื่อง
+- ข้อมูลที่ต้องได้ก่อนแนะนำ: ซื้อเงินสดหรือผ่อน (payment: "cash" หรือ "finance"), รายได้ต่อเดือนเฉพาะคนที่ผ่อน (ใช้บอกค่างวดเท่านั้น), งบ, ทรงรถที่ชอบ (ต้องถามทุกครั้ง), จำนวนคนที่นั่งประจำ, การใช้งานหลัก, แบรนด์ที่เจาะจงหรือไม่เอา, ขุมพลังที่อยากได้ (fuel_preferred), ลำดับความสำคัญของ 6 เรื่อง
 - แบรนด์: "ชอบ X" หรือ "ชอบ X ที่สุด" ใส่ใน brand_preferred (ยังดูแบรนด์อื่นด้วย) ; ใส่ brand_only เฉพาะเมื่อลูกค้าพูดชัดว่า "เอาแค่ X", "เฉพาะ X" หรือ "ไม่เอาแบรนด์อื่น" เท่านั้น
 - งบ = ราคารถที่ผู้ใช้ตั้งไว้เอง (ราคาตัวรถ) อย่าบอกว่างบรวมเงินดาวน์หรือดอกเบี้ย และอย่าใช้คำชมแปลก ๆ เช่น "ยอดดี"
 - ถามเรื่องงบให้รู้ว่ายืดได้แค่ไหน: ไม่ยืดเลย (0) ยืดได้นิดหน่อย (0.1) หรือยืดได้ถ้าคุ้ม (0.2)
@@ -113,16 +115,17 @@ SYSTEM_PROMPT = """คุณคือที่ปรึกษาการเล�
 ข้อห้าม
 - ห้ามแนะนำรุ่นรถหรือบอกราคาเอง ระบบจะคัดรถให้เมื่อข้อมูลครบ
 - ห้ามเดาค่าที่ลูกค้าไม่ได้บอก ให้ใส่ null และระบุใน missing
-- lifestyles ใส่เฉพาะกิจกรรมที่ลูกค้าพูดถึงจริง เช่น "ชอบแคมป์ปิ้ง" = camping; มีลูกหรือครอบครัวใหญ่ไม่ได้แปลว่า merit_family หรือ school_run จนกว่าลูกค้าจะพูดถึงการพาผู้ใหญ่ไปทำบุญหรือการรับส่งลูก
+- lifestyles = การใช้งานที่ลูกค้าพูดถึงจริงเท่านั้น: ขับในเมือง = city, ต่างจังหวัด/ทางไกล = long_trips, ทางลุย/ลูกรัง/ขึ้นเขา/น้ำท่วม/แคมป์ปิ้ง = offroad, ขนของ/ทำงาน = cargo, พาคนเยอะ/ผู้สูงอายุ/ทำบุญกับพ่อแม่ = people, มีลูกเล็ก/รับส่งลูก = kids, สัตว์เลี้ยง/จักรยาน/อุปกรณ์แคมป์ = bulky
+- fuel_preferred = แบบรถที่ลูกค้าอยากได้ (petrol, diesel, hybrid, ev) ถ้าบอกว่าไม่สนใจให้ใส่ ["any"] ; "เอาเฉพาะ/ต้องเป็น" ไฟฟ้าเท่านั้น ใส่ทั้ง fuel_preferred และ fuel_only
 - body_preferred ใส่เฉพาะเมื่อลูกค้าบอกตัวถังที่อยากได้เอง ห้ามเลือกให้
 - ห้ามคุยเรื่องไฟแนนซ์ ถ้าลูกค้าถาม ให้บอกว่ามีลิงก์ไปผู้ให้บริการในหน้าผลลัพธ์
 - ถ้าลูกค้าคุยเรื่องอื่นที่ไม่เกี่ยวกับการเลือกรถ ให้พากลับมาอย่างสุภาพ
 
 โครง criteria (ส่งกลับทุกช่อง ค่าที่ไม่รู้ให้เป็น null):
 {"payment": "cash"|"finance"|null, "monthly_income": int|null, "budget": int|null, "budget_stretch": 0|0.1|0.15|0.2|null, "brand_only": [str], "brand_exclude": [str], "brand_preferred": [str],
- "seats_min": int|null, "fuel_exclude": [str], "min_ncap_stars": 3|null, "body_preferred": [str], "lifestyles": [str], "km_per_year": int|null,
- "priorities": {"budget":1-3,"lifestyle":1-3,"running_cost":1-3,"safety":1-3,"design":1-3}|null}
-lifestyles ใช้ได้เฉพาะ: school_run, camping, merit_family, pets, city, long_trips, work_cargo
+ "seats_min": int|null, "fuel_exclude": [str], "fuel_preferred": [str], "fuel_only": [str]|null, "min_ncap_stars": 3|null, "body_preferred": [str], "lifestyles": [str], "km_per_year": int|null,
+ "priorities": {"budget":1-3,"lifestyle":1-3,"running_cost":1-3,"safety":1-3,"design":1-3,"powertrain":1-3}|null}
+lifestyles ใช้ได้เฉพาะ: city, long_trips, offroad, cargo, people, kids, bulky
 body_preferred ใช้ได้เฉพาะ: sedan, hatchback, suv, ppv, mpv, pickup, coupe
 fuel_exclude ใช้ได้เฉพาะ: petrol, diesel, hybrid, ev
 min_ncap_stars ใส่ 3 เฉพาะเมื่อลูกค้าบอกเองว่าไม่เอารถที่ผลทดสอบชนต่ำ/ต้องการรถที่ผ่านการทดสอบชน ไม่งั้นเป็น null
@@ -142,14 +145,16 @@ BRAND_TH = {"โตโยต้า": "Toyota", "ฮอนด้า": "Honda", "�
 CHINESE = ["MG", "BYD", "GWM", "Neta", "GAC", "Deepal", "Changan", "Zeekr", "XPENG", "AVATR", "Hyptec", "Riddara",
            "Geely", "Chery", "Omoda", "Jaecoo", "Denza"]
 LIFESTYLE_WORDS = {
-    "school_run": ["ลูก", "โรงเรียน", "ส่งเด็ก"],
-    "camping": ["แคมป์", "แค้มป์", "เข้าป่า", "ลุย", "ภูเขา", "ทางลูกรัง"],
-    "merit_family": ["ทำบุญ", "วัด", "พ่อแม่", "ผู้ใหญ่", "ยาย", "ปู่", "ย่า", "ตา "],
-    "pets": ["หมา", "แมว", "สุนัข", "สัตว์เลี้ยง"],
     "city": ["ในเมือง", "รถติด", "ไปทำงาน", "กรุงเทพ", "จอดยาก"],
     "long_trips": ["ต่างจังหวัด", "ทางไกล", "เดินทางไกล", "กลับบ้านต่างจังหวัด", "เที่ยว"],
-    "work_cargo": ["ขนของ", "ค้าขาย", "บรรทุก", "ส่งของ"],
+    "offroad": ["ลุย", "ลูกรัง", "ภูเขา", "ขึ้นเขา", "น้ำท่วม", "แคมป์", "แค้มป์", "เข้าป่า", "ออฟโรด"],
+    "cargo": ["ขนของ", "ค้าขาย", "บรรทุก", "ส่งของ", "ทำงาน ขน"],
+    "people": ["ทำบุญ", "พ่อแม่", "ผู้ใหญ่", "ผู้สูงอายุ", "ยาย", "ปู่", "ย่า", "คนเยอะ", "ครอบครัวใหญ่", "7 ที่นั่ง", "เจ็ดที่นั่ง"],
+    "kids": ["ลูกเล็ก", "เด็กเล็ก", "โรงเรียน", "ส่งลูก", "ส่งเด็ก", "คาร์ซีท", "เบาะเด็ก", "มีเด็ก", "มีลูก"],
+    "bulky": ["หมา", "แมว", "สุนัข", "สัตว์เลี้ยง", "จักรยาน", "อุปกรณ์แคมป์", "ของใหญ่", "แคมป์"],
 }
+FUEL_WORDS = {"hybrid": ["ไฮบริด", "hybrid", "hev", "phev"], "ev": ["ไฟฟ้า", " ev", "อีวี"],
+              "diesel": ["ดีเซล", "diesel"], "petrol": ["น้ำมัน", "เบนซิน", "แก๊สโซฮอล์"]}
 BODY_WORDS = {"suv": ["suv", "เอสยูวี", "ครอสโอเวอร์"], "pickup": ["กระบะ", "pickup"],
               "sedan": ["ซีดาน", "เก๋ง", "sedan"], "hatchback": ["แฮทช์", "hatchback", "อีโค่คาร์"],
               "mpv": ["รถตู้", "mpv"], "ppv": ["ppv"], "coupe": ["คูเป้", "สปอร์ต"]}
@@ -249,6 +254,17 @@ def rules_extract(text, crit):
     if bodies:
         c["body_preferred"] = sorted(bodies)
 
+    if re.search(r"ไม่สน(ใจ)?\s*(แบบรถ|ขุมพลัง|เครื่อง|ว่าน้ำมัน|น้ำมันหรือไฟฟ้า)|ขุมพลังอะไรก็ได้|แบบรถอะไรก็ได้", t):
+        c["fuel_preferred"] = ["any"]
+    fp = [k for k, words in FUEL_WORDS.items()
+          if any(w in (" " + t) for w in words) and not re.search(r"ไม่เอา(รถ)?" + words[0], t)]
+    # "ค่าน้ำมัน" (fuel cost) is not a wish for a petrol car
+    if "petrol" in fp and re.search(r"ค่าน้ำมัน|กินน้ำมัน|ประหยัดน้ำมัน", t):
+        fp.remove("petrol")
+    if fp:
+        c["fuel_preferred"] = sorted(set((c.get("fuel_preferred") or []) + fp) - {"any"})
+    if re.search(r"(เอา|ต้องเป็น|เฉพาะ)(แค่|แต่)?(รถ)?ไฟฟ้า(เท่านั้น)?", t) and re.search(r"เท่านั้น|เฉพาะ|ต้องเป็น|เอาแค่|เอาแต่", t):
+        c["fuel_only"] = ["ev"]
     fx = set(c.get("fuel_exclude") or [])
     if re.search(r"ไม่เอา(รถ)?(ไฟฟ้า|ev)", t):
         fx.add("ev")
@@ -306,6 +322,8 @@ def _answered(t, c):
         return c.get("budget_stretch") is not None
     if t == "design":
         return bool(c.get("body_preferred")) or bool(c.get("brand_preferred"))
+    if t == "fuel":
+        return bool(c.get("fuel_preferred")) or bool(c.get("fuel_only"))
     if t == "priorities":
         return bool(c.get("priorities"))
     return False
@@ -330,10 +348,14 @@ def fill_required(c):
     if not c.get("lifestyles"):
         c["lifestyles"] = ["city"]
         notes.append("ยังไม่ทราบการใช้งานหลัก ขอคิดเป็นขับในเมืองไปก่อนนะคะ")
+    if not c.get("fuel_preferred") and not c.get("fuel_only"):
+        c["fuel_preferred"] = ["any"]
+        notes.append("ยังไม่ได้บอกแบบรถที่อยากได้ (น้ำมัน ไฮบริด ไฟฟ้า) ขอคิดเป็นไม่สนใจไปก่อน ทุกคันได้คะแนนขุมพลังเท่ากันค่ะ")
     if not c.get("body_preferred") and not c.get("brand_preferred"):
         bodies = []
-        for ls in c["lifestyles"]:
-            bodies += [b for b in BODY_FOR_LIFESTYLE.get(ls, []) if b not in bodies]
+        for ls0 in c["lifestyles"]:
+            for ls in cfg.LEGACY_LIFESTYLES.get(ls0, [ls0]):
+                bodies += [b for b in BODY_FOR_LIFESTYLE.get(ls, []) if b not in bodies]
         c["body_preferred"] = bodies or ["suv"]
         notes.append("ยังไม่ได้บอกทรงที่ชอบ ขอใช้ทรงที่เหมาะกับการใช้งานของคุณคือ %s ในคะแนนดีไซน์ไปก่อน เปลี่ยนได้ตลอดค่ะ"
                      % ", ".join(BODY_TH_CHAT.get(b, b) for b in c["body_preferred"]))
@@ -354,13 +376,16 @@ def summarize(c):
     if c.get("seats_min"):
         parts.append("นั่ง %d คนขึ้นไป" % c["seats_min"])
     if c.get("lifestyles"):
-        parts.append("ใช้งาน: " + ", ".join(cfg.LIFESTYLE_TH[x] for x in c["lifestyles"]))
+        parts.append("ใช้งาน: " + ", ".join(cfg.LIFESTYLE_TH.get(y, y) for x in c["lifestyles"] for y in cfg.LEGACY_LIFESTYLES.get(x, [x])))
     if c.get("brand_only"):
         parts.append("เอาเฉพาะ " + ", ".join(c["brand_only"]))
     if c.get("brand_preferred"):
         parts.append("ชอบ " + ", ".join(c["brand_preferred"]))
     if c.get("brand_exclude"):
         parts.append("ไม่เอา " + ", ".join(c["brand_exclude"][:4]) + ("…" if len(c["brand_exclude"]) > 4 else ""))
+    if c.get("fuel_preferred"):
+        fp = c["fuel_preferred"]
+        parts.append("ขุมพลัง: " + ("ไม่สนใจ" if "any" in fp else ", ".join(cfg.FUEL_TH.get(f, f) for f in fp)))
     if c.get("fuel_exclude"):
         fuel_th = {"ev": "ไฟฟ้า", "diesel": "ดีเซล", "petrol": "เบนซิน", "hybrid": "ไฮบริด"}
         parts.append("ไม่เอารถ" + ", ".join(fuel_th.get(f, f) for f in c["fuel_exclude"]))
@@ -411,14 +436,20 @@ def _clean_criteria(raw):
         out["budget_stretch"] = float(s)
     for k, allowed in (("lifestyles", cfg.LIFESTYLES),
                        ("body_preferred", list(cfg.BODY_SIMILAR)),
-                       ("fuel_exclude", ["petrol", "diesel", "hybrid", "ev"])):
+                       ("fuel_exclude", ["petrol", "diesel", "hybrid", "ev"]),
+                       ("fuel_preferred", ["petrol", "diesel", "hybrid", "ev", "any"])):
         v = raw.get(k) or []
         if isinstance(v, list):
-            out[k] = [x for x in v if x in allowed]
+            if k == "lifestyles":  # an older family lifestyle maps onto the usage list
+                v = [y for x in v for y in cfg.LEGACY_LIFESTYLES.get(x, [x])]
+            out[k] = list(dict.fromkeys(x for x in v if x in allowed))
     for k in ("brand_only", "brand_exclude", "brand_preferred"):
         v = raw.get(k) or []
         if isinstance(v, list):
             out[k] = [x for x in v if isinstance(x, str) and x in BRANDS]
+    fo = raw.get("fuel_only")
+    if isinstance(fo, list) and fo and all(x in ("petrol", "diesel", "hybrid", "ev") for x in fo):
+        out["fuel_only"] = fo
     ns = raw.get("min_ncap_stars")
     if isinstance(ns, int) and 1 <= ns <= 5:
         out["min_ncap_stars"] = ns

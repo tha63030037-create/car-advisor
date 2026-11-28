@@ -33,6 +33,7 @@ class Priorities(BaseModel):
     running_cost: int = 2
     safety: int = 2
     design: int = 2
+    powertrain: int = 2
 
     @field_validator("*")
     @classmethod
@@ -57,6 +58,8 @@ class Criteria(BaseModel):
     # opt-in: drop cars whose ASEAN NCAP result is below this; untested cars stay in
     min_ncap_stars: Optional[int] = Field(None, ge=1, le=5)
     lifestyles: List[str] = []
+    # powertrain card: kinds the buyer prefers; ["any"] = no preference (everyone scores full)
+    fuel_preferred: List[str] = []
     # monthly income (household, before tax); required by the UI, optional here so old callers still work
     # "cash" or "finance" (decided 26 Nov: the budget is the user's own; income only informs an installment
     # estimate for people who finance and never changes scores or filters)
@@ -69,9 +72,23 @@ class Criteria(BaseModel):
     priorities: Priorities = Priorities()
     top_n: int = Field(cfg.DEFAULT_TOP_N, ge=1, le=200)
 
+    @field_validator("fuel_preferred")
+    @classmethod
+    def _known_fuels(cls, v):
+        bad = [x for x in v if x not in cfg.FUELS and x != "any"]
+        if bad:
+            raise ValueError("unknown fuel types: %s" % ", ".join(bad))
+        return v
+
     @field_validator("lifestyles")
     @classmethod
     def _known_lifestyles(cls, v):
+        out = []
+        for x in v:  # old family lifestyles map onto the usage list
+            for y in cfg.LEGACY_LIFESTYLES.get(x, [x]):
+                if y not in out:
+                    out.append(y)
+        v = out
         bad = [x for x in v if x not in cfg.LIFESTYLES]
         if bad:
             raise ValueError("unknown lifestyles: %s" % ", ".join(bad))
@@ -133,27 +150,23 @@ def _features(car):
 
     per_km = energy_cost_per_km(car)
     cargo, bed = car.get("cargo_l"), car.get("has_cargo_bed")
-    adas = car.get("adas") or {}
     four = car.get("drivetrain")
+    doors = car.get("doors")
+    rng = car.get("ev_range_km")
     return {
-        "isofix": opt(car.get("isofix")),
         "compact": _scale(car.get("length_mm"), *cfg.COMPACT_LENGTH_MM),
-        "city_economy": _scale(per_km, *cfg.CITY_COST_PER_KM),
-        "aeb": opt(adas.get("aeb")),
+        # only an EV has a range to worry about; petrol, diesel and hybrid refuel anywhere
+        "ev_range": (_scale(rng, *cfg.EV_RANGE_KM) if rng else None) if car["fuelType"] == "ev" else 1.0,
+        "cargo_trip": 1.0 if bed else _scale(cargo, *cfg.CARGO_TRIP_L),
         "ground_clearance": _scale(car.get("ground_clearance_mm"), *cfg.GROUND_MM),
-        "cargo_large": 1.0 if bed else _scale(cargo, *cfg.CARGO_LARGE_L),
-        "roof_rails": opt(car.get("roof_rails")),
         "four_wd": None if four is None else (1.0 if four in ("4WD", "AWD") else 0.0),
-        "seven_seats": 1.0 if car["seats"] >= 7 else 0.0,
-        "easy_entry": opt(car.get("easy_entry")),
-        "rear_ac": opt(car.get("rear_ac_vents")),
-        "fold_flat": None if bed else opt(car.get("rear_seat_fold_flat")),  # n/a with a pickup bed
-        "parking_aid": opt(adas.get("parking_sensors")),
-        "adaptive_cruise": opt(adas.get("adaptive_cruise")),
-        "highway_economy": _scale(per_km, *cfg.HIGHWAY_COST_PER_KM),
         "cargo_work": 1.0 if bed else _scale(cargo, *cfg.CARGO_WORK_L_RANGE),
-        "low_maintenance": _scale(car.get("maintenance_5y_thb"), *cfg.MAINT_5Y_THB),
-        "lane_assist": opt(adas.get("lane_assist")),
+        "fold_flat": None if bed else opt(car.get("rear_seat_fold_flat")),  # n/a with a pickup bed
+        "seven_seats": 1.0 if car["seats"] >= 7 else 0.0,
+        "rear_ac": opt(car.get("rear_ac_vents")),
+        "isofix": opt(car.get("isofix")),
+        "rear_doors": None if doors is None else (1.0 if doors >= 4 else 0.0),
+        "cargo_large": 1.0 if bed else _scale(cargo, *cfg.CARGO_LARGE_L),
     }
 
 
@@ -313,6 +326,18 @@ def score_budget(price, budget, m):
     return max(0.0, 1 - gap)
 
 
+def score_powertrain(car, preferred):
+    """Powertrain card: 1 for a kind the buyer picked, 0.5 for a neighbouring kind, else 0."""
+    if not preferred or "any" in preferred:
+        return 1.0
+    f = car["fuelType"]
+    if f in preferred:
+        return 1.0
+    if any(f in cfg.FUEL_NEIGHBOURS.get(p, []) for p in preferred):
+        return cfg.FUEL_NEIGHBOUR_SCORE
+    return 0.0
+
+
 def score_lifestyle(car, lifestyles):
     if not lifestyles:
         return None, []  # not chosen: the criterion is left out, not handed out as free points
@@ -462,6 +487,7 @@ def recommend(c, cars=None):
             "running_cost": s_cost,
             "safety": score_safety(car),
             "design": score_design(car, body_pref, c.brand_preferred),
+            "powertrain": score_powertrain(car, c.fuel_preferred),
         }
         # A criterion with unknown data is skipped for this car: re-normalise the remaining weights.
         usable = {k: w for k, w in weights.items() if scores[k] is not None}
@@ -539,14 +565,7 @@ def recommend(c, cars=None):
 
 
 # ----------------------------------------------------------- catalogue views
-FEATURE_TH = {
-    "isofix": "จุดยึดคาร์ซีท ISOFIX", "compact": "ตัวรถกะทัดรัด จอดง่าย", "city_economy": "ประหยัดในเมือง",
-    "aeb": "เบรกฉุกเฉินอัตโนมัติ (AEB)", "ground_clearance": "ใต้ท้องสูง ลุยได้", "cargo_large": "ที่เก็บของกว้าง",
-    "roof_rails": "ราวหลังคา", "four_wd": "ขับเคลื่อน 4 ล้อ", "seven_seats": "7 ที่นั่ง", "easy_entry": "ขึ้นลงง่าย",
-    "rear_ac": "แอร์ตอนหลัง", "fold_flat": "เบาะหลังพับราบ", "parking_aid": "เซ็นเซอร์ช่วยจอด",
-    "adaptive_cruise": "ครูซคอนโทรลแบบปรับระยะ", "highway_economy": "ประหยัดทางไกล", "cargo_work": "บรรทุกของได้มาก",
-    "low_maintenance": "ค่าบำรุงรักษาต่ำ", "lane_assist": "ระบบช่วยรักษาเลน",
-}
+FEATURE_TH = cfg.FEATURE_TH  # lifestyle features shown on the car page
 
 
 def car_public(car, full=True):

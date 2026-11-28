@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 /* ------------------------------------------------------------------ types */
-export type Key = "budget" | "lifestyle" | "running_cost" | "safety" | "design";
+export type Key = "budget" | "lifestyle" | "running_cost" | "safety" | "design" | "powertrain";
 export type Zone = 3 | 2 | 1;
 
 export interface Photo { file: string; credit?: string | null }
@@ -104,10 +104,11 @@ export interface CarDetail extends CarSummary {
 /* -------------------------------------------------------------- constants */
 export const CARDS: { key: Key; label: string; short: string; icon: string; hint: string }[] = [
   { key: "budget", label: "งบประมาณ", short: "งบ", icon: "💰", hint: "ราคาอยู่ในงบแค่ไหน" },
-  { key: "lifestyle", label: "ไลฟ์สไตล์", short: "ไลฟ์สไตล์", icon: "🧳", hint: "เข้ากับชีวิตประจำวัน" },
+  { key: "lifestyle", label: "การใช้งาน", short: "การใช้งาน", icon: "🧳", hint: "ตัวรถเหมาะกับการใช้งานจริงแค่ไหน" },
   { key: "running_cost", label: "ค่าใช้จ่ายระยะยาว", short: "ค่าใช้จ่าย", icon: "⛽", hint: "ค่าน้ำมันหรือค่าไฟ และค่าซ่อมบำรุง" },
   { key: "safety", label: "ความปลอดภัย", short: "ปลอดภัย", icon: "🛡️", hint: "ผลทดสอบชน ถุงลม ระบบช่วยขับ" },
   { key: "design", label: "รูปทรงดีไซน์", short: "ดีไซน์", icon: "✨", hint: "ตรงทรงที่ชอบ" },
+  { key: "powertrain", label: "ขุมพลัง", short: "ขุมพลัง", icon: "🔌", hint: "น้ำมัน ดีเซล ไฮบริด หรือไฟฟ้า ตามที่อยากได้" },
 ];
 
 export const CRIT_COLOR: Record<Key, string> = {
@@ -116,6 +117,7 @@ export const CRIT_COLOR: Record<Key, string> = {
   running_cost: "#2A7FD4",
   safety: "#6D4AD6",
   design: "#D9467A",
+  powertrain: "#5B6B7F",
 };
 
 export const FUEL_TH: Record<string, string> = { petrol: "เบนซิน", diesel: "ดีเซล", hybrid: "ไฮบริด", ev: "ไฟฟ้า" };

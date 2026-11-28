@@ -42,11 +42,11 @@ def test_budget_within_and_beyond_ceiling():
 # ---- 4.2 weights from card zones
 def test_weights_examples_from_spec():
     general = weights_from_priorities(Priorities(budget=3, lifestyle=3, running_cost=2, safety=2, design=1))
-    assert round(general["budget"] * 100) == 27
+    assert round(general["budget"] * 100) == 23   # 3 of 13 points (6 cards)
     nobudget = weights_from_priorities(Priorities(budget=1, lifestyle=3, running_cost=1, safety=2, design=3))
-    assert round(nobudget["budget"] * 100) == 10
+    assert round(nobudget["budget"] * 100) == 8    # 1 of 12 points
     equal = weights_from_priorities(Priorities(budget=2, lifestyle=2, running_cost=2, safety=2, design=2))
-    assert all(abs(v - 0.2) < 1e-9 for v in equal.values())
+    assert all(abs(v - 1 / 6) < 1e-9 for v in equal.values())   # 6 cards
 
 
 def test_priority_points_validated():

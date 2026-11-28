@@ -9,24 +9,24 @@ import { baht, BODY_TH, CARDS, CRIT_COLOR, Key, postJSON, RecommendResponse, Res
    sees on the first screen is the product working, not a stock photo. */
 const PERSONAS: { key: string; label: string; brief: string; criteria: Record<string, unknown> }[] = [
   {
-    key: "family", label: "ครอบครัวมีลูกเล็ก", brief: "งบ 1.3 ล้าน · รับส่งลูก ไปทำบุญกับที่บ้าน · เน้นปลอดภัย",
-    criteria: { budget: 1300000, lifestyles: ["school_run", "merit_family"], body_preferred: ["suv"], seats_min: 5, priorities: { budget: 2, lifestyle: 3, running_cost: 2, safety: 3, design: 1 } },
+    key: "family", label: "ครอบครัวมีลูกเล็ก", brief: "งบ 1.3 ล้าน · มีลูกเล็ก พาผู้ใหญ่ไปด้วย · เน้นปลอดภัย",
+    criteria: { budget: 1300000, lifestyles: ["kids", "people"], body_preferred: ["suv"], seats_min: 5, priorities: { budget: 2, lifestyle: 3, running_cost: 2, safety: 3, design: 1, powertrain: 2 }, fuel_preferred: ["hybrid", "ev"] },
   },
   {
     key: "city", label: "ขับในเมือง งบจำกัด", brief: "งบ 7 แสน · ขับไปทำงานทุกวัน · อยากประหยัด",
-    criteria: { budget: 700000, lifestyles: ["city"], body_preferred: ["hatchback", "sedan"], priorities: { budget: 3, lifestyle: 2, running_cost: 3, safety: 2, design: 1 } },
+    criteria: { budget: 700000, lifestyles: ["city"], body_preferred: ["hatchback", "sedan"], priorities: { budget: 3, lifestyle: 2, running_cost: 3, safety: 2, design: 1, powertrain: 1 }, fuel_preferred: ["any"] },
   },
   {
     key: "trip", label: "สายเที่ยว แคมปิ้ง", brief: "งบ 1.6 ล้าน · ขับต่างจังหวัดบ่อย · ขนของเยอะ",
-    criteria: { budget: 1600000, lifestyles: ["camping", "long_trips"], body_preferred: ["suv", "ppv"], priorities: { budget: 2, lifestyle: 3, running_cost: 1, safety: 2, design: 2 } },
+    criteria: { budget: 1600000, lifestyles: ["offroad", "long_trips", "bulky"], body_preferred: ["suv", "ppv"], priorities: { budget: 2, lifestyle: 3, running_cost: 1, safety: 2, design: 2, powertrain: 1 }, fuel_preferred: ["diesel", "hybrid"] },
   },
   {
     key: "sedan", label: "ซีดานไฟฟ้า หน้าตาดี", brief: "งบ 1.5 ล้าน · รถไฟฟ้าเท่านั้น · ดีไซน์สำคัญที่สุด",
-    criteria: { budget: 1500000, lifestyles: ["city", "long_trips"], fuel_only: ["ev"], body_preferred: ["sedan"], priorities: { budget: 2, lifestyle: 2, running_cost: 2, safety: 2, design: 3 } },
+    criteria: { budget: 1500000, lifestyles: ["city", "long_trips"], fuel_only: ["ev"], body_preferred: ["sedan"], priorities: { budget: 2, lifestyle: 2, running_cost: 2, safety: 2, design: 3, powertrain: 3 }, fuel_preferred: ["ev"] },
   },
   {
     key: "work", label: "ใช้ทำงาน ขนของ", brief: "งบ 1 ล้าน · บรรทุกของ วิ่งไกล · คุ้มค่าที่สุด",
-    criteria: { budget: 1000000, lifestyles: ["work_cargo", "long_trips"], body_preferred: ["pickup"], priorities: { budget: 3, lifestyle: 3, running_cost: 2, safety: 1, design: 1 } },
+    criteria: { budget: 1000000, lifestyles: ["cargo", "long_trips"], body_preferred: ["pickup"], priorities: { budget: 3, lifestyle: 3, running_cost: 2, safety: 1, design: 1, powertrain: 1 }, fuel_preferred: ["diesel"] },
   },
 ];
 
@@ -176,7 +176,7 @@ export default function Home() {
 
       {/* ----------------------------------------------------- the 5 cards */}
       <section className="wrap block">
-        <h2 className="h2 big">ตัดสินจาก 5 เรื่อง คุณเป็นคนเรียงว่าเรื่องไหนสำคัญกว่า</h2>
+        <h2 className="h2 big">ตัดสินจาก 6 เรื่อง คุณเป็นคนเรียงว่าเรื่องไหนสำคัญกว่า</h2>
         <p className="muted sub">วางการ์ดลงโซน สำคัญที่สุด สำคัญ หรือไม่ค่อยสำคัญ ระบบแปลงเป็นน้ำหนักทันที อันดับรถเปลี่ยนตามตอนที่คุณขยับการ์ด</p>
         <div className="cards5">
           {CARDS.map((c) => (
@@ -304,8 +304,8 @@ export default function Home() {
         .block { margin-top: clamp(56px, 8vw, 104px); }
         .big { font-size: clamp(22px, 2.4vw, 30px); letter-spacing: -0.02em; line-height: 1.25; }
         .sub { margin: -2px 0 22px; max-width: 64ch; }
-        .cards5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
-        @media (max-width: 900px) { .cards5 { grid-template-columns: repeat(2, 1fr); } }
+        .cards5 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+        @media (max-width: 1100px) { .cards5 { grid-template-columns: repeat(3, 1fr); } } @media (max-width: 600px) { .cards5 { grid-template-columns: repeat(2, 1fr); } }
         .c5 { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 4px; min-height: 130px; }
         .c5-ic { font-size: 24px; }
         .c5-l { font-weight: 700; font-size: 17px; }

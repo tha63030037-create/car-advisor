@@ -6,13 +6,14 @@ explained to the committee and changed without touching the engine.
 
 # 4.2 Card zones -> points
 ZONE_POINTS = {"most": 3, "important": 2, "less": 1}
-CRITERIA = ["budget", "lifestyle", "running_cost", "safety", "design"]
+CRITERIA = ["budget", "lifestyle", "running_cost", "safety", "design", "powertrain"]
 CRITERIA_TH = {
     "budget": "งบประมาณ",
-    "lifestyle": "ไลฟ์สไตล์และการใช้งาน",
+    "lifestyle": "การใช้งาน",
     "running_cost": "ค่าใช้จ่ายระยะยาว",
     "safety": "ความปลอดภัยและเทคโนโลยี",
     "design": "รูปทรงและดีไซน์",
+    "powertrain": "ขุมพลัง",
 }
 
 # 4.3 Stretchable budget
@@ -27,51 +28,60 @@ CITY_ECON_KML = 17          # petrol km/l considered economical in city use
 LONG_TRIP_ECON_KML = 16
 LOW_MAINT_5Y_THB = 40000    # below this counts as "low maintenance"
 
-LIFESTYLES = ["school_run", "camping", "merit_family", "pets", "city", "long_trips", "work_cargo"]
+# Lifestyles = what the car is used for (Thanaree, 28 Nov 2026), each measured only by physical specs
+# from the maker's spec sheet. Driver-assist systems live in the safety card alone (no double count).
+LIFESTYLES = ["city", "long_trips", "offroad", "cargo", "people", "kids", "bulky"]
 LIFESTYLE_TH = {
-    "school_run": "ส่งลูกไปเรียน",
-    "camping": "ครอบครัวสายแคมป์ปิ้ง",
-    "merit_family": "ครอบครัวสายทำบุญ พาผู้ใหญ่ไปด้วย",
-    "pets": "เลี้ยงสัตว์",
-    "city": "ขับในเมืองเป็นหลัก",
-    "long_trips": "เดินทางไกลบ่อย",
-    "work_cargo": "ใช้ทำงาน ขนของ",
+    "city": "ขับในเมือง รถติด จอดบ่อย",
+    "long_trips": "ขับทางไกล ต่างจังหวัดบ่อย",
+    "offroad": "ทางลุย ลูกรัง ขึ้นเขา น้ำท่วม",
+    "cargo": "บรรทุกของ ใช้ทำงาน",
+    "people": "พาคนเยอะ ครอบครัวใหญ่ ผู้สูงอายุ",
+    "kids": "มีเด็กเล็ก",
+    "bulky": "ขนของใหญ่ สัตว์เลี้ยง จักรยาน อุปกรณ์แคมป์",
+}
+# the advisor's family lifestyles (and old saved searches) map onto the usage list
+LEGACY_LIFESTYLES = {
+    "school_run": ["kids", "city"],
+    "camping": ["offroad", "bulky"],
+    "merit_family": ["people"],
+    "pets": ["bulky"],
+    "work_cargo": ["cargo"],
 }
 FEATURE_TH = {
-    "isofix": "จุดยึดเบาะเด็ก",
-    "compact": "ตัวรถไม่ใหญ่ จอดง่าย",
-    "city_economy": "ประหยัดน้ำมันในเมือง",
-    "aeb": "เบรกอัตโนมัติ",
+    "compact": "ตัวรถไม่ยาว จอดง่าย",
+    "ev_range": "วิ่งไกลต่อการชาร์จ",
+    "cargo_trip": "ท้ายรถพอสำหรับเดินทาง",
     "ground_clearance": "ใต้ท้องสูง",
-    "cargo_large": "ท้ายรถจุเยอะ",
-    "roof_rails": "ราวหลังคา",
     "four_wd": "ขับเคลื่อนสี่ล้อ",
-    "seven_seats": "7 ที่นั่งขึ้นไป",
-    "easy_entry": "ขึ้นลงง่าย",
-    "rear_ac": "ช่องแอร์หลัง",
+    "cargo_work": "กระบะหรือท้ายรถขนของได้",
     "fold_flat": "เบาะหลังพับราบ",
-    "parking_aid": "ระบบช่วยจอด",
-    "adaptive_cruise": "ระบบช่วยขับทางไกล",
-    "highway_economy": "ประหยัดนอกเมือง",
-    "cargo_work": "ท้ายรถหรือกระบะขนของได้",
-    "low_maintenance": "ค่าบำรุงรักษาต่ำ",
-    "lane_assist": "ระบบช่วยรักษาเลน",
+    "seven_seats": "7 ที่นั่งขึ้นไป",
+    "rear_ac": "ช่องแอร์หลัง",
+    "isofix": "จุดยึดเบาะเด็ก ISOFIX",
+    "rear_doors": "มีประตูหลัง",
+    "cargo_large": "ท้ายรถจุเยอะ",
 }
-# Feature -> weight inside each lifestyle (revised 26 Nov 2026). The defining feature counts more
-# (a pickup bed for work, ground clearance for camping). Fuel economy and maintenance cost were taken
-# out of the lifestyles because the running-cost card already scores them: counting them twice made
-# every EV win every lifestyle.
+# equal weight inside each lifestyle: no hand-set 1/2/3 points to defend
 LIFESTYLE_FEATURES = {
-    "school_run": {"isofix": 1, "compact": 1, "aeb": 1},
-    "camping": {"ground_clearance": 2, "cargo_large": 1, "roof_rails": 1, "four_wd": 1},
-    "merit_family": {"seven_seats": 2, "easy_entry": 1, "rear_ac": 1},
-    "pets": {"cargo_large": 1, "fold_flat": 1, "rear_ac": 1},
-    "city": {"compact": 2, "parking_aid": 1},
-    "long_trips": {"adaptive_cruise": 1, "lane_assist": 1, "cargo_large": 1},
-    "work_cargo": {"cargo_work": 3, "fold_flat": 1},
+    "city": {"compact": 1},
+    "long_trips": {"ev_range": 1, "cargo_trip": 1},
+    "offroad": {"ground_clearance": 1, "four_wd": 1},
+    "cargo": {"cargo_work": 1, "fold_flat": 1},
+    "people": {"seven_seats": 1, "rear_ac": 1},
+    "kids": {"isofix": 1, "rear_doors": 1},
+    "bulky": {"cargo_large": 1, "fold_flat": 1},
 }
+EV_RANGE_KM = (300, 500)          # claimed range: <= 300 km scores 0, >= 500 km scores 1; non-EV = 1
+CARGO_TRIP_L = (250, 400)         # luggage for a family trip
 
-# 4.5 Running cost assumptions
+# Powertrain card (Thanaree, 28 Nov 2026): the buyer's preferred kind of car. Match = 1, a neighbour = 0.5
+# (a hybrid sits between petrol and EV; petrol and diesel are both engines), else 0. "Any" = 1 for all.
+FUELS = ["petrol", "diesel", "hybrid", "ev"]
+FUEL_TH = {"petrol": "น้ำมัน", "diesel": "ดีเซล", "hybrid": "ไฮบริด", "ev": "ไฟฟ้า"}
+FUEL_NEIGHBOURS = {"petrol": ["diesel", "hybrid"], "diesel": ["petrol"], "hybrid": ["petrol", "ev"], "ev": ["hybrid"]}
+FUEL_NEIGHBOUR_SCORE = 0.5
+
 DEFAULT_KM_PER_YEAR = 15000
 FUEL_PRICE_THB = {"petrol": 38.0, "hybrid": 38.0, "diesel": 32.0}
 EV_PRICE_THB_PER_KWH = 6.0   # home/public charging mix
