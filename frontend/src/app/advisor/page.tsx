@@ -404,23 +404,7 @@ export default function Advisor() {
             ))}
           </div>
 
-          <h2>3. เงื่อนไขบังคับ <small>(ตัดทิ้ง ไม่ใช่แค่หักคะแนน)</small></h2>
-          <label className="sub">เอาเฉพาะแบรนด์</label>
-          <div className="chips small">
-            {BRANDS.map((b) => (
-              <button key={b} className={`chip ${brandOnly.includes(b) ? "on" : ""}`} onClick={() => toggle(brandOnly, b, setBrandOnly)}>{b}</button>
-            ))}
-          </div>
-          <label className="sub">ต้องนั่งได้อย่างน้อย</label>
-          <div className="chips">
-            {[null, 5, 7].map((s) => (
-              <button key={String(s)} className={`chip ${seatsMin === s ? "on" : ""}`} onClick={() => setSeatsMin(s)}>{s ? `${s} ที่นั่ง` : "ไม่จำกัด"}</button>
-            ))}
-            <button className={`chip ${noEv ? "on" : ""}`} onClick={() => setNoEv(!noEv)}>🚫⚡ ไม่เอารถไฟฟ้า</button>
-            <button className={`chip ${ncapMin ? "on" : ""}`} onClick={() => setNcapMin(!ncapMin)} title="รถที่ยังไม่มีผลทดสอบจะยังแสดงอยู่">🛡️ ไม่เอารถผลทดสอบชนต่ำกว่า 3 ดาว</button>
-          </div>
-
-          <h2>4. ทรงและแบรนด์ที่ชอบ <b className="req">จำเป็น</b> <small>(ใช้กับการ์ดดีไซน์ ไม่ตัดรถคันอื่น)</small></h2>
+          <h2>3. ทรงและแบรนด์ที่ชอบ <b className="req">จำเป็น</b> <small>(ใช้กับการ์ดดีไซน์ ไม่ตัดรถคันอื่น)</small></h2>
           <div className="chips">
             {BODIES.map((b) => (
               <button key={b.key} className={`chip ${bodies.includes(b.key) ? "on" : ""}`} onClick={() => toggle(bodies, b.key, setBodies)}>{b.label}</button>
@@ -432,14 +416,14 @@ export default function Advisor() {
               <button key={b} className={`chip ${brandPref.includes(b) ? "on" : ""}`} onClick={() => toggle(brandPref, b, setBrandPref)}>{b}</button>
             ))}
           </div>
-          <h2>5. ขุมพลังที่อยากได้ <b className="req">จำเป็น</b> <small>(ใช้กับการ์ดขุมพลัง ไม่ตัดรถคันอื่น)</small></h2>
+          <h2>4. ขุมพลังที่อยากได้ <b className="req">จำเป็น</b> <small>(ใช้กับการ์ดขุมพลัง ไม่ตัดรถคันอื่น)</small></h2>
           <div className="chips">
             {FUELS.map((f) => (
               <button key={f.key} className={`chip ${fuelPref.includes(f.key) ? "on" : ""}`} onClick={() => toggleFuel(f.key)}>{f.label}</button>
             ))}
           </div>
           <p className="muted small" style={{ margin: "6px 0 0" }}>ตรงที่เลือกได้เต็ม · แบบใกล้เคียงได้ครึ่ง (ไฮบริดใกล้กับน้ำมันและไฟฟ้า, น้ำมันใกล้กับดีเซล) · ไม่สนใจ = ทุกคันได้เท่ากัน</p>
-          <h2>6. จัดการ์ดความสำคัญ <small>(ทำท้ายสุด ใช้ลำดับตั้งต้นก็ได้)</small></h2>
+          <h2>5. จัดการ์ดความสำคัญ <small>(ทำท้ายสุด ใช้ลำดับตั้งต้นก็ได้)</small></h2>
           <div className="zones">
             {ZONES.map(({ z, label }) => (
               <div
@@ -468,7 +452,7 @@ export default function Advisor() {
                     >
                       <span className="ic">{c.icon}</span>
                       <span className="cl">{c.label}</span>
-                      <span className="cw" style={{ color: inactive.includes(c.key) ? "var(--muted)" : CRIT_COLOR[c.key] }} title={inactive.includes(c.key) ? (c.key === "design" ? "ยังไม่ได้เลือกทรงรถในข้อ 4 จึงไม่นับเกณฑ์นี้" : "ยังไม่ได้เลือกการใช้งาน จึงไม่นับเกณฑ์นี้") : undefined}>{wLabel(c.key)}</span>
+                      <span className="cw" style={{ color: inactive.includes(c.key) ? "var(--muted)" : CRIT_COLOR[c.key] }} title={inactive.includes(c.key) ? (c.key === "design" ? "ยังไม่ได้เลือกทรงรถในข้อ 3 จึงไม่นับเกณฑ์นี้" : "ยังไม่ได้เลือกการใช้งาน จึงไม่นับเกณฑ์นี้") : undefined}>{wLabel(c.key)}</span>
                     </button>
                   ))}
                   {CARDS.every((c) => zones[c.key] !== z) && <span className="empty">วางการ์ดที่นี่</span>}
