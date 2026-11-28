@@ -18,12 +18,19 @@ PERSONAS = json.load(open(os.path.join(os.path.dirname(__file__), "personas.json
 
 
 # ---- 4.3 the advisor's own example: same 50,000 over, lower budget is hit harder
+# Budget card (28 Nov 2026): minus exactly the % the price is away from the budget, either side
 def test_budget_stretch_advisor_example():
     low = score_budget(550000, 500000, 0.15)
     high = score_budget(950000, 900000, 0.15)
-    assert round(low, 2) == 0.33
-    assert round(high, 2) == 0.63
+    assert round(low, 2) == 0.90
+    assert round(high, 2) == 0.94
     assert low < high
+
+
+def test_budget_cheaper_loses_the_same_percent():
+    assert round(score_budget(600000, 900000, 0.15), 2) == 0.67   # 33% under
+    assert round(score_budget(810000, 900000, 0.15), 2) == 0.90   # 10% under
+    assert score_budget(810000, 900000, 0.15) == score_budget(990000, 900000, 0.15)
 
 
 def test_budget_within_and_beyond_ceiling():

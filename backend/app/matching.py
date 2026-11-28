@@ -304,15 +304,13 @@ def apply_filters(cars, c):
 
 # ----------------------------------------------------------------- scores
 def score_budget(price, budget, m):
-    """4.3: full marks within budget, linear penalty by % over budget, cut beyond ceiling."""
-    if price <= budget:
-        return 1.0
-    if m <= 0:
+    """Budget card (Thanaree, 28 Nov 2026): the score drops by exactly the % the car's price is away
+    from the buyer's budget, cheaper or dearer alike. 10% away = 0.90, 33% away = 0.67, 100% = 0.
+    Cars above the ceiling (budget + stretch) are still filtered out before scoring."""
+    if price > budget * (1 + max(m, 0.0)) + 1e-6:
         return None  # filtered out
-    over = (price - budget) / float(budget)
-    if over > m:
-        return None
-    return max(0.0, 1 - over / m)
+    gap = abs(price - budget) / float(budget)
+    return max(0.0, 1 - gap)
 
 
 def score_lifestyle(car, lifestyles):
